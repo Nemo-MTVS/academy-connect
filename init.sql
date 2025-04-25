@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS lunch_matchings;
 DROP TABLE IF EXISTS lunch_matching_classes;
 
-DROP TABLE IF EXISTS undefined_consulting_booklings;
+DROP TABLE IF EXISTS undefined_consulting_bookings;
 DROP TABLE IF EXISTS undefined_consultings;
 
 DROP TABLE IF EXISTS consulting_bookings;
@@ -57,10 +57,14 @@ CREATE TABLE `undefined_consultings` (
                                         `id` BIGINT NOT NULL,
                                         `student_id` VARCHAR(255) NOT NULL COMMENT 'UUID',
                                         `instructor_id` VARCHAR(255) NOT NULL COMMENT 'UUID',
-                                        `request_at` DATETIME NOT NULL
+                                        `request_at` DATETIME NOT NULL,
+                                        `status` ENUM('WAITING', 'DONE') NOT NULL,
+                                        `updated_at` DATETIME NOT NULL,
+                                        `comment` TEXT NULL COMMENT '상담 요청 내용'
+
 );
 
-CREATE TABLE `undefined_consulting_booklings` (
+CREATE TABLE `undefined_consulting_bookings` (
                                                  `id` BIGINT NOT NULL,
                                                  `consulting_booking_id` BIGINT NOT NULL,
                                                  `undefined_consulting_id` BIGINT NOT NULL,
@@ -97,7 +101,7 @@ ALTER TABLE profiles ADD CONSTRAINT PK_profiles PRIMARY KEY (id);
 ALTER TABLE consulting_slots ADD CONSTRAINT PK_consulting_slots PRIMARY KEY (id);
 ALTER TABLE consulting_bookings ADD CONSTRAINT PK_consulting_booking PRIMARY KEY (id);
 ALTER TABLE undefined_consultings ADD CONSTRAINT PK_undefined_consulting PRIMARY KEY (id);
-ALTER TABLE undefined_consulting_booklings ADD CONSTRAINT PK_undefined_consulting_bookling PRIMARY KEY (id);
+ALTER TABLE undefined_consulting_bookings ADD CONSTRAINT PK_undefined_consulting_bookling PRIMARY KEY (id);
 ALTER TABLE lunch_matching_classes ADD CONSTRAINT PK_lunch_matching_class PRIMARY KEY (id);
 ALTER TABLE lunch_matchings ADD CONSTRAINT PK_lunch_matching PRIMARY KEY (id);
 
@@ -138,12 +142,12 @@ ALTER TABLE undefined_consultings
         FOREIGN KEY (instructor_id) REFERENCES users(id);
 
 -- undefined_consulting_bookling.consulting_booking_id → consulting_bookings.id
-ALTER TABLE undefined_consulting_booklings
+ALTER TABLE undefined_consulting_bookings
     ADD CONSTRAINT FK_undefined_consulting_bookling_booking
         FOREIGN KEY (consulting_booking_id) REFERENCES consulting_bookings(id);
 
 -- undefined_consulting_bookling.undefined_consulting_id → undefined_consultings.id
-ALTER TABLE undefined_consulting_booklings
+ALTER TABLE undefined_consulting_bookings
     ADD CONSTRAINT FK_undefined_consulting_bookling_request
         FOREIGN KEY (undefined_consulting_id) REFERENCES undefined_consultings(id);
 
