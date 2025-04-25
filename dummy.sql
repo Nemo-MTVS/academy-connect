@@ -1,4 +1,3 @@
-use `academy-connect`;
 INSERT INTO class_groups (id, name, created_at, expired_at)
 VALUES
     (1, 'BackEnd', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH)),
