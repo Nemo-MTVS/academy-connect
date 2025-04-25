@@ -28,6 +28,18 @@
 - **lunch_matching_classes**: 점심 매칭 분류
 - **lunch_matchings**: 점심 매칭 정보
 
+### Commit Convention
+| 타입 (type) | 설명 | 예시 |
+| --- | --- | --- |
+| `feat` | 새로운 기능 추가 | `feat: 회원가입 기능 추가` |
+| `fix` | 버그 수정 | `fix: 로그인 시 비밀번호 오류 수정` |
+| `refactor` | 리팩토링 (기능 변화 없이 구조 개선) | `refactor: 중복 로직 제거` |
+| `style` | 코드 스타일 수정 (동작 변화 없음) | `style: 들여쓰기 수정` |
+| `docs` | 문서 수정 | `docs: README 오타 수정` |
+| `test` | 테스트 코드 추가/수정 | `test: 유저 로그인 테스트 추가` |
+| `chore` | 기타 설정, 빌드 관련 작업 | `chore: gradle 버전 업그레이드` |
+| `build` | 빌드 관련 설정 변경 | `build: 빌드 스크립트 수정` |
+
 ## 프로젝트 구조
 프로젝트는 DDD(Domain-Driven Design) 패턴을 기반으로 구성되어 있습니다.
 
