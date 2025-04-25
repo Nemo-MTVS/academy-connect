@@ -10,4 +10,5 @@ import java.util.List;
 
 public interface LunchMatchingRepository extends JpaRepository<LunchMatching, String> {
 
-} 
+    int countByLunchMatchingClassId(Long lunchMatchingClassId);
+}
