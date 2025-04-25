@@ -33,6 +33,10 @@ public class LunchMatching {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
     @Builder
     public LunchMatching(String id, LunchMatchingClass lunchMatchingClass, User user, LocalDateTime createdAt, LocalDateTime deletedAt) {
         this.id = id;

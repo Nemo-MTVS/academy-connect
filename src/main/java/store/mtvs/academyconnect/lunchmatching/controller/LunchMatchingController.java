@@ -32,4 +32,18 @@ public class LunchMatchingController {
         // 정상 응답 반환
         return ResponseEntity.ok("신청 완료");
     }
+
+    /**
+     * 점심 매칭 신청 취소 API
+     * POST /lunch/cancel
+     * 요청 본문으로 사용자 ID와 매칭 클래스 ID를 받음
+     *
+     * @param request ApplyRequestDto: userId, lunchMatchingClassId 포함
+     * @return 성공 시 200 OK + "신청 취소 완료" 메시지 반환
+     */
+    @PostMapping("/cancel")
+    public ResponseEntity<String> cancel(@RequestBody ApplyRequestDto request) {
+        lunchMatchingService.cancel(request.getUserId(), request.getLunchMatchingClassId());
+        return ResponseEntity.ok("신청 취소 완료");
+    }
 }
