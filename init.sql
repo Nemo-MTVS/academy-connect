@@ -58,6 +58,8 @@ CREATE TABLE `undefined_consultings` (
                                         `student_id` VARCHAR(255) NOT NULL COMMENT 'UUID',
                                         `instructor_id` VARCHAR(255) NOT NULL COMMENT 'UUID',
                                         `request_at` DATETIME NOT NULL,
+                                        `status` ENUM('WAITING', 'DONE') NOT NULL,
+                                        `updated_at` DATETIME NOT NULL,
                                         `comment` TEXT NULL COMMENT '상담 요청 내용'
 
 );
