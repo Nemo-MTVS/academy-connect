@@ -1,0 +1,57 @@
+/* 푸터 스타일 */
+.footer-container {
+    padding: 20px 0;
+    border-top: 1px solid rgba(34, 34, 34, 0.2);
+    position: relative;
+}
+.member-section {
+    text-align: center;
+}
+.member-title {
+    color: #0A142F;
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+.member-name {
+    color: #828282;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+.company-logo {
+    margin-bottom: 15px;
+    padding-left: 20px; /* 로고 왼쪽 여백 추가 */
+}
+.company-info {
+    color: #0A142F;
+    font-size: 14px;
+    margin-bottom: 5px;
+    padding-left: 20px; /* 회사명 왼쪽 여백 추가 */
+}
+.company-address {
+    color: #0A142F;
+    font-size: 12px;
+    margin-bottom: 15px;
+    padding-left: 20px; /* 주소 왼쪽 여백 추가 */
+}
+.contact-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    color: #0A142F;
+    font-size: 14px;
+    padding-left: 20px; /* 연락처 왼쪽 여백 추가 */
+}
+.contact-info i {
+    margin-right: 8px;
+}
+.rights-reserved {
+    position: absolute;
+    top: 50%; /* 푸터의 중앙에 위치 */
+    left: -20px; /* 왼쪽으로 더 이동 */
+    transform: rotate(-90deg) translateX(-50%); /* 회전 및 위치 조정 */
+    transform-origin: left center; /* 회전 기준점 설정 */
+    color: rgba(10, 20, 47, 0.5);
+    font-size: 14px;
+    white-space: nowrap;
+}
