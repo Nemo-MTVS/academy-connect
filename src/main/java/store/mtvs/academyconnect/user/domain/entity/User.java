@@ -4,8 +4,12 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import store.mtvs.academyconnect.classgroup.domain.entity.ClassGroup;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
+import store.mtvs.academyconnect.user.domain.enums.Role;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -14,6 +18,7 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
@@ -33,24 +38,27 @@ public class User {
     @Column(name = "name", nullable = false, columnDefinition = "VARCHAR(255) COMMENT '암호화(복호화 가능)'")
     private String name;
 
-    @Column(name = "created_at", nullable = false)
+    @CreatedDate
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updatedAt", nullable = false)
+    @LastModifiedDate
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "deletedAt", nullable = false)
+    @Column
     private LocalDateTime deletedAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private String role;
+    private Role role;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Profile profile;
 
     @Builder
     public User(String id, ClassGroup classGroup, String loginId, String password, String name,
-                LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt, String role) {
+                LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt, Role role) {
         this.id = id;
         this.classGroup = classGroup;
         this.loginId = loginId;
