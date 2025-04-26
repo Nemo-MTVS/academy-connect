@@ -3,6 +3,11 @@ package store.mtvs.academyconnect.classgroup.infrastructure.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import store.mtvs.academyconnect.classgroup.domain.entity.ClassGroup;
 
+import java.util.Optional;
+
 public interface ClassGroupRepository extends JpaRepository<ClassGroup, Long> {
-    // 추가적인 쿼리 메소드 정의 가능
-} 
+
+    Optional<ClassGroup> findByName(String name);
+
+    boolean existsByName(String name);
+}

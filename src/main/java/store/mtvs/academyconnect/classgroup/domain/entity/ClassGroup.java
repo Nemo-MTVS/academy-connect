@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import store.mtvs.academyconnect.user.domain.entity.User;
 
 import jakarta.persistence.*;
@@ -19,7 +21,7 @@ import java.util.List;
 public class ClassGroup {
 
     @Id
-    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name", nullable = false, columnDefinition = "VARCHAR(255) COMMENT '백엔드'")
@@ -31,12 +33,10 @@ public class ClassGroup {
     @Column(name = "expiredAt", nullable = false)
     private LocalDateTime expiredAt;
 
-    @OneToMany(mappedBy = "classGroup", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "classGroup", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<User> users = new ArrayList<>();
 
-    @Builder
-    public ClassGroup(Long id, String name, LocalDateTime createdAt, LocalDateTime expiredAt) {
-        this.id = id;
+    public ClassGroup(String name, LocalDateTime createdAt, LocalDateTime expiredAt) {
         this.name = name;
         this.createdAt = createdAt;
         this.expiredAt = expiredAt;
