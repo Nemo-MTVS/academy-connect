@@ -36,11 +36,11 @@ public class Profile {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
+    @MapsId
     private User user;
 
-    @Builder
-    public Profile(String id, String md, String github, String blog, String email, String filePath, User user) {
-        this.id = id;
+    public Profile(String md, String github, String blog, String email, String filePath, User user) {
+        this.id = user.getId();
         this.md = md;
         this.github = github;
         this.blog = blog;
