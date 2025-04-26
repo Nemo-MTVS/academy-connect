@@ -1,6 +1,7 @@
 package store.mtvs.academyconnect.user.service;
 
 import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -14,6 +15,7 @@ import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class UserService {
     private final ClassGroupService classGroupService;
     private final EntityManager entityManager; // EntityManager 주입
@@ -40,23 +42,35 @@ public class UserService {
     @Transactional
     public User registerUser(String loginId, String className, String password, String name) {
         String uuid = UUID.randomUUID().toString();
+        try{
+            ClassGroup classGroup = classGroupService.getClassGroup(className);
 
-        ClassGroup classGroup = classGroupService.getClassGroup(className);
+            if (!StringUtils.hasText(loginId)
+                    || !StringUtils.hasText(className)
+                    || !StringUtils.hasText(password)
+                    || !StringUtils.hasText(name)
+            ) {
+                throw new IllegalArgumentException("로그인 아이디는 필수입니다");
+            }
+            User user = new User(
+                    uuid,
+                    classGroup,
+                    loginId,
+                    password,
+                    name,
+                    "STUDENT"
+            );
+            entityManager.persist(user);
 
-        User user = new User(
-                uuid,
-                classGroup,
-                loginId,
-                password,
-                name,
-                "STUDENT"
-        );
-        entityManager.persist(user);
+            Profile profile = createProfile(user);
+            entityManager.persist(profile);
 
-        Profile profile = createProfile(user);
-        entityManager.persist(profile);
-
-        return user;
+            log.info("유저 생성 완료: 유저 ID {}", user.getId());
+            return user;
+        }catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     // 사용자 조회
