@@ -40,7 +40,7 @@ CREATE TABLE `class_groups` (
                               `id` BIGINT NOT NULL,
                               `name` VARCHAR(255) NOT NULL COMMENT '백엔드',
                               `created_at` DATETIME NOT NULL,
-                              `expiredAt` DATETIME NOT NULL
+                              `expired_at` DATETIME NOT NULL
 );
 
 CREATE TABLE `consulting_slots` (

@@ -1,7 +1,6 @@
 package store.mtvs.academyconnect.profile.domain.entity;
 
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import store.mtvs.academyconnect.user.domain.entity.User;
