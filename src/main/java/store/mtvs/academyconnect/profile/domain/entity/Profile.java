@@ -1,7 +1,6 @@
 package store.mtvs.academyconnect.profile.domain.entity;
 
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import store.mtvs.academyconnect.user.domain.entity.User;
@@ -36,11 +35,11 @@ public class Profile {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
+    @MapsId
     private User user;
 
-    @Builder
-    public Profile(String id, String md, String github, String blog, String email, String filePath, User user) {
-        this.id = id;
+    public Profile(String md, String github, String blog, String email, String filePath, User user) {
+        this.id = user.getId();
         this.md = md;
         this.github = github;
         this.blog = blog;
