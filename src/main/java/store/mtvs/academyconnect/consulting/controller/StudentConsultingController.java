@@ -5,17 +5,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/consulting")
-public class ConsultingController {
+@RequestMapping("/student")
+public class StudentConsultingController {
 
     // 상담 예약 페이지
-    @GetMapping("/booking")
+    @GetMapping("/consulting-booking")
     public String booking() {
         return "consulting/booking";
     }
     
     // 내 예약 보기 페이지
-    @GetMapping("/my-bookings")
+    @GetMapping("/consulting-my-bookings")
     public String myBookings() {
         return "consulting/my-bookings";
     }
