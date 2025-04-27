@@ -56,13 +56,13 @@ public class StudentConsultingController {
             log.error("예약 목록 조회 실패: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("backUrl", "/");
-            return "error/custom-error";
+            return "error/consulting-student-error";
         } catch (Exception e) {
             // 기타 예외 처리
             log.error("예약 목록 조회 중 예기치 않은 오류 발생: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "예약 목록을 불러오는 중 오류가 발생했습니다.");
             model.addAttribute("backUrl", "/");
-            return "error/custom-error";
+            return "error/consulting-student-error";
         }
     }
 
@@ -87,12 +87,12 @@ public class StudentConsultingController {
             log.error("예약 취소 실패: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("backUrl", "/student/consulting-my-bookings");
-            return "error/custom-error";
+            return "error/consulting-student-error";
         } catch (Exception e) {
             log.error("예약 취소 중 예기치 않은 오류 발생: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "예약 취소 중 오류가 발생했습니다.");
             model.addAttribute("backUrl", "/student/consulting-my-bookings");
-            return "error/custom-error";
+            return "error/consulting-student-error";
         }
     }
 }
