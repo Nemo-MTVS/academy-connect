@@ -32,7 +32,7 @@ CREATE TABLE `users` (
                         `name` VARCHAR(255) NOT NULL COMMENT '암호화(복호화 가능)',
                         `created_at` DATETIME NOT NULL,
                         `updatedAt` DATETIME NOT NULL,
-                        `deletedAt` DATETIME NOT NULL,
+                        `deletedAt` DATETIME NULL,
                         `role` VARCHAR(255) NOT NULL
 );
 
