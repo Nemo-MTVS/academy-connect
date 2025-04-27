@@ -1,0 +1,71 @@
+/* 탭 스타일 */
+.nav-tabs {
+    border-bottom: 2px solid #f1f1f1;
+    padding-bottom: 0.5rem;
+}
+
+.nav-tabs .nav-link {
+    font-size: 1.1rem;
+    color: #aaa;
+    padding: 0.8rem 1.5rem;
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+}
+
+.nav-tabs .nav-link.active {
+    color: #ff9800;
+    border-bottom-color: #ff9800;
+    background: transparent;
+}
+
+/* 예약 카드 스타일 */
+.booking-card {
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.3s;
+    overflow: hidden;
+}
+
+.booking-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.booking-header {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.instructor-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.message-text {
+    color: #444;
+    font-size: 0.95rem;
+}
+
+.time-info {
+    color: #666;
+    font-weight: 500;
+}
+
+.btn-cancel {
+    background-color: #fff;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.empty-state {
+    color: #777;
+}
