@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상세 프로필</title>
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .profile-content {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .profile-section {
+            margin-bottom: 20px;
+        }
+        .profile-section h3 {
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #0066cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-button:hover {
+            background-color: #0055aa;
+        }
+    </style>
+</head>
+<body>
+<div class="profile-container">
+    <div class="profile-header">
+        <h1 th:text="${user.name} + ' 님의 프로필'"></h1>
+    </div>
+
+    <div class="profile-content">
+        <div class="profile-section">
+            <h3>기본 정보</h3>
+            <p th:if="${profile.github}">GitHub: <a th:href="${profile.github}" target="_blank" th:text="${profile.github}"></a></p>
+            <p th:if="${profile.blog}">Blog: <a th:href="${profile.blog}" target="_blank" th:text="${profile.blog}"></a></p>
+            <p th:if="${profile.email}">Email: <span th:text="${profile.email}"></span></p>
+        </div>
+
+        <div class="profile-section" th:if="${profile.md}">
+            <h3>자기소개</h3>
+            <div th:utext="${profile.md}"></div>
+        </div>
+    </div>
+
+    <a th:href="@{/profile}" class="back-button">목록으로 돌아가기</a>
+</div>
+</body>
+</html> 

@@ -161,3 +161,4 @@ ALTER TABLE lunch_matchings
     ADD CONSTRAINT FK_lunch_matching_user
         FOREIGN KEY (user_id) REFERENCES users(id);
 
+ALTER TABLE users CHANGE updatedAt updated_at DATETIME NOT NULL;

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<meta charset="UTF-8">
+<head>
+    <title>학생 프로필</title>
+    <style>
+        .class-buttons {
+            margin: 20px 0;
+        }
+        .class-buttons button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .student-list {
+            margin-top: 20px;
+        }
+        .student-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .student-name {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .student-name:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<h1>학생 프로필</h1>
+
+<div class="class-buttons">
+    <h2>반 선택</h2>
+    <form th:action="@{/profile}" method="get">
+        <button type="submit" name="className" value="Backend">백엔드</button>
+        <button type="submit" name="className" value="Unity">유니티</button>
+        <button type="submit" name="className" value="TA">TA</button>
+    </form>
+</div>
+
+<div th:if="${students}" class="student-list">
+    <h2 th:text="${selectedClass} + ' 반 학생들'"></h2>
+    <div th:each="student : ${students}" class="student-card">
+        <a th:href="@{/profile/{id}(id=${student.id})}" class="student-name" th:text="${student.name}"></a>
+    </div>
+</div>
+</body>
+</html>

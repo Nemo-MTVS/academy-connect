@@ -3,6 +3,7 @@ package store.mtvs.academyconnect.profile.domain.entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import store.mtvs.academyconnect.classgroup.domain.entity.ClassGroup;
 import store.mtvs.academyconnect.user.domain.entity.User;
 
 import jakarta.persistence.*;
@@ -38,7 +39,11 @@ public class Profile {
     @MapsId
     private User user;
 
-    public Profile(String md, String github, String blog, String email, String filePath, User user) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "class_group_id")
+    private ClassGroup classGroup;
+
+    public Profile(String md, String github, String blog, String email, String filePath, User user, ClassGroup classGroup) {
         this.id = user.getId();
         this.md = md;
         this.github = github;
@@ -46,5 +51,6 @@ public class Profile {
         this.email = email;
         this.filePath = filePath;
         this.user = user;
+        this.classGroup = classGroup;
     }
-} 
+}

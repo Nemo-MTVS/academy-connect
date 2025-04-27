@@ -44,9 +44,6 @@ public class User {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @Column(name = "deletedAt")
-    private LocalDateTime deletedAt;
-
     @Column(name = "role", nullable = false)
     private String role = "STUDENT";
 

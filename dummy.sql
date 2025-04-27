@@ -5,7 +5,7 @@ VALUES
     (3, 'TA', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH));
 
 
-INSERT INTO users (id, class_group_id, login_id, passwd, name, created_at, updated_at, deleted_at, role)
+INSERT INTO users (id, class_group_id, login_id, passwd, name, created_at, role)
 VALUES
 -- BackEnd 반 (class_group_id = 1)
 ('uuid-be-001', 1, 'login_be_001', 'pass_be_001', '홍길동1', NOW(), NOW(),NULL, 'STUDENT'),
@@ -22,7 +22,7 @@ VALUES
 ('uuid-ta-002', 3, 'login_ta_002', 'pass_ta_002', '성춘향2', NOW(), NOW(),NULL, 'STUDENT'),
 ('uuid-ta-003', 3, 'login_ta_003', 'pass_ta_003', '성춘향3', NOW(), NOW(),NULL, 'STUDENT');
 
-INSERT INTO users (id, class_group_id, login_id, passwd, name, created_at, updated_at, deleted_at, role)
+INSERT INTO users (id, class_group_id, login_id, passwd, name, created_at, role)
 VALUES
 -- BackEnd 반 강사
 ('uuid-be-ins', 1, 'login_be_ins', 'pass_be_ins', '백엔드강사', NOW(), NOW(),NULL, 'INSTRUCTOR'),
@@ -59,3 +59,56 @@ VALUES
 
 -- TA 강사
 ('uuid-ta-ins', '3D모델링과 3D스캐닝 기술을 활용하여 메타버스 플렛폼 및 적용 가능한 소스를 제작하는데 도움이 되고 싶습니다.', 'https://github.com/ta-instructor', 'https://blog.com/ta-instructor', 'ta-ins@example.com', NULL);
+-- users 테이블에 테스트 데이터 삽입
+INSERT INTO users (id, class_group_id, login_id, passwd, name, created_at, updatedAt, role)
+VALUES
+    -- 백엔드 반 학생들
+    ('user1', 1, 'backend1', 'password1', '김백엔', NOW(), NOW(), 'STUDENT'),
+    ('user2', 1, 'backend2', 'password2', '이백엔', NOW(), NOW(), 'STUDENT'),
+    ('user3', 1, 'backend3', 'password3', '박백엔', NOW(), NOW(), 'STUDENT'),
+
+    -- 유니티 반 학생들
+    ('user4', 2, 'unity1', 'password4', '김유니', NOW(), NOW(), 'STUDENT'),
+    ('user5', 2, 'unity2', 'password5', '이유니', NOW(), NOW(), 'STUDENT'),
+    ('user6', 2, 'unity3', 'password6', '박유니', NOW(), NOW(), 'STUDENT'),
+
+    -- TA 반 학생들
+    ('user7', 3, 'ta1', 'password7', '김티에이', NOW(), NOW(), 'STUDENT'),
+    ('user8', 3, 'ta2', 'password8', '이티에이', NOW(), NOW(), 'STUDENT'),
+    ('user9', 3, 'ta3', 'password9', '박티에이', NOW(), NOW(), 'STUDENT');
+
+-- users 테이블에 테스트 데이터 삽입
+INSERT INTO users (id, class_group_id, login_id, passwd, name, created_at, updatedAt, role)
+VALUES
+    -- 백엔드 반 학생들
+    ('user1', 1, 'backend1', 'password1', '김백엔', NOW(), NOW(), 'STUDENT'),
+    ('user2', 1, 'backend2', 'password2', '이백엔', NOW(), NOW(), 'STUDENT'),
+    ('user3', 1, 'backend3', 'password3', '박백엔', NOW(), NOW(), 'STUDENT'),
+
+    -- 유니티 반 학생들
+    ('user4', 2, 'unity1', 'password4', '김유니', NOW(), NOW(), 'STUDENT'),
+    ('user5', 2, 'unity2', 'password5', '이유니', NOW(), NOW(), 'STUDENT'),
+    ('user6', 2, 'unity3', 'password6', '박유니', NOW(), NOW(), 'STUDENT'),
+
+    -- TA 반 학생들
+    ('user7', 3, 'ta1', 'password7', '김티에이', NOW(), NOW(), 'STUDENT'),
+    ('user8', 3, 'ta2', 'password8', '이티에이', NOW(), NOW(), 'STUDENT'),
+    ('user9', 3, 'ta3', 'password9', '박티에이', NOW(), NOW(), 'STUDENT');
+
+-- profiles 테이블에 테스트 데이터 삽입
+INSERT INTO profiles (id, md, github, blog, email, file_path)
+VALUES
+    -- 백엔드 반 학생들 프로필
+    ('user1', '# 김백엔의 프로필\n안녕하세요! 백엔드 개발자 김백엔입니다.', 'https://github.com/backend1', 'https://backend1.blog.com', 'backend1@example.com', NULL),
+    ('user2', '# 이백엔의 프로필\n백엔드 개발을 좋아하는 이백엔입니다.', 'https://github.com/backend2', 'https://backend2.blog.com', 'backend2@example.com', NULL),
+    ('user3', '# 박백엔의 프로필\n백엔드 개발자 박백엔입니다.', 'https://github.com/backend3', 'https://backend3.blog.com', 'backend3@example.com', NULL),
+
+    -- 유니티 반 학생들 프로필
+    ('user4', '# 김유니의 프로필\n유니티 개발자 김유니입니다.', 'https://github.com/unity1', 'https://unity1.blog.com', 'unity1@example.com', NULL),
+    ('user5', '# 이유니의 프로필\n유니티 개발을 좋아하는 이유니입니다.', 'https://github.com/unity2', 'https://unity2.blog.com', 'unity2@example.com', NULL),
+    ('user6', '# 박유니의 프로필\n유니티 개발자 박유니입니다.', 'https://github.com/unity3', 'https://unity3.blog.com', 'unity3@example.com', NULL),
+
+    -- TA 반 학생들 프로필
+    ('user7', '# 김티에이의 프로필\nTA 김티에이입니다.', 'https://github.com/ta1', 'https://ta1.blog.com', 'ta1@example.com', NULL),
+    ('user8', '# 이티에이의 프로필\nTA 이유니입니다.', 'https://github.com/ta2', 'https://ta2.blog.com', 'ta2@example.com', NULL),
+    ('user9', '# 박티에이의 프로필\nTA 박티에이입니다.', 'https://github.com/ta3', 'https://ta3.blog.com', 'ta3@example.com', NULL);
