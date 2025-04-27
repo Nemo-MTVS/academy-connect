@@ -16,16 +16,15 @@ import java.time.LocalDateTime;
 public class ConsultingBooking {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  // ID 자동생성 설정 추가
     @Column(name = "id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false)  // nullable=false 명시적 추가
+    @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "instructor_id", nullable = false)  // nullable=false 명시적 추가
+    @JoinColumn(name = "instructor_id", nullable = false)
     private User instructor;
 
     @Enumerated(EnumType.STRING)
