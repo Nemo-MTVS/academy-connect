@@ -17,7 +17,7 @@ CREATE TABLE `consulting_bookings` (
                                       `student_id` VARCHAR(255) NOT NULL COMMENT 'UUID',
                                       `instructor_id` VARCHAR(255) NOT NULL COMMENT 'UUID',
                                       `status` ENUM('취소됨','상담완료','예약됨') NOT NULL DEFAULT '예약됨' COMMENT '예약 상태',
-                                      `message` VARCHAR(255) NOT NULL COMMENT '~~ 점이 궁금해요',
+                                      `message` VARCHAR(255) NULL COMMENT '~~ 점이 궁금해요',
                                       `created_at` DATETIME NOT NULL,
                                       `update_at` DATETIME NOT NULL,
                                       `start_time` DATETIME NOT NULL,
