@@ -20,18 +20,18 @@ public class ConsultingBooking {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id")
+    @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "instructor_id")
+    @JoinColumn(name = "instructor_id", nullable = false)
     private User instructor;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, columnDefinition = "ENUM('취소됨','상담완료','예약됨') NOT NULL DEFAULT '예약됨' COMMENT '예약 상태'")
     private BookingStatus status;
 
-    @Column(name = "message", nullable = false, columnDefinition = "VARCHAR(255) NOT NULL COMMENT '~~ 점이 궁금해요'")
+    @Column(name = "message", nullable = true, columnDefinition = "VARCHAR(255) NULL COMMENT '~~ 점이 궁금해요'") // 코멘트는 nullable
     private String message;
 
     @Column(name = "created_at", nullable = false)
@@ -48,7 +48,7 @@ public class ConsultingBooking {
 
     @Builder
     public ConsultingBooking(Long id, User student, User instructor, BookingStatus status, String message,
-                          LocalDateTime createdAt, LocalDateTime updateAt, LocalDateTime startTime, LocalDateTime endTime) {
+                             LocalDateTime createdAt, LocalDateTime updateAt, LocalDateTime startTime, LocalDateTime endTime) {
         this.id = id;
         this.student = student;
         this.instructor = instructor;
@@ -63,4 +63,4 @@ public class ConsultingBooking {
     public enum BookingStatus {
         취소됨, 상담완료, 예약됨
     }
-} 
+}

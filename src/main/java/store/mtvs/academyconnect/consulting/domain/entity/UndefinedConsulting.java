@@ -1,23 +1,22 @@
 package store.mtvs.academyconnect.consulting.domain.entity;
 
-import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import store.mtvs.academyconnect.consulting.domain.enums.UndefinedConsultingState;
 import store.mtvs.academyconnect.user.domain.entity.User;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "undefined_consultings")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class UndefinedConsulting {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,16 +29,30 @@ public class UndefinedConsulting {
 
     @Column(name = "request_at", nullable = false)
     private LocalDateTime requestAt;
-
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private UndefinedConsultingState status;
-
+    private RequestStatus status;
+    
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    @Lob
+    
     @Column(name = "comment")
     private String comment;
 
+    @Builder
+    public UndefinedConsulting(Long id, User student, User instructor, LocalDateTime requestAt, 
+                              RequestStatus status, LocalDateTime updatedAt, String comment) {
+        this.id = id;
+        this.student = student;
+        this.instructor = instructor;
+        this.requestAt = requestAt;
+        this.status = status;
+        this.updatedAt = updatedAt;
+        this.comment = comment;
+    }
+
+    public enum RequestStatus {
+        WAITING, DONE
+    }
 }
