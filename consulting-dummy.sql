@@ -16,9 +16,9 @@ VALUES
     ('uuid-ta-001', 3, 'login_ta_001', 'pass_ta_001', '성춘향1', NOW(), NOW(), NULL, 'STUDENT'),
     ('uuid-ta-002', 3, 'login_ta_002', 'pass_ta_002', '성춘향2', NOW(), NOW(), NULL, 'STUDENT'),
     ('uuid-ta-003', 3, 'login_ta_003', 'pass_ta_003', '성춘향3', NOW(), NOW(), NULL, 'STUDENT'),
-    ('uuid-be-ins', 1, 'login_be_ins', 'pass_be_ins', '백엔드강사', NOW(), NOW(), NULL, 'INSTRUCTOR'),
-    ('uuid-unity-ins', 2, 'login_unity_ins', 'pass_unity_ins', '유니티강사', NOW(), NOW(), NULL, 'INSTRUCTOR'),
-    ('uuid-ta-ins', 3, 'login_ta_ins', 'pass_ta_ins', 'TA강사', NOW(), NOW(), NULL, 'INSTRUCTOR');
+    ('uuid-be-ins', 1, 'login_be_ins', 'pass_be_ins', '백엔드/이상우', NOW(), NOW(), NULL, 'INSTRUCTOR'),
+    ('uuid-unity-ins', 2, 'login_unity_ins', 'pass_unity_ins', '유니티/오민석', NOW(), NOW(), NULL, 'INSTRUCTOR'),
+    ('uuid-ta-ins', 3, 'login_ta_ins', 'pass_ta_ins', 'TA/최용훈', NOW(), NOW(), NULL, 'INSTRUCTOR');
 
 
 INSERT INTO profiles (id, md, github, blog, email, file_path)
