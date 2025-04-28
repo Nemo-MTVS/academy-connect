@@ -2,14 +2,24 @@ package store.mtvs.academyconnect.consulting.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import store.mtvs.academyconnect.consulting.dto.AvailableSlotDto;
 import store.mtvs.academyconnect.consulting.dto.MyBookingListItemDto;
+import store.mtvs.academyconnect.consulting.dto.TeacherInfoForListDto;
+import store.mtvs.academyconnect.consulting.dto.TeacherProfileDto;
 import store.mtvs.academyconnect.consulting.dto.UndefinedConsultingDto;
 import store.mtvs.academyconnect.consulting.service.ConsultingBookingService;
+import store.mtvs.academyconnect.consulting.service.InstructorInfoService;
+import store.mtvs.academyconnect.consulting.service.StudentBookingViewService;
 import store.mtvs.academyconnect.consulting.service.UndefinedConsultingService;
+
 import java.time.Clock;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Slf4j
@@ -20,12 +30,133 @@ public class StudentConsultingController {
 
     private final ConsultingBookingService consultingBookingService;
     private final UndefinedConsultingService undefinedConsultingService;
+    private final StudentBookingViewService studentBookingViewService;
+    private final InstructorInfoService instructorInfoService;
     private final Clock clock;
 
-    // 학생의 예약용 화면
+    /**
+     * 학생의 예약용 화면 (S01, S02, S03 기능 통합)
+     */
     @GetMapping("/consulting-booking")
-    public String booking() {
-        return "consulting/student/booking";
+    public String booking(
+            @RequestParam(required = false) String instructorId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            Model model) {
+
+        // 임시 학생 ID 설정 (추후 로그인 기능 구현 시 수정 필요)
+        String studentId = "uuid-be-001";
+        model.addAttribute("studentId", studentId);
+
+        log.info("상담 예약 페이지 요청: studentId={}, instructorId={}, date={}, year={}, month={}",
+                studentId, instructorId, date, year, month);
+
+        try {
+            // S01: 강사 목록 조회
+            List<TeacherInfoForListDto> instructors = instructorInfoService.getActiveTeachers();
+            model.addAttribute("instructors", instructors);
+
+            // 선택된 강사 ID 결정 (파라미터 > 기본 할당 > 첫 번째 강사)
+            String selectedInstructorId = instructorId;
+            if (selectedInstructorId == null) {
+                selectedInstructorId = instructorInfoService.getAssignedTeacherId(studentId);
+                // 할당된 강사도 없으면 첫 번째 강사 선택
+                if (selectedInstructorId == null && !instructors.isEmpty()) {
+                    selectedInstructorId = instructors.get(0).getId();
+                }
+            }
+            model.addAttribute("selectedInstructorId", selectedInstructorId);
+
+            if (selectedInstructorId != null) {
+                // S02: 선택된 강사의 프로필 정보 조회
+                TeacherProfileDto selectedInstructor = instructorInfoService.getTeacherProfile(selectedInstructorId);
+                model.addAttribute("selectedInstructor", selectedInstructor);
+
+                // 표시할 년월 결정 로직 개선
+                LocalDate now = LocalDate.now(clock);
+
+                // 우선순위:
+                // 1. URL 파라미터로 받은 year, month
+                // 2. 선택된 날짜(date)의 year, month
+                // 3. 현재 날짜의 year, month
+                int selectedYear;
+                int selectedMonth;
+
+                if (year != null && month != null) {
+                    // 1. URL 파라미터로 받은 year, month 사용
+                    selectedYear = year;
+                    selectedMonth = month;
+                } else if (date != null) {
+                    // 2. 선택된 날짜의 year, month 사용
+                    selectedYear = date.getYear();
+                    selectedMonth = date.getMonthValue();
+                } else {
+                    // 3. 현재 날짜의 year, month 사용
+                    selectedYear = now.getYear();
+                    selectedMonth = now.getMonthValue();
+                }
+
+                model.addAttribute("year", selectedYear);
+                model.addAttribute("month", selectedMonth);
+
+                // 해당 년월의 정보
+                YearMonth yearMonth = YearMonth.of(selectedYear, selectedMonth);
+                model.addAttribute("monthName", yearMonth.getMonth().toString());
+                model.addAttribute("daysInMonth", yearMonth.lengthOfMonth());
+                model.addAttribute("firstDayOfWeek", yearMonth.atDay(1).getDayOfWeek().getValue() % 7);
+
+                // 선택된 날짜 설정 (URL 파라미터만 사용)
+                LocalDate selectedDate = date;
+                model.addAttribute("selectedDate", selectedDate);
+                model.addAttribute("selectedDateStr", selectedDate != null ? selectedDate.toString() : null);
+
+                // 로깅 추가
+                log.debug("달력 표시 정보: year={}, month={}, selectedDate={}", selectedYear, selectedMonth, selectedDate);
+
+                // S03: 달력 데이터 생성
+                model.addAttribute("calendarData",
+                        studentBookingViewService.getCalendarData(selectedInstructorId, selectedYear, selectedMonth, selectedDate));
+
+                // S03: 선택된 날짜의 예약 가능 시간 슬롯 조회
+                List<AvailableSlotDto> availableSlots =
+                        studentBookingViewService.getAvailableSlots(selectedInstructorId, selectedDate);
+                model.addAttribute("availableSlots", availableSlots);
+                model.addAttribute("hasAvailableSlots", !availableSlots.isEmpty());
+
+                log.info("상담 예약 페이지 로드 성공: instructorId={}, date={}, year={}, month={}, 예약 가능 슬롯 수={}",
+                        selectedInstructorId, selectedDate, selectedYear, selectedMonth, availableSlots.size());
+            }
+
+            return "consulting/student/booking";
+        } catch (Exception e) {
+            // 예외 처리
+            log.error("상담 예약 페이지 로드 중 오류 발생: {}", e.getMessage(), e);
+            model.addAttribute("errorMessage", "상담 예약 페이지를 불러오는 중 오류가 발생했습니다.");
+            model.addAttribute("backUrl", "/");
+            return "error/consulting-student-error";
+        }
+    }
+
+    /**
+     * 특정 강사/날짜의 예약 가능 시간 슬롯 조회 API (AJAX용)
+     */
+    @GetMapping("/api/consulting/teachers/{teacherId}/available-slots")
+    @ResponseBody
+    public ResponseEntity<List<AvailableSlotDto>> getAvailableSlotsForDate(
+            @PathVariable String teacherId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        log.info("예약 가능 시간 슬롯 API 요청: teacherId={}, date={}", teacherId, date);
+
+        try {
+            List<AvailableSlotDto> availableSlots = studentBookingViewService.getAvailableSlots(teacherId, date);
+            log.info("예약 가능 시간 슬롯 API 응답: {} 개의 슬롯 반환", availableSlots.size());
+            return ResponseEntity.ok(availableSlots);
+        } catch (Exception e) {
+            log.error("예약 가능 시간 슬롯 API 오류: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**
