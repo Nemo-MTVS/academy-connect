@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>프로필 수정</title>
+</head>
+<body>
+<h1>프로필 수정 페이지</h1>
+
+<form th:action="@{/profile/{id}/update(id=${student.id})}" method="post">
+    <input type="text" name="name" th:value="${student.name}">
+    <input type="text" name="email" th:value="${profile.email}">
+    <input type="text" name="github" th:value="${profile.github}">
+    <input type="text" name="blog" th:value="${profile.blog}">
+    <button type="submit">저장</button>
+</form>
+    <button type="submit"> <a th:href="@{/profile/{id}/edit(id=${userId})}">수정</a></button>
+
+</form>
+</body>
+</html>

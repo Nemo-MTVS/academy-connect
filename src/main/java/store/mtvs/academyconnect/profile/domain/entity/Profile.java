@@ -53,4 +53,40 @@ public class Profile {
         this.user = user;
         this.classGroup = classGroup;
     }
+
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+
+    public void setMd(String md) {
+        this.md = md;
+    }
+    public void setGithub(String github) {
+        this.github = github;
+    }
+
+
+    public void setBlog(String blog) {
+        this.blog = blog;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+
+    public void setClassGroup(ClassGroup classGroup) {
+        this.classGroup = classGroup;
+    }
 }

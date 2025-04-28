@@ -59,7 +59,19 @@
             <div th:utext="${profile.md}"></div>
         </div>
     </div>
+    <button type="button"
+            th:attr="data-userid=${userId}"
+            onclick="goEdit(this)"
+            style="padding: 8px 16px; margin-top: 10px;">
+        수정
+    </button>
 
+    <script>
+        function goEdit(btn) {
+            var userId = btn.getAttribute('data-userid');
+            location.href = '/profile/' + userId + '/edit';
+        }
+    </script>
     <a th:href="@{/profile}" class="back-button">목록으로 돌아가기</a>
 </div>
 </body>

@@ -2,12 +2,15 @@ package store.mtvs.academyconnect.profile.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
 import store.mtvs.academyconnect.profile.infrastructure.repository.ProfileRepository;
 import store.mtvs.academyconnect.user.domain.entity.User;
 import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
+import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -53,6 +56,25 @@ public class ProfileService {
             log.error("Error finding profile for user {}: {}", userId, e.getMessage(), e);
             throw e;
         }
+    }
+
+    @Transactional
+    public void updateProfile(String userId, String name, String email, String github, String blog) {
+        log.info("Updating profile for user: {}", name);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+
+        Profile profile = profileRepository.findByUserId(userId);
+        if (profile == null) {
+            throw new IllegalArgumentException("Profile not found for user: " + userId);
+        }
+        user.changeName(name);
+        profile.setEmail(email);
+        profile.setGithub(github);
+        profile.setBlog(blog);
+
+        // 3. 저장은 트랜잭션 덕분에 자동 (JPA 변경 감지)
+        log.info("Profile updated successfully for user: {}", userId);
     }
 
     public User getUserById(String userId) {

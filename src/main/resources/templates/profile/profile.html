@@ -1,56 +1,134 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <meta charset="UTF-8">
-<meta charset="UTF-8">
 <head>
     <title>학생 프로필</title>
+    <link th:href="@{/css/header.css}" rel="stylesheet">
+    <link th:href="@{/css/footer.css}" rel="stylesheet">
     <style>
-        .class-buttons {
-            margin: 20px 0;
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #fff;
         }
-        .class-buttons button {
-            margin: 0 10px;
-            padding: 10px 20px;
-            font-size: 16px;
+        .class-buttons {
+            margin: 30px 0 40px 0;
+            display: flex;
+            gap: 20px;
+            justify-content: flex-start;
+        }
+        .class-btn {
+            background: #eaf6ff;
+            color: #222;
+            border: 4px solid #bfc9d1;
+            border-radius: 15px;
+            font-size: 32px;
+            font-weight: 400;
+            padding: 10px 24px;
+            min-width: 140px;
+            min-height: 48px;
+            margin-right: 16px;
             cursor: pointer;
+            transition: background 0.2s, color 0.2s, border 0.2s;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .class-btn.selected {
+            background: #2d3994;
+            color: #fff;
+            border: 4px solid #2d3994;
+        }
+        .class-btn:hover {
+            background: #b3d8ff;
         }
         .student-list {
-            margin-top: 20px;
+            margin-top: 40px;
+        }
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 25px 30px;
+            max-width: 1200px;
         }
         .student-card {
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 5px;
+            background: #fff;
+            border: 5px solid #d3dbe2;
+            border-radius: 15px;
+            padding: 18px 0;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 400;
+            transition: border 0.2s, box-shadow 0.2s;
+            min-width: 170px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        .student-card:hover {
+            border: 5px solid #2d3994;
+            box-shadow: 0 4px 16px rgba(45,57,148,0.08);
         }
         .student-name {
-            color: #0066cc;
+            color: #222;
             text-decoration: none;
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 32px;
+            font-weight: 400;
         }
         .student-name:hover {
+            color: #2d3994;
             text-decoration: underline;
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        h2 {
+            display: none;
+        }
+        @media (max-width: 1300px) {
+            .student-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 900px) {
+            .student-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .class-btn {
+                font-size: 32px;
+                min-width: 160px;
+                min-height: 60px;
+                padding: 10px 20px;
+            }
         }
     </style>
 </head>
 <body>
+<!-- 헤더 fragment include -->
+<div th:replace="fragments/header :: header"></div>
+
 <h1>학생 프로필</h1>
 
 <div class="class-buttons">
-    <h2>반 선택</h2>
-    <form th:action="@{/profile}" method="get">
-        <button type="submit" name="className" value="Backend">백엔드</button>
-        <button type="submit" name="className" value="Unity">유니티</button>
-        <button type="submit" name="className" value="TA">TA</button>
+    <form th:action="@{/profile}" method="get" style="display: flex; gap: 20px;">
+        <button type="submit" name="className" value="Backend" th:classappend="${selectedClass} == 'Backend' ? 'selected' : ''" class="class-btn">Back-end</button>
+        <button type="submit" name="className" value="TA" th:classappend="${selectedClass} == 'TA' ? 'selected' : ''" class="class-btn">TA</button>
+        <button type="submit" name="className" value="Unity" th:classappend="${selectedClass} == 'Unity' ? 'selected' : ''" class="class-btn">Unity</button>
+        <button type="submit" name="className" value="AI" th:classappend="${selectedClass} == 'AI' ? 'selected' : ''" class="class-btn">AI</button>
+        <button type="submit" name="className" value="Unreal" th:classappend="${selectedClass} == 'Unreal' ? 'selected' : ''" class="class-btn">Unreal</button>
     </form>
 </div>
 
 <div th:if="${students}" class="student-list">
     <h2 th:text="${selectedClass} + ' 반 학생들'"></h2>
-    <div th:each="student : ${students}" class="student-card">
-        <a th:href="@{/profile/{id}(id=${student.id})}" class="student-name" th:text="${student.name}"></a>
+    <div class="student-grid">
+        <div th:each="student : ${students}" class="student-card">
+            <a th:href="@{/profile/{id}(id=${student.id})}" class="student-name" th:text="${student.name}"></a>
+        </div>
     </div>
 </div>
+<!-- 푸터 fragment include -->
+<div th:replace="fragments/footer :: footer"></div>
 </body>
 </html>
