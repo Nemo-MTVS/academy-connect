@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import store.mtvs.academyconnect.lunchmatching.dto.ApplyRequestDto;
+import store.mtvs.academyconnect.lunchmatching.dto.LunchMatchingStatusResponse;
 import store.mtvs.academyconnect.lunchmatching.service.LunchMatchingService;
+
+import java.util.List;
 
 @RestController // REST API 컨트롤러임을 나타냄 (JSON 형태로 응답)
 @RequiredArgsConstructor // 생성자를 통한 의존성 주입 자동 처리
@@ -66,4 +69,21 @@ public class LunchMatchingController {
         lunchMatchingService.resetAllMatchings(); // 같은 리셋 로직 재사용
         return ResponseEntity.ok("초기화 완료");
     }
+
+    /**
+     * 점심 매칭 현황 조회 API
+     * GET /lunch/status
+     *
+     * 각 매칭 클래스별로
+     * - 현재 신청 인원 수
+     * - 신청자 이름 리스트를 조회하여 반환한다.
+     *
+     * @return 신청 현황 리스트
+     */
+    @GetMapping("/status")
+    public ResponseEntity<List<LunchMatchingStatusResponse>> getLunchMatchingStatus() {
+        List<LunchMatchingStatusResponse> statusList = lunchMatchingService.getLunchMatchingStatus();
+        return ResponseEntity.ok(statusList);
+    }
+
 }

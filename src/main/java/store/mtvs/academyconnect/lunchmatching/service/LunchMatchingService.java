@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import store.mtvs.academyconnect.lunchmatching.domain.entity.LunchMatching;
 import store.mtvs.academyconnect.lunchmatching.domain.entity.LunchMatchingClass;
+import store.mtvs.academyconnect.lunchmatching.dto.LunchMatchingStatusResponse;
 import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.LunchMatchingClassRepository;
 import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.LunchMatchingRepository;
 import store.mtvs.academyconnect.user.domain.entity.User;
@@ -12,6 +13,7 @@ import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,15 +67,15 @@ public class LunchMatchingService {
                 .orElseThrow(() -> new IllegalArgumentException("매칭 클래스가 존재하지 않습니다."));
 
         // 본인의 전공이 매칭 클래스 이름에 포함되어 있어야 신청 가능
-        String userMajor = user.getClassGroup().getName();
+        String userMajor = mapMajor(user.getClassGroup().getName());
         String matchName = lunchClass.getName();
         if(!matchName.contains(userMajor)) {
             throw new IllegalArgumentException("본인 전공과 관련된 매칭만 신청할 수 있습니다.");
         }
-
+        
         // 해당 클래스에 신청한 인원이 6명 이상이면 신청 불가
-        int currentCount = lunchMatchingRepository.countByLunchMatchingClassId(lunchMatchingClassId);
-        if(currentCount >= 6) {
+        int currentCount = lunchMatchingRepository.countByLunchMatchingClassIdAndDeletedAtIsNull(lunchMatchingClassId);
+        if (currentCount >= 6) {
             throw new IllegalArgumentException("신청 인원이 초과되었습니다.");
         }
 
@@ -91,6 +93,20 @@ public class LunchMatchingService {
                 .build();
 
         lunchMatchingRepository.save(matching); // 매칭 정보 저장
+    }
+
+    /**
+     * 사용자 전공명을 매칭용 약어로 변환하는 메서드
+     */
+    private String mapMajor(String originalMajor) {
+        if ("Backend".equalsIgnoreCase(originalMajor)) {
+            return "BE";
+        } else if ("TA".equalsIgnoreCase(originalMajor)) {
+            return "TA";
+        } else if ("Unity".equalsIgnoreCase(originalMajor)) {
+            return "Unity";
+        }
+        return originalMajor; // 혹시 다른 전공 있으면 그대로 반환
     }
 
     /**
@@ -151,5 +167,42 @@ public class LunchMatchingService {
 //        System.out.println("✅ [자동 리셋] 점심 매칭 초기화 실행됨: " + LocalDateTime.now()); // 로그 찍기
 //        resetAllMatchings(); // 기존 로직 실행
 //    }
+
+    /**
+     * 점심 매칭 현황 전체 조회 메서드
+     *
+     * @return 매칭 클래스별 신청 현황 리스트
+     */
+    @Transactional
+    public List<LunchMatchingStatusResponse> getLunchMatchingStatus() {
+        List<LunchMatchingStatusResponse> result = new ArrayList<>();
+
+        // 모든 매칭 클래스를 조회 (ex: BE-TA, BE-Unity, Unity-TA)
+        List<LunchMatchingClass> lunchClasses = lunchMatchingClassRepository.findAll();
+
+        for (LunchMatchingClass lunchClass : lunchClasses) {
+            // 각 클래스별 살아있는 신청자 목록 가져오기
+            List<LunchMatching> matchings = lunchMatchingRepository.findByLunchMatchingClassIdAndDeletedAtIsNull(lunchClass.getId());
+
+            // 신청자 이름만 추출
+            List<String> studentNames = matchings.stream()
+                    .map(matching -> matching.getUser().getName())
+                    .toList();
+
+            // 현재 신청 인원 수
+            int currentCount = studentNames.size();
+
+            // 결과 리스트에 추가
+            LunchMatchingStatusResponse response = new LunchMatchingStatusResponse(
+                    lunchClass.getId(),
+                    lunchClass.getName(),
+                    currentCount,
+                    studentNames
+            );
+            result.add(response);
+        }
+
+        return result;
+    }
 
 }
