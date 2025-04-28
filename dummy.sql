@@ -1,6 +1,6 @@
 INSERT INTO class_groups (id, name, created_at, expired_at)
 VALUES
-    (1, 'BackEnd', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH)),
+    (1, 'Backend', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH)),
     (2, 'Unity', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH)),
     (3, 'TA', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH));
 
