@@ -9,8 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import store.mtvs.academyconnect.consulting.dto.AvailableSlotDto;
 import store.mtvs.academyconnect.consulting.dto.MyBookingListItemDto;
-import store.mtvs.academyconnect.consulting.dto.TeacherInfoForListDto;
-import store.mtvs.academyconnect.consulting.dto.TeacherProfileDto;
+import store.mtvs.academyconnect.consulting.dto.InstructorInfoForListDto;
+import store.mtvs.academyconnect.consulting.dto.InstructorProfileDto;
 import store.mtvs.academyconnect.consulting.dto.UndefinedConsultingDto;
 import store.mtvs.academyconnect.consulting.service.ConsultingBookingService;
 import store.mtvs.academyconnect.consulting.service.InstructorInfoService;
@@ -54,8 +54,16 @@ public class StudentConsultingController {
 
         try {
             // S01: 강사 목록 조회
-            List<TeacherInfoForListDto> instructors = instructorInfoService.getActiveTeachers();
+            List<InstructorInfoForListDto> instructors = instructorInfoService.getActiveTeachers();
             model.addAttribute("instructors", instructors);
+            
+            // 강사 목록이 비어있는지 확인하고, 비어있다면 에러 페이지로 리디렉션
+            if (instructors == null || instructors.isEmpty()) {
+                log.warn("등록된 강사가 없습니다.");
+                model.addAttribute("errorMessage", "등록된 강사가 없습니다.");
+                model.addAttribute("backUrl", "/");
+                return "error/consulting-student-error";
+            }
 
             // 선택된 강사 ID 결정 (파라미터 > 기본 할당 > 첫 번째 강사)
             String selectedInstructorId = instructorId;
@@ -70,7 +78,7 @@ public class StudentConsultingController {
 
             if (selectedInstructorId != null) {
                 // S02: 선택된 강사의 프로필 정보 조회
-                TeacherProfileDto selectedInstructor = instructorInfoService.getTeacherProfile(selectedInstructorId);
+                InstructorProfileDto selectedInstructor = instructorInfoService.getTeacherProfile(selectedInstructorId);
                 model.addAttribute("selectedInstructor", selectedInstructor);
 
                 // 표시할 년월 결정 로직 개선
