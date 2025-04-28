@@ -12,7 +12,7 @@
 <header th:fragment="header" class="header-container">
     <!-- Logo -->
     <div class="logo-container">
-        <a th:href="@{/static}">
+        <a th:href="@{/}">
             <img th:src="@{/images/logo.png}" alt="NimoVerse Logo" width="140" height="50"
                  onerror="this.src='https://placehold.co/140x50'">
         </a>
@@ -22,26 +22,26 @@
     <nav class="nav-menu-container">
         <!-- Service Introduction -->
         <div class="nav-item">
-            <a class="nav-link" th:href="@{/static}">서비스 소개</a>
+            <a class="nav-link" th:href="@{/}">서비스 소개</a>
         </div>
         
         <!-- Consulting -->
         <div class="nav-item dropdown-hover">
             <span class="nav-link">상담</span>
             <div class="dropdown-menu-hover">
-                <a class="dropdown-item" th:href="@{/templates/student/consulting/booking}">예약하기</a>
-                <a class="dropdown-item" th:href="@{/templates/student/consulting/my-bookings}">내 예약 보기</a>
+                <a class="dropdown-item" th:href="@{/student/consulting-booking}">예약하기</a>
+                <a class="dropdown-item" th:href="@{/student/consulting-my-bookings}">내 예약 보기</a>
             </div>
         </div>
         
         <!-- Lunch Mate -->
         <div class="nav-item">
-            <a class="nav-link" th:href="@{/templates/lunchmatching}">점심 메이트</a>
+            <a class="nav-link" th:href="@{/lunchmatching}">점심 메이트</a>
         </div>
         
         <!-- Profile -->
         <div class="nav-item">
-            <a class="nav-link" th:href="@{/templates/profile}">프로필</a>
+            <a class="nav-link" th:href="@{/profile}">프로필</a>
         </div>
         
         <!-- Login / Profile Menu -->
