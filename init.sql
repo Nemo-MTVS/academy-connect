@@ -31,8 +31,8 @@ CREATE TABLE `users` (
                         `passwd` VARCHAR(255) NOT NULL COMMENT '암호화',
                         `name` VARCHAR(255) NOT NULL COMMENT '암호화(복호화 가능)',
                         `created_at` DATETIME NOT NULL,
-                        `updatedAt` DATETIME NOT NULL,
-                        `deletedAt` DATETIME NULL,
+                        `updated_at` DATETIME NOT NULL,
+                        `deleted_at` DATETIME NULL,
                         `role` VARCHAR(255) NOT NULL
 );
 
