@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TeacherInfoForListDto {
+public class InstructorInfoForListDto {
     private String id;
     private String name;
     private String classGroupName;

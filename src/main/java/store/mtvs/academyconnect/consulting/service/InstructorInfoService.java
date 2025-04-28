@@ -3,8 +3,8 @@ package store.mtvs.academyconnect.consulting.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import store.mtvs.academyconnect.consulting.dto.TeacherInfoForListDto;
-import store.mtvs.academyconnect.consulting.dto.TeacherProfileDto;
+import store.mtvs.academyconnect.consulting.dto.InstructorInfoForListDto;
+import store.mtvs.academyconnect.consulting.dto.InstructorProfileDto;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
 import store.mtvs.academyconnect.profile.infrastructure.repository.ProfileRepository;
 import store.mtvs.academyconnect.user.domain.entity.User;
@@ -29,7 +29,7 @@ public class InstructorInfoService {
     /**
      * 활성화된 모든 강사 목록 조회
      */
-    public List<TeacherInfoForListDto> getActiveTeachers() {
+    public List<InstructorInfoForListDto> getActiveTeachers() {
         List<User> instructors = userRepository.findByRoleWithClassGroupWithProfile("INSTRUCTOR");
         
         return instructors.stream()
@@ -38,7 +38,7 @@ public class InstructorInfoService {
                     Profile profile = instructor.getProfile();
                     String profileImageUrl = profile != null ? profile.getFilePath() : null;
                     
-                    return TeacherInfoForListDto.builder()
+                    return InstructorInfoForListDto.builder()
                             .id(instructor.getId())
                             .name(instructor.getName())
                             .classGroupName(instructor.getClassGroup().getName())
@@ -51,7 +51,7 @@ public class InstructorInfoService {
     /**
      * 특정 강사의 프로필 정보 조회
      */
-    public TeacherProfileDto getTeacherProfile(String instructorId) {
+    public InstructorProfileDto getTeacherProfile(String instructorId) {
         User instructor = userRepository.findById(instructorId)
                 .orElseThrow(() -> new IllegalArgumentException("강사를 찾을 수 없습니다."));
         
@@ -62,7 +62,7 @@ public class InstructorInfoService {
         Profile profile = profileRepository.findById(instructorId)
                 .orElse(null);
                 
-        return TeacherProfileDto.builder()
+        return InstructorProfileDto.builder()
                 .id(instructor.getId())
                 .name(instructor.getName())
                 .classGroupName(instructor.getClassGroup().getName())
