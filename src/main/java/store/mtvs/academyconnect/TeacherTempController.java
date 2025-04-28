@@ -16,5 +16,10 @@ public class TeacherTempController {
         return "reservation";
     }
 
+    @GetMapping("/teacher/schedule")
+    public String test3() {
+        return "teacher";
+    }
+
 }
 
