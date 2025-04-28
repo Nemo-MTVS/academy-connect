@@ -1,5 +1,6 @@
 package store.mtvs.academyconnect.lunchmatching.controller;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,34 +17,40 @@ public class LunchMatchingController {
     /**
      * 점심 매칭 신청 API
      * POST /lunch/apply
-     * 요청 본문으로 사용자 ID와 매칭 클래스 ID를 받음
      *
-     * @param request ApplyRequestDto: userId, lunchMatchingClassId 포함
+     * 요청 본문으로 매칭 클래스 ID(lunchMatchingClassId)만 받음.
+     * 사용자 ID는 서버 내부에서 임의로 고정하여 사용한다. (테스트용)
+     *
+     * @param request ApplyRequestDto: lunchMatchingClassId 포함
      * @return 성공 시 200 OK + "신청 완료" 메시지 반환
      */
     @PostMapping("/apply")
     public ResponseEntity<String> apply(@RequestBody ApplyRequestDto request) {
-        // 서비스 계층에 신청 처리 위임
-        lunchMatchingService.apply(
-                request.getUserId(),
-                request.getLunchMatchingClassId()
-        );
+        // 임시 student 아이디 고정 (세션 없이)
+        String student = "uuid-be-001"; // 테스트용
 
-        // 정상 응답 반환
+        lunchMatchingService.apply(student, request.getLunchMatchingClassId());
+
         return ResponseEntity.ok("신청 완료");
     }
 
     /**
      * 점심 매칭 신청 취소 API
      * POST /lunch/cancel
-     * 요청 본문으로 사용자 ID와 매칭 클래스 ID를 받음
      *
-     * @param request ApplyRequestDto: userId, lunchMatchingClassId 포함
+     * 요청 본문으로 매칭 클래스 ID(lunchMatchingClassId)만 받음.
+     * 사용자 ID는 서버 내부에서 임의로 고정하여 사용한다. (테스트용)
+     *
+     * @param request ApplyRequestDto: lunchMatchingClassId 포함
      * @return 성공 시 200 OK + "신청 취소 완료" 메시지 반환
      */
     @PostMapping("/cancel")
     public ResponseEntity<String> cancel(@RequestBody ApplyRequestDto request) {
-        lunchMatchingService.cancel(request.getUserId(), request.getLunchMatchingClassId());
+        // 임시 student 아이디 고정
+        String student = "uuid-be-001";
+
+        lunchMatchingService.cancel(student, request.getLunchMatchingClassId());
+
         return ResponseEntity.ok("신청 취소 완료");
     }
 

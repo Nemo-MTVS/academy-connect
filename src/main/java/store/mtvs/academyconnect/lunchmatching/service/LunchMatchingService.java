@@ -7,9 +7,8 @@ import store.mtvs.academyconnect.lunchmatching.domain.entity.LunchMatching;
 import store.mtvs.academyconnect.lunchmatching.domain.entity.LunchMatchingClass;
 import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.LunchMatchingClassRepository;
 import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.LunchMatchingRepository;
-import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.UserRepositoryImpl;
 import store.mtvs.academyconnect.user.domain.entity.User;
-import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.UserRepository;
+import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -28,10 +27,10 @@ public class LunchMatchingService {
     private static final String CANCEL_RESTRICTED = "현재는 점심 신청 취소가 제한된 시간입니다. (11:30~13:00)";
 
     // 생성자를 통해 필요한 레포지토리 주입
-    public LunchMatchingService(LunchMatchingRepository lunchMatchingRepository,LunchMatchingClassRepository lunchMatchingClassRepository){
+    public LunchMatchingService(LunchMatchingRepository lunchMatchingRepository,LunchMatchingClassRepository lunchMatchingClassRepository, UserRepository userRepository) {
         this.lunchMatchingRepository = lunchMatchingRepository;
         this.lunchMatchingClassRepository = lunchMatchingClassRepository;
-        userRepository = new UserRepositoryImpl();
+        this.userRepository = userRepository;
     }
 
     /**
