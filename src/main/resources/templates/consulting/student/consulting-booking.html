@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상담 예약</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+    <link th:href="@{/css/header.css}" rel="stylesheet">
+    <link th:href="@{/css/footer.css}" rel="stylesheet">
+    <style>
+        /* 캘린더 스타일 */
+        .calendar-container {
+            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .calendar-table th {
+            text-align: center;
+            padding: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .calendar-table td {
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            height: 50px;
+            width: 50px;
+            border: 1px solid #eee;
+        }
+        
+        .calendar-table td:hover {
+            background-color: #f0f7ff;
+        }
+        
+        .calendar-table td.today {
+            background-color: #e6f0fa;
+            font-weight: bold;
+        }
+        
+        .calendar-table td.selected {
+            background-color: #d0e5ff;
+        }
+        
+        .calendar-table td.other-month {
+            color: #ccc;
+        }
+        
+        /* 시간대 선택 스타일 */
+        .time-slot {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .time-slot.available {
+            background-color: #fff;
+            color: #333;
+        }
+        
+        .time-slot.unavailable {
+            background-color: #f8f9fa;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+        
+        .time-slot.selected {
+            background-color: #cfe2ff;
+            border-color: #0d6efd;
+            color: #0d6efd;
+        }
+        
+        /* 강사 프로필 스타일 */
+        .teacher-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .teacher-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 20px;
+            object-fit: cover;
+        }
+        
+        .teacher-info h3 {
+            margin: 0 0 5px;
+            font-size: 24px;
+        }
+        
+        .teacher-info p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* 메인 컨텐츠 영역 */
+        .main-content {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 15px;
+        }
+        
+        .booking-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+        }
+        
+        /* 버튼 스타일 */
+        .btn-booking {
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-specific {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+        
+        .btn-unspecific {
+            background-color: #212529;
+            color: white;
+            border: none;
+        }
+        
+        /* 강사 프로필 아바타 선택 스타일 */
+        .teacher-avatars {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        
+        .avatar-item {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            object-fit: cover;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .avatar-item:hover {
+            transform: scale(1.1);
+        }
+        
+        .avatar-item.selected {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+        }
+        
+        .teacher-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .teacher-subtitle {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 포함 -->
+    <div th:replace="fragments/header :: header"></div>
+    
+    <!-- 메인 컨텐츠 -->
+    <div class="main-content">
+        <div class="row">
+            <!-- 좌측 영역: 강사 정보 -->
+            <div class="col-md-3">
+                <div class="teacher-title">강사님</div>
+                <div class="teacher-subtitle">성일 말고 강민호 선생님도 상담하세요.</div>
+                
+                <!-- 강사 아바타 선택 영역 -->
+                <div class="teacher-avatars">
+                    <img src="https://via.placeholder.com/50" alt="김강사" class="avatar-item selected" data-teacher-id="1">
+                    <img src="https://via.placeholder.com/50" alt="이강사" class="avatar-item" data-teacher-id="2">
+                    <img src="https://via.placeholder.com/50" alt="박강사" class="avatar-item" data-teacher-id="3">
+                </div>
+                
+                <div class="teacher-profile mb-4">
+                    <div class="d-flex align-items-center">
+                        <img src="https://via.placeholder.com/80" alt="강사님" class="teacher-avatar" id="detail-teacher-avatar">
+                        <div class="teacher-info ms-3">
+                            <h3 id="detail-teacher-name">김강사</h3>
+                            <p id="detail-teacher-position">백엔드 / 이사님</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <p id="detail-teacher-desc">어려운 것도 쉽, 수 금 오전에만 시간이 됩니다. 질의사항을 적어주세요.</p>
+                </div>
+            </div>
+            
+            <!-- 중앙 영역: 캘린더 -->
+            <div class="col-md-5">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <h4 id="current-month-year"></h4>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary me-2" id="prev-month">&lt;</button>
+                            <button class="btn btn-sm btn-outline-secondary" id="next-month">&gt;</button>
+                        </div>
+                    </div>
+                    <table class="calendar-table">
+                        <thead>
+                            <tr>
+                                <th>월</th>
+                                <th>화</th>
+                                <th>수</th>
+                                <th>목</th>
+                                <th>금</th>
+                                <th>토</th>
+                                <th>일</th>
+                            </tr>
+                        </thead>
+                        <tbody id="calendar-body">
+                            <!-- JavaScript로 동적 생성 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 우측 영역: 시간대 및 예약 정보 -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-transparent" id="selected-date-header">
+                        날짜를 선택해주세요
+                    </div>
+                    <div class="card-body">
+                        <!-- 시간대 선택 -->
+                        <div class="time-slots">
+                            <div class="time-slot unavailable">9:00 - 10:00</div>
+                            <div class="time-slot unavailable">10:00 - 11:00</div>
+                            <div class="time-slot unavailable">11:00 - 12:00</div>
+                            <div class="time-slot available">13:00 - 14:00</div>
+                            <div class="time-slot available">14:00 - 15:00</div>
+                            <div class="time-slot available">15:00 - 16:00</div>
+                        </div>
+                        
+                        <!-- 메시지 입력 -->
+                        <div class="mt-4">
+                            <textarea class="form-control" rows="4" placeholder="강사님께 상담 전 남길 메시지를 적어주세요."></textarea>
+                        </div>
+                        
+                        <!-- 예약 버튼 -->
+                        <div class="d-flex mt-4 justify-content-between">
+                            <button class="btn btn-booking btn-specific">시간 지정 예약</button>
+                            <button class="btn btn-booking btn-unspecific">날짜 시간 미지정 예약</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 푸터 포함 -->
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 현재 날짜 정보
+            let currentDate = new Date();
+            let currentYear = currentDate.getFullYear();
+            let currentMonth = currentDate.getMonth();
+            let selectedDate = null;
+            let selectedTeacherId = "1"; // 기본 선택된 강사 ID
+
+            // 강사 정보 데이터
+            const teacherData = {
+                "1": {
+                    id: 1,
+                    name: "김강사",
+                    position: "백엔드 / 이사님",
+                    avatar: "https://via.placeholder.com/80",
+                    description: "어려운 것도 쉽, 수 금 오전에만 시간이 됩니다. 질의사항을 적어주세요."
+                },
+                "2": {
+                    id: 2,
+                    name: "이강사",
+                    position: "프론트엔드 / 팀장",
+                    avatar: "https://via.placeholder.com/80",
+                    description: "프론트엔드 관련 질문은 언제든지 환영합니다. 주로 화, 목요일에 상담 가능합니다."
+                },
+                "3": {
+                    id: 3,
+                    name: "박강사",
+                    position: "데이터분석 / 수석",
+                    avatar: "https://via.placeholder.com/80",
+                    description: "데이터 분석, 머신러닝 관련 상담이 가능합니다. 평일 모두 시간 조율 가능합니다."
+                }
+            };
+
+            // 강사 아바타 선택 이벤트
+            document.querySelectorAll('.avatar-item').forEach(avatar => {
+                avatar.addEventListener('click', function() {
+                    // 이전 선택 제거
+                    document.querySelectorAll('.avatar-item.selected').forEach(selected => {
+                        selected.classList.remove('selected');
+                    });
+                    
+                    // 현재 선택 추가
+                    this.classList.add('selected');
+                    
+                    // 선택된 강사 ID 저장
+                    selectedTeacherId = this.getAttribute('data-teacher-id');
+                    
+                    // 강사 상세 정보 업데이트
+                    updateTeacherDetail(selectedTeacherId);
+                    
+                    // 캘린더 및 시간대 정보 갱신 (날짜가 선택되어 있으면 시간대도 갱신)
+                    if (selectedDate) {
+                        loadTimeSlots(selectedDate, selectedTeacherId);
+                    }
+                });
+            });
+
+            // 강사 상세 정보 업데이트 함수
+            function updateTeacherDetail(teacherId) {
+                const teacher = teacherData[teacherId];
+                if (teacher) {
+                    document.getElementById('detail-teacher-name').textContent = teacher.name;
+                    document.getElementById('detail-teacher-position').textContent = teacher.position;
+                    document.getElementById('detail-teacher-avatar').src = teacher.avatar;
+                    document.getElementById('detail-teacher-desc').textContent = teacher.description;
+                }
+            }
+
+            // 캘린더 초기화
+            initCalendar();
+            
+            // 이전/다음 월 버튼 이벤트
+            document.getElementById('prev-month').addEventListener('click', function() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                updateCalendar();
+            });
+            
+            document.getElementById('next-month').addEventListener('click', function() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                updateCalendar();
+            });
+            
+            // 시간대 선택 이벤트
+            function initTimeSlots() {
+                const timeSlots = document.querySelectorAll('.time-slot.available');
+                timeSlots.forEach(slot => {
+                    slot.addEventListener('click', function() {
+                        // 이전에 선택된 시간대가 있으면 선택 해제
+                        document.querySelectorAll('.time-slot.selected').forEach(selected => {
+                            selected.classList.remove('selected');
+                        });
+                        
+                        // 현재 선택한 시간대에 선택 스타일 적용
+                        this.classList.add('selected');
+                    });
+                });
+            }
+            
+            // 캘린더 초기화 함수
+            function initCalendar() {
+                updateCalendar();
+                initTimeSlots();
+                // 초기 강사 정보 표시
+                updateTeacherDetail(selectedTeacherId);
+            }
+            
+            // 캘린더 업데이트 함수
+            function updateCalendar() {
+                // 월 표시 업데이트
+                const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+                document.getElementById('current-month-year').textContent = `${currentYear}년 ${monthNames[currentMonth]}`;
+                
+                const today = new Date();
+                const firstDay = new Date(currentYear, currentMonth, 1);
+                const lastDay = new Date(currentYear, currentMonth + 1, 0);
+                
+                const startingDay = firstDay.getDay() || 7; // 1(월요일) - 7(일요일)로 변환
+                const daysInMonth = lastDay.getDate();
+                
+                // 캘린더 바디 초기화
+                const calendarBody = document.getElementById('calendar-body');
+                calendarBody.innerHTML = '';
+                
+                let date = 1;
+                let calendarHTML = '';
+                
+                // 주 단위로 행 생성
+                for (let i = 0; i < 6; i++) {
+                    let rowHTML = '<tr>';
+                    
+                    // 각 주의 일 단위로 셀 생성
+                    for (let j = 1; j <= 7; j++) {
+                        if (i === 0 && j < startingDay) {
+                            // 이전 달의 날짜
+                            const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
+                            const prevDate = prevMonthLastDay - (startingDay - j - 1);
+                            rowHTML += `<td class="other-month">${prevDate}</td>`;
+                        } else if (date > daysInMonth) {
+                            // 다음 달의 날짜
+                            rowHTML += `<td class="other-month">${date - daysInMonth}</td>`;
+                            date++;
+                        } else {
+                            // 현재 달의 날짜
+                            const isToday = date === today.getDate() && 
+                                           currentMonth === today.getMonth() && 
+                                           currentYear === today.getFullYear();
+                            
+                            const classes = isToday ? 'today' : '';
+                            
+                            rowHTML += `<td class="${classes}" data-date="${date}">${date}</td>`;
+                            date++;
+                        }
+                    }
+                    
+                    rowHTML += '</tr>';
+                    calendarHTML += rowHTML;
+                    
+                    // 모든 날짜를 표시했으면 반복 종료
+                    if (date > daysInMonth) {
+                        break;
+                    }
+                }
+                
+                calendarBody.innerHTML = calendarHTML;
+                
+                // 날짜 선택 이벤트 추가
+                document.querySelectorAll('#calendar-body td:not(.other-month)').forEach(cell => {
+                    cell.addEventListener('click', function() {
+                        // 이전에 선택된 날짜가 있으면 선택 해제
+                        document.querySelectorAll('#calendar-body td.selected').forEach(selected => {
+                            selected.classList.remove('selected');
+                        });
+                        
+                        // 현재 선택한 날짜에 선택 스타일 적용
+                        this.classList.add('selected');
+                        
+                        // 선택한 날짜 정보 저장
+                        const day = parseInt(this.getAttribute('data-date'));
+                        selectedDate = new Date(currentYear, currentMonth, day);
+                        
+                        // 선택한 날짜 표시 업데이트
+                        updateSelectedDateHeader();
+                        
+                        // 해당 날짜의 시간대 정보 로드
+                        loadTimeSlots(selectedDate, selectedTeacherId);
+                    });
+                });
+            }
+            
+            // 선택한 날짜 표시 업데이트
+            function updateSelectedDateHeader() {
+                if (selectedDate) {
+                    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                    const dayOfWeek = dayNames[selectedDate.getDay()];
+                    const formattedDate = `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일 (${dayOfWeek})`;
+                    document.getElementById('selected-date-header').textContent = formattedDate;
+                } else {
+                    document.getElementById('selected-date-header').textContent = '날짜를 선택해주세요';
+                }
+            }
+            
+            // 시간대 로드 함수 (실제로는 서버에서 가져와야 함)
+            function loadTimeSlots(date, teacherId) {
+                // Ajax 요청을 통해 서버에서 시간대 정보를 가져오는 로직
+                // 예시 데이터 - 실제로는 서버에서 받아오는 데이터로 대체
+                const timeSlotsContainer = document.querySelector('.time-slots');
+                
+                // 예시 데이터 - 실제로는 서버에서 받아온 데이터
+                let timeSlotHTML = '';
+                
+                // 요일에 따라 다른 시간대 제공 (예시)
+                const dayOfWeek = date.getDay(); // 0: 일요일, 1: 월요일, ...
+                
+                // 강사 ID에 따라 서로 다른 시간대 제공 (예시)
+                if (teacherId === '1') { // 김강사
+                    if (dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5) { // 월, 수, 금
+                        timeSlotHTML = `
+                            <div class="time-slot available">9:00 - 10:00</div>
+                            <div class="time-slot available">10:00 - 11:00</div>
+                            <div class="time-slot available">11:00 - 12:00</div>
+                            <div class="time-slot unavailable">13:00 - 14:00</div>
+                            <div class="time-slot unavailable">14:00 - 15:00</div>
+                            <div class="time-slot unavailable">15:00 - 16:00</div>
+                        `;
+                    } else {
+                        timeSlotHTML = `
+                            <div class="time-slot unavailable">9:00 - 10:00</div>
+                            <div class="time-slot unavailable">10:00 - 11:00</div>
+                            <div class="time-slot unavailable">11:00 - 12:00</div>
+                            <div class="time-slot unavailable">13:00 - 14:00</div>
+                            <div class="time-slot unavailable">14:00 - 15:00</div>
+                            <div class="time-slot unavailable">15:00 - 16:00</div>
+                        `;
+                    }
+                } else if (teacherId === '2') { // 이강사
+                    if (dayOfWeek === 2 || dayOfWeek === 4) { // 화, 목
+                        timeSlotHTML = `
+                            <div class="time-slot unavailable">9:00 - 10:00</div>
+                            <div class="time-slot unavailable">10:00 - 11:00</div>
+                            <div class="time-slot unavailable">11:00 - 12:00</div>
+                            <div class="time-slot available">13:00 - 14:00</div>
+                            <div class="time-slot available">14:00 - 15:00</div>
+                            <div class="time-slot available">15:00 - 16:00</div>
+                        `;
+                    } else {
+                        timeSlotHTML = `
+                            <div class="time-slot unavailable">9:00 - 10:00</div>
+                            <div class="time-slot unavailable">10:00 - 11:00</div>
+                            <div class="time-slot unavailable">11:00 - 12:00</div>
+                            <div class="time-slot unavailable">13:00 - 14:00</div>
+                            <div class="time-slot unavailable">14:00 - 15:00</div>
+                            <div class="time-slot unavailable">15:00 - 16:00</div>
+                        `;
+                    }
+                } else if (teacherId === '3') { // 박강사
+                    if (dayOfWeek >= 1 && dayOfWeek <= 5) { // 월-금
+                        timeSlotHTML = `
+                            <div class="time-slot available">9:00 - 10:00</div>
+                            <div class="time-slot available">10:00 - 11:00</div>
+                            <div class="time-slot available">11:00 - 12:00</div>
+                            <div class="time-slot available">13:00 - 14:00</div>
+                            <div class="time-slot available">14:00 - 15:00</div>
+                            <div class="time-slot available">15:00 - 16:00</div>
+                        `;
+                    } else {
+                        timeSlotHTML = `
+                            <div class="time-slot unavailable">9:00 - 10:00</div>
+                            <div class="time-slot unavailable">10:00 - 11:00</div>
+                            <div class="time-slot unavailable">11:00 - 12:00</div>
+                            <div class="time-slot unavailable">13:00 - 14:00</div>
+                            <div class="time-slot unavailable">14:00 - 15:00</div>
+                            <div class="time-slot unavailable">15:00 - 16:00</div>
+                        `;
+                    }
+                }
+                
+                timeSlotsContainer.innerHTML = timeSlotHTML;
+                
+                // 시간대 선택 이벤트 다시 초기화
+                initTimeSlots();
+            }
+        });
+    </script>
+</body>
+</html> 
