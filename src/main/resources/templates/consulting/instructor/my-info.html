@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{instructor-layout :: html(~{::title}, ~{::link}, ~{this::section}, ~{::script})}">
+<head>
+    <title>강사 개인정보 관리</title>
+    <link th:href="@{/css/consulting.css}" rel="stylesheet">
+</head>
+<body>
+<section>
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3>강사 개인정보 관리</h3>
+            </div>
+            <div class="card-body">
+                <!-- 여기에 개인정보 관련 내용 -->
+                <p>강사 비밀번호 변경</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // 페이지 특정 자바스크립트
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('강사 개인정보 관리 페이지 로드됨');
+    });
+</script>
+</body>
+</html>
