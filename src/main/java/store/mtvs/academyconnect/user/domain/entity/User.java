@@ -1,9 +1,11 @@
 package store.mtvs.academyconnect.user.domain.entity;
 
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import store.mtvs.academyconnect.classgroup.domain.entity.ClassGroup;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
 
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
@@ -34,31 +37,29 @@ public class User {
     private String name;
 
     @Column(name = "created_at", nullable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
 
-    @Column(name = "updatedAt", nullable = false)
+    @Column(name = "updated_at", nullable = false)
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @Column(name = "deletedAt", nullable = false)
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     @Column(name = "role", nullable = false)
-    private String role;
+    private String role = "STUDENT";
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Profile profile;
 
-    @Builder
     public User(String id, ClassGroup classGroup, String loginId, String password, String name,
-                LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt, String role) {
+                 String role) {
         this.id = id;
         this.classGroup = classGroup;
         this.loginId = loginId;
         this.password = password;
         this.name = name;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.deletedAt = deletedAt;
         this.role = role;
     }
 } 

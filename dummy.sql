@@ -1,6 +1,6 @@
 INSERT INTO class_groups (id, name, created_at, expired_at)
 VALUES
-    (1, 'BackEnd', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH)),
+    (1, 'Backend', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH)),
     (2, 'Unity', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH)),
     (3, 'TA', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH));
 
@@ -8,30 +8,30 @@ VALUES
 INSERT INTO users (id, class_group_id, login_id, passwd, name, created_at, updated_at, deleted_at, role)
 VALUES
 -- BackEnd 반 (class_group_id = 1)
-('uuid-be-001', 1, 'login_be_001', 'pass_be_001', '홍길동1', NOW(), NOW(), NOW(), 'STUDENT'),
-('uuid-be-002', 1, 'login_be_002', 'pass_be_002', '홍길동2', NOW(), NOW(), NOW(), 'STUDENT'),
-('uuid-be-003', 1, 'login_be_003', 'pass_be_003', '홍길동3', NOW(), NOW(), NOW(), 'STUDENT'),
+('uuid-be-001', 1, 'login_be_001', 'pass_be_001', '홍길동1', NOW(), NOW(),NULL, 'STUDENT'),
+('uuid-be-002', 1, 'login_be_002', 'pass_be_002', '홍길동2', NOW(), NOW(),NULL, 'STUDENT'),
+('uuid-be-003', 1, 'login_be_003', 'pass_be_003', '홍길동3', NOW(), NOW(),NULL, 'STUDENT'),
 
 -- Unity 반 (class_group_id = 2)
-('uuid-unity-001', 2, 'login_unity_001', 'pass_unity_001', '임꺽정1', NOW(), NOW(), NOW(), 'STUDENT'),
-('uuid-unity-002', 2, 'login_unity_002', 'pass_unity_002', '임꺽정2', NOW(), NOW(), NOW(), 'STUDENT'),
-('uuid-unity-003', 2, 'login_unity_003', 'pass_unity_003', '임꺽정3', NOW(), NOW(), NOW(), 'STUDENT'),
+('uuid-unity-001', 2, 'login_unity_001', 'pass_unity_001', '임꺽정1', NOW(), NOW(),NULL, 'STUDENT'),
+('uuid-unity-002', 2, 'login_unity_002', 'pass_unity_002', '임꺽정2', NOW(), NOW(),NULL, 'STUDENT'),
+('uuid-unity-003', 2, 'login_unity_003', 'pass_unity_003', '임꺽정3', NOW(), NOW(),NULL, 'STUDENT'),
 
 -- TA 반 (class_group_id = 3)
-('uuid-ta-001', 3, 'login_ta_001', 'pass_ta_001', '성춘향1', NOW(), NOW(), NOW(), 'STUDENT'),
-('uuid-ta-002', 3, 'login_ta_002', 'pass_ta_002', '성춘향2', NOW(), NOW(), NOW(), 'STUDENT'),
-('uuid-ta-003', 3, 'login_ta_003', 'pass_ta_003', '성춘향3', NOW(), NOW(), NOW(), 'STUDENT');
+('uuid-ta-001', 3, 'login_ta_001', 'pass_ta_001', '성춘향1', NOW(), NOW(),NULL, 'STUDENT'),
+('uuid-ta-002', 3, 'login_ta_002', 'pass_ta_002', '성춘향2', NOW(), NOW(),NULL, 'STUDENT'),
+('uuid-ta-003', 3, 'login_ta_003', 'pass_ta_003', '성춘향3', NOW(), NOW(),NULL, 'STUDENT');
 
 INSERT INTO users (id, class_group_id, login_id, passwd, name, created_at, updated_at, deleted_at, role)
 VALUES
 -- BackEnd 반 강사
-('uuid-be-ins', 1, 'login_be_ins', 'pass_be_ins', '백엔드강사', NOW(), NOW(), NOW(), 'INSTRUCTOR'),
+('uuid-be-ins', 1, 'login_be_ins', 'pass_be_ins', '백엔드강사', NOW(), NOW(),NULL, 'INSTRUCTOR'),
 
 -- Unity 반 강사
-('uuid-unity-ins', 2, 'login_unity_ins', 'pass_unity_ins', '유니티강사', NOW(), NOW(), NOW(), 'INSTRUCTOR'),
+('uuid-unity-ins', 2, 'login_unity_ins', 'pass_unity_ins', '유니티강사', NOW(), NOW(),NULL, 'INSTRUCTOR'),
 
 -- TA 반 강사
-('uuid-ta-ins', 3, 'login_ta_ins', 'pass_ta_ins', 'TA강사', NOW(), NOW(), NOW(), 'INSTRUCTOR');
+('uuid-ta-ins', 3, 'login_ta_ins', 'pass_ta_ins', 'TA강사', NOW(), NOW(),NULL, 'INSTRUCTOR');
 
 
 

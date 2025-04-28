@@ -1,0 +1,119 @@
+/* 헤더 스타일 */
+.header-container {
+    padding: 8px 12px;
+    background: white;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.logo-container {
+    width: 140px;
+    height: 50px;
+    padding: 5px 0;
+}
+
+.logo-container img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.nav-menu-container {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.nav-item {
+    padding: 8px 16px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.nav-link {
+    color: rgba(0, 0, 0, 0.55);
+    font-size: 16px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.nav-link:hover {
+    color: rgba(0, 0, 0, 0.9);
+}
+
+.nav-link.active {
+    color: rgba(0, 0, 0, 0.9);
+    font-weight: 500;
+    border-bottom: 2px solid #4580FF;
+    padding-bottom: 2px;
+}
+
+.login-item {
+    margin-left: 20px;
+}
+
+.login-item .nav-link {
+    color: rgba(0, 0, 0, 0.55);
+}
+
+/* 드롭다운 호버 스타일 */
+.dropdown-hover {
+    position: relative;
+}
+
+.dropdown-hover .nav-link {
+    cursor: default; /* 상담 메뉴는 클릭할 수 없음을 표시 */
+}
+
+.dropdown-menu-hover {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+    z-index: 1;
+    border-radius: 4px;
+    padding: 8px 0;
+    margin-top: 8px;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none; /* 초기에는 마우스 이벤트 비활성화 */
+}
+
+.dropdown-hover:hover .dropdown-menu-hover {
+    display: block;
+    opacity: 1;
+    pointer-events: auto; /* 호버 시 마우스 이벤트 활성화 */
+}
+
+/* 드롭다운 메뉴와 그 사이 영역을 연결하는 가상 요소 */
+.dropdown-hover:hover::after {
+    content: '';
+    position: absolute;
+    height: 20px;
+    width: 100%;
+    bottom: -10px;
+    left: 0;
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    clear: both;
+    text-align: left;
+    color: rgba(0, 0, 0, 0.7);
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: rgba(0, 0, 0, 0.9);
+}

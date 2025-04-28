@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: html(
+        ~{::title},
+        ~{::link},
+        ~{::main},
+        ~{::script}
+      )}">
+<head>
+    <title>NimoVerse - 아카데미 커넥트</title>
+    <link th:href="@{/css/index.css}" rel="stylesheet">
+</head>
+<body>
+    <main class="main-container">
+        <!-- Main Banner -->
+        <div class="main-banner">
+            <img th:src="@{/images/intro.png}" alt="수중 바다 배경">
+
+        </div>
+        
+        <!-- Divider -->
+        <div class="divider"></div>
+    </main>
+
+    <script>
+        // 메인 페이지 특정 스크립트가 필요하다면 이곳에 작성
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('메인 페이지가 로드되었습니다.');
+        });
+    </script>
+</body>
+</html>
