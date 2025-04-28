@@ -46,4 +46,17 @@ public class LunchMatchingController {
         lunchMatchingService.cancel(request.getUserId(), request.getLunchMatchingClassId());
         return ResponseEntity.ok("신청 취소 완료");
     }
+
+    /**
+     * 점심 매칭 전체 초기화 API (Soft Delete 처리)
+     * POST /lunch/reset
+     * 매일 오후 13시에 신청 내역을 초기화하는 기능 (수동 호출용)
+     *
+     * @return 성공 시 200 OK + "초기화 완료" 메시지 반환
+     */
+    @PostMapping("/reset")
+    public ResponseEntity<String> reset() {
+        lunchMatchingService.resetAllMatchings(); // 같은 리셋 로직 재사용
+        return ResponseEntity.ok("초기화 완료");
+    }
 }

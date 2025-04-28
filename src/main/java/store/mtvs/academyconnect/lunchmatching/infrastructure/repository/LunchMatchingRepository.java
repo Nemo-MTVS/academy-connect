@@ -11,6 +11,8 @@ import java.util.Optional;
 
 public interface LunchMatchingRepository extends JpaRepository<LunchMatching, String> {
 
+    String user(User user);
+
     // 해당 매칭 클래스의 현재 신청 인원 수 조회
     int countByLunchMatchingClassId(Long lunchMatchingClassId);
 
@@ -20,5 +22,6 @@ public interface LunchMatchingRepository extends JpaRepository<LunchMatching, St
     // 사용자의 유효한(삭제되지 않은) 신청 내역 조회 (취소 기능용)
     Optional<LunchMatching> findByUserIdAndLunchMatchingClassIdAndDeletedAtIsNull(String userId, Long lunchMatchingClassId);
 
-    String user(User user);
+    // 삭제되지 않은 모든 신청 내역 조회
+    List<LunchMatching> findAllByDeletedAtIsNull();
 }
