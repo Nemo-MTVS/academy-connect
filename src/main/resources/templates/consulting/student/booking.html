@@ -42,13 +42,13 @@
         .calendar-table td {
             text-align: center;
             padding: 10px;
-            cursor: pointer;
+            cursor: default;
             height: 50px;
             width: 50px;
             border: 1px solid #eee;
         }
 
-        .calendar-table td:hover {
+        .calendar-table td:hover:not(.empty):not(.past):not(.unavailable) {
             background-color: #f0f7ff;
         }
 
@@ -61,8 +61,33 @@
             background-color: #d0e5ff;
         }
 
-        .calendar-table td.other-month {
+        .calendar-table td.empty {
             color: #ccc;
+            cursor: default;
+        }
+
+        .calendar-table td.past {
+            color: #999;
+        }
+
+        .calendar-table td.available:not(.past):not(.empty):not(.unavailable) {
+            cursor: pointer;
+        }
+
+        .calendar-table td.unavailable {
+            pointer-events: none; /* 클릭 등 이벤트 차단 */
+            cursor: not-allowed;  /* 마우스 커서 비활성화 표시 */
+            color: #ccc;          /* 흐릿한 텍스트 색상 */
+            background-color: #f5f5f5; /* 연한 회색 배경 */
+        }
+
+        .calendar-table td.available {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+
+        .calendar-table td.weekend {
+            color: #dc3545;
         }
 
         /* 시간대 선택 스타일 */
@@ -157,6 +182,7 @@
             display: flex;
             margin-bottom: 20px;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .avatar-item {
@@ -176,6 +202,7 @@
         .avatar-item.selected {
             border-color: #0d6efd;
             box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+            transform: scale(1.5);
         }
 
         .teacher-title {
@@ -189,6 +216,13 @@
             font-size: 14px;
             margin-bottom: 20px;
         }
+
+        .no-slots-message {
+            text-align: center;
+            padding: 30px 0;
+            color: #6c757d;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -201,40 +235,66 @@
         <!-- 좌측 영역: 강사 정보 -->
         <div class="col-md-3">
             <div class="teacher-title">강사님</div>
-            <div class="teacher-subtitle">성일 말고 강민호 선생님도 상담하세요.</div>
+            <div class="teacher-subtitle">필요한 강사님을 선택하여 상담을 예약하세요.</div>
 
             <!-- 강사 아바타 선택 영역 -->
             <div class="teacher-avatars">
-                <img src="https://via.placeholder.com/50" alt="김강사" class="avatar-item selected" data-teacher-id="1">
-                <img src="https://via.placeholder.com/50" alt="이강사" class="avatar-item" data-teacher-id="2">
-                <img src="https://via.placeholder.com/50" alt="박강사" class="avatar-item" data-teacher-id="3">
+                <a th:each="instructor : ${instructors}"
+                   th:href="@{/student/consulting-booking(instructorId=${instructor.id})}"
+                   class="text-decoration-none">
+                    <img th:src="${instructor.profileImageUrl != null ? instructor.profileImageUrl : '/img/default-profile.png'}"
+                         th:alt="${instructor.name}"
+                         class="avatar-item"
+                         th:classappend="${instructor.id == selectedInstructorId ? 'selected' : ''}"
+                         th:data-teacher-id="${instructor.id}">
+                </a>
             </div>
 
-            <div class="teacher-profile mb-4">
+            <div class="teacher-profile mb-4" th:if="${selectedInstructor != null}">
                 <div class="d-flex align-items-center">
-                    <img src="https://via.placeholder.com/80" alt="강사님" class="teacher-avatar" id="detail-teacher-avatar">
-                    <div class="teacher-info ms-3">
-                        <h3 id="detail-teacher-name">김강사</h3>
-                        <p id="detail-teacher-position">백엔드 / 이사님</p>
+<!--                    <img th:src="${selectedInstructor.profileImageUrl != null ? selectedInstructor.profileImageUrl : '/img/default-profile.png'}"
+                         th:alt="${selectedInstructor.name}"
+                         class="teacher-avatar"
+                         id="detail-teacher-avatar">-->
+                    <div class="teacher-info mt-3">
+                        <h3 id="detail-teacher-name" th:text="${selectedInstructor.name}">강사명</h3>
+                        <p id="detail-teacher-position" th:text="${selectedInstructor.classGroupName}">분야</p>
                     </div>
                 </div>
             </div>
-            <div class="mt-3">
-                <p id="detail-teacher-desc">어려운 것도 쉽, 수 금 오전에만 시간이 됩니다. 질의사항을 적어주세요.</p>
+            <div class="mt-3" th:if="${selectedInstructor != null}">
+                <p id="detail-teacher-desc" th:text="${selectedInstructor.bio}">강사 소개</p>
+<!--                <div class="mt-3" th:if="${selectedInstructor.github != null || selectedInstructor.blog != null || selectedInstructor.email != null}">
+                    <p th:if="${selectedInstructor.github != null}">
+                        <i class="bi bi-github"></i>
+                        <a th:href="${selectedInstructor.github}" target="_blank" th:text="${selectedInstructor.github}">GitHub</a>
+                    </p>
+                    <p th:if="${selectedInstructor.blog != null}">
+                        <i class="bi bi-link-45deg"></i>
+                        <a th:href="${selectedInstructor.blog}" target="_blank" th:text="${selectedInstructor.blog}">Blog</a>
+                    </p>
+                    <p th:if="${selectedInstructor.email != null}">
+                        <i class="bi bi-envelope"></i>
+                        <a th:href="'mailto:' + ${selectedInstructor.email}" th:text="${selectedInstructor.email}">Email</a>
+                    </p>
+                </div>-->
             </div>
         </div>
 
         <!-- 중앙 영역: 캘린더 -->
         <div class="col-md-5">
             <div class="calendar-container">
-                <div class="calendar-header">
-                    <h4 id="current-month-year"></h4>
+                <div class="calendar-header d-flex justify-content-between align-items-center mb-2">
+                    <h4 th:text="${year} + '년 ' + ${month} + '월'" id="current-month-year">2025년 5월</h4>
                     <div>
-                        <button class="btn btn-sm btn-outline-secondary me-2" id="prev-month">&lt;</button>
-                        <button class="btn btn-sm btn-outline-secondary" id="next-month">&gt;</button>
+                        <a th:href="@{/student/consulting-booking(instructorId=${selectedInstructorId}, year=${month == 1 ? year - 1 : year}, month=${month == 1 ? 12 : month - 1})}"
+                           class="btn btn-sm btn-outline-secondary me-2">&lt;</a>
+                        <a th:href="@{/student/consulting-booking(instructorId=${selectedInstructorId}, year=${month == 12 ? year + 1 : year}, month=${month == 12 ? 1 : month + 1})}"
+                           class="btn btn-sm btn-outline-secondary">&gt;</a>
                     </div>
                 </div>
-                <table class="calendar-table">
+
+                <table class="calendar-table table table-bordered text-center">
                     <thead>
                     <tr>
                         <th>월</th>
@@ -247,39 +307,84 @@
                     </tr>
                     </thead>
                     <tbody id="calendar-body">
-                    <!-- JavaScript로 동적 생성 -->
+                    <tr th:each="week : ${calendarData}">
+                        <td th:each="day : ${week}"
+                            th:class="${day.isEmpty ? 'empty' : ''} +
+  ${day.isPast ? ' past' : ''} +
+  ${day.isToday ? ' today' : ''} +
+  ${day.isSelected ? ' selected' : ''} +
+  ${day.isAvailable ? ' available' : ' unavailable'} +
+  ${day.isWeekend ? ' weekend' : ''}"
+                            th:text="${day.isEmpty ? '' : day.dayOfMonth}"
+                            th:data-date="${day.dateString}">
+
+                            <!-- 예약 가능 날짜에만 링크 추가 (year와 month 파라미터 추가) -->
+                            <a th:if="${!day.isEmpty and !day.isPast and day.isAvailable}"
+                               th:href="@{/student/consulting-booking(instructorId=${selectedInstructorId}, date=${day.dateString}, year=${year}, month=${month})}"
+                               style="display:block; width:100%; height:100%;"></a>
+                        </td>
+                    </tr>
                     </tbody>
+
                 </table>
             </div>
         </div>
 
+
         <!-- 우측 영역: 시간대 및 예약 정보 -->
         <div class="col-md-4">
             <div class="card mb-4">
-                <div class="card-header bg-transparent" id="selected-date-header">
+                <div class="card-header bg-transparent" id="selected-date-header" th:text="${selectedDate != null ? #temporals.format(selectedDate, 'yyyy년 MM월 dd일 (E)') : '날짜를 선택해주세요'}">
                     날짜를 선택해주세요
                 </div>
                 <div class="card-body">
                     <!-- 시간대 선택 -->
                     <div class="time-slots">
-                        <div class="time-slot unavailable">9:00 - 10:00</div>
-                        <div class="time-slot unavailable">10:00 - 11:00</div>
-                        <div class="time-slot unavailable">11:00 - 12:00</div>
-                        <div class="time-slot available">13:00 - 14:00</div>
-                        <div class="time-slot available">14:00 - 15:00</div>
-                        <div class="time-slot available">15:00 - 16:00</div>
+                        <div th:if="${hasAvailableSlots}" class="row">
+                            <div th:each="slot : ${availableSlots}" class="col-12">
+                                <div class="time-slot available"
+                                     th:attr="data-slot-id=${slot.slotId}"
+                                     th:onclick="'selectTimeSlot(this, ' + ${slot.slotId} + ')'">
+                                    <span th:text="${slot.timeRangeStr}">시간대</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:unless="${hasAvailableSlots}" class="no-slots-message">
+                            선택한 날짜에 예약 가능한 시간이 없습니다.<br>
+                            다른 날짜를 선택해 주세요.
+                        </div>
                     </div>
 
-                    <!-- 메시지 입력 -->
-                    <div class="mt-4">
-                        <textarea class="form-control" rows="4" placeholder="강사님께 상담 전 남길 메시지를 적어주세요."></textarea>
-                    </div>
+                    <form id="bookingForm" action="/student/consulting-booking/specific" method="post" th:if="${hasAvailableSlots}">
+                        <input type="hidden" name="instructorId" th:value="${selectedInstructorId}">
+                        <input type="hidden" name="date" th:value="${selectedDateStr}">
+                        <input type="hidden" name="slotId" id="selectedSlotId" value="">
 
-                    <!-- 예약 버튼 -->
-                    <div class="d-flex mt-4 justify-content-between">
-                        <button class="btn btn-booking btn-specific">시간 지정 예약</button>
-                        <button class="btn btn-booking btn-unspecific">날짜 시간 미지정 예약</button>
-                    </div>
+                        <!-- 메시지 입력 -->
+                        <div class="mt-4">
+                            <textarea class="form-control" name="message" rows="4" placeholder="강사님께 상담 전 남길 메시지를 적어주세요."></textarea>
+                        </div>
+
+                        <!-- 예약 버튼 -->
+                        <div class="d-flex mt-4 justify-content-between">
+                            <button type="button" id="btnTimeSpecificBooking" class="btn btn-booking btn-specific" disabled>시간 지정 예약</button>
+                            <button type="button" id="btnTimeUnspecificBooking" class="btn btn-booking btn-unspecific">날짜 시간 미지정 예약</button>
+                        </div>
+                    </form>
+
+                    <form id="unspecificForm" action="/student/consulting-booking/unspecific" method="post" th:unless="${hasAvailableSlots}">
+                        <input type="hidden" name="instructorId" th:value="${selectedInstructorId}">
+
+                        <!-- 메시지 입력 -->
+                        <div class="mt-4">
+                            <textarea class="form-control" name="message" rows="4" placeholder="강사님께 상담 전 남길 메시지를 적어주세요."></textarea>
+                        </div>
+
+                        <!-- 예약 버튼 -->
+                        <div class="d-flex mt-4 justify-content-center">
+                            <button type="button" id="btnTimeUnspecificBooking2" class="btn btn-booking btn-unspecific">날짜 시간 미지정 예약</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -292,297 +397,97 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
+<script th:inline="javascript">
+    // Thymeleaf 변수를 JavaScript 변수로 변환
+    const selectedInstructorId = /*[[${selectedInstructorId}]]*/ null;
+    const selectedDateStr = /*[[${selectedDateStr}]]*/ null;
+    const hasAvailableSlots = /*[[${hasAvailableSlots}]]*/ false;
+
+    // 시간대 선택 함수
+    function selectTimeSlot(element, slotId) {
+        // 이전에 선택된 시간대가 있으면 선택 해제
+        document.querySelectorAll('.time-slot.selected').forEach(selected => {
+            selected.classList.remove('selected');
+        });
+
+        // 현재 선택한 시간대에 선택 스타일 적용
+        element.classList.add('selected');
+
+        // 선택한 슬롯 ID 저장
+        document.getElementById('selectedSlotId').value = slotId;
+
+        // 버튼 활성화
+        document.getElementById('btnTimeSpecificBooking').disabled = false;
+    }
+
+    // AJAX로 특정 날짜의 시간 슬롯 가져오기 (필요시 사용)
+    function loadTimeSlots(teacherId, date) {
+        fetch(`/student/api/consulting/teachers/${teacherId}/available-slots?date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                // 시간 슬롯 UI 업데이트 로직
+                console.log('슬롯 데이터:', data);
+            })
+            .catch(error => {
+                console.error('시간 슬롯 로드 오류:', error);
+            });
+    }
+
+    // 캘린더 날짜 셀 클릭 이벤트를 처리하는 함수 - 수정
     document.addEventListener('DOMContentLoaded', function() {
-        // 현재 날짜 정보
-        let currentDate = new Date();
-        let currentYear = currentDate.getFullYear();
-        let currentMonth = currentDate.getMonth();
-        let selectedDate = null;
-        let selectedTeacherId = "1"; // 기본 선택된 강사 ID
+        // 모든 available 클래스를 가진 캘린더 셀에 클릭 이벤트 추가
+        document.querySelectorAll('.calendar-table td.available').forEach(cell => {
+            cell.addEventListener('click', function() {
+                const dateStr = this.getAttribute('data-date');
+                if (dateStr) {
+                    // 현재 URL에서 year와 month 값을 가져옴
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const currentYear = urlParams.get('year') || /*[[${year}]]*/ '2025';
+                    const currentMonth = urlParams.get('month') || /*[[${month}]]*/ '5';
 
-        // 강사 정보 데이터
-        const teacherData = {
-            "1": {
-                id: 1,
-                name: "김강사",
-                position: "백엔드 / 이사님",
-                avatar: "https://via.placeholder.com/80",
-                description: "어려운 것도 쉽, 수 금 오전에만 시간이 됩니다. 질의사항을 적어주세요."
-            },
-            "2": {
-                id: 2,
-                name: "이강사",
-                position: "프론트엔드 / 팀장",
-                avatar: "https://via.placeholder.com/80",
-                description: "프론트엔드 관련 질문은 언제든지 환영합니다. 주로 화, 목요일에 상담 가능합니다."
-            },
-            "3": {
-                id: 3,
-                name: "박강사",
-                position: "데이터분석 / 수석",
-                avatar: "https://via.placeholder.com/80",
-                description: "데이터 분석, 머신러닝 관련 상담이 가능합니다. 평일 모두 시간 조율 가능합니다."
-            }
-        };
-
-        // 강사 아바타 선택 이벤트
-        document.querySelectorAll('.avatar-item').forEach(avatar => {
-            avatar.addEventListener('click', function() {
-                // 이전 선택 제거
-                document.querySelectorAll('.avatar-item.selected').forEach(selected => {
-                    selected.classList.remove('selected');
-                });
-
-                // 현재 선택 추가
-                this.classList.add('selected');
-
-                // 선택된 강사 ID 저장
-                selectedTeacherId = this.getAttribute('data-teacher-id');
-
-                // 강사 상세 정보 업데이트
-                updateTeacherDetail(selectedTeacherId);
-
-                // 캘린더 및 시간대 정보 갱신 (날짜가 선택되어 있으면 시간대도 갱신)
-                if (selectedDate) {
-                    loadTimeSlots(selectedDate, selectedTeacherId);
+                    // year와 month 파라미터를 포함한 URL로 이동
+                    window.location.href = `/student/consulting-booking?instructorId=${selectedInstructorId}&date=${dateStr}&year=${currentYear}&month=${currentMonth}`;
                 }
             });
         });
+    });
 
-        // 강사 상세 정보 업데이트 함수
-        function updateTeacherDetail(teacherId) {
-            const teacher = teacherData[teacherId];
-            if (teacher) {
-                document.getElementById('detail-teacher-name').textContent = teacher.name;
-                document.getElementById('detail-teacher-position').textContent = teacher.position;
-                document.getElementById('detail-teacher-avatar').src = teacher.avatar;
-                document.getElementById('detail-teacher-desc').textContent = teacher.description;
-            }
-        }
+    document.addEventListener('DOMContentLoaded', function() {
+        // 시간 지정 예약 버튼 클릭 이벤트
+        const btnTimeSpecificBooking = document.getElementById('btnTimeSpecificBooking');
+        if (btnTimeSpecificBooking) {
+            btnTimeSpecificBooking.addEventListener('click', function() {
+                const slotId = document.getElementById('selectedSlotId').value;
+                if (!slotId) {
+                    alert('예약할 시간을 선택해주세요.');
+                    return;
+                }
 
-        // 캘린더 초기화
-        initCalendar();
-
-        // 이전/다음 월 버튼 이벤트
-        document.getElementById('prev-month').addEventListener('click', function() {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            updateCalendar();
-        });
-
-        document.getElementById('next-month').addEventListener('click', function() {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            updateCalendar();
-        });
-
-        // 시간대 선택 이벤트
-        function initTimeSlots() {
-            const timeSlots = document.querySelectorAll('.time-slot.available');
-            timeSlots.forEach(slot => {
-                slot.addEventListener('click', function() {
-                    // 이전에 선택된 시간대가 있으면 선택 해제
-                    document.querySelectorAll('.time-slot.selected').forEach(selected => {
-                        selected.classList.remove('selected');
-                    });
-
-                    // 현재 선택한 시간대에 선택 스타일 적용
-                    this.classList.add('selected');
-                });
+                document.getElementById('bookingForm').submit();
             });
         }
 
-        // 캘린더 초기화 함수
-        function initCalendar() {
-            updateCalendar();
-            initTimeSlots();
-            // 초기 강사 정보 표시
-            updateTeacherDetail(selectedTeacherId);
-        }
-
-        // 캘린더 업데이트 함수
-        function updateCalendar() {
-            // 월 표시 업데이트
-            const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-            document.getElementById('current-month-year').textContent = `${currentYear}년 ${monthNames[currentMonth]}`;
-
-            const today = new Date();
-            const firstDay = new Date(currentYear, currentMonth, 1);
-            const lastDay = new Date(currentYear, currentMonth + 1, 0);
-
-            const startingDay = firstDay.getDay() || 7; // 1(월요일) - 7(일요일)로 변환
-            const daysInMonth = lastDay.getDate();
-
-            // 캘린더 바디 초기화
-            const calendarBody = document.getElementById('calendar-body');
-            calendarBody.innerHTML = '';
-
-            let date = 1;
-            let calendarHTML = '';
-
-            // 주 단위로 행 생성
-            for (let i = 0; i < 6; i++) {
-                let rowHTML = '<tr>';
-
-                // 각 주의 일 단위로 셀 생성
-                for (let j = 1; j <= 7; j++) {
-                    if (i === 0 && j < startingDay) {
-                        // 이전 달의 날짜
-                        const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
-                        const prevDate = prevMonthLastDay - (startingDay - j - 1);
-                        rowHTML += `<td class="other-month">${prevDate}</td>`;
-                    } else if (date > daysInMonth) {
-                        // 다음 달의 날짜
-                        rowHTML += `<td class="other-month">${date - daysInMonth}</td>`;
-                        date++;
-                    } else {
-                        // 현재 달의 날짜
-                        const isToday = date === today.getDate() &&
-                            currentMonth === today.getMonth() &&
-                            currentYear === today.getFullYear();
-
-                        const classes = isToday ? 'today' : '';
-
-                        rowHTML += `<td class="${classes}" data-date="${date}">${date}</td>`;
-                        date++;
-                    }
+        // 날짜 시간 미지정 예약 버튼 클릭 이벤트
+        const btnTimeUnspecificBooking = document.getElementById('btnTimeUnspecificBooking');
+        if (btnTimeUnspecificBooking) {
+            btnTimeUnspecificBooking.addEventListener('click', function() {
+                if (confirm('강사님과 시간 조율이 필요한 방식입니다. 계속하시겠습니까?')) {
+                    document.getElementById('bookingForm').action = '/student/consulting-booking/unspecific';
+                    document.getElementById('bookingForm').submit();
                 }
-
-                rowHTML += '</tr>';
-                calendarHTML += rowHTML;
-
-                // 모든 날짜를 표시했으면 반복 종료
-                if (date > daysInMonth) {
-                    break;
-                }
-            }
-
-            calendarBody.innerHTML = calendarHTML;
-
-            // 날짜 선택 이벤트 추가
-            document.querySelectorAll('#calendar-body td:not(.other-month)').forEach(cell => {
-                cell.addEventListener('click', function() {
-                    // 이전에 선택된 날짜가 있으면 선택 해제
-                    document.querySelectorAll('#calendar-body td.selected').forEach(selected => {
-                        selected.classList.remove('selected');
-                    });
-
-                    // 현재 선택한 날짜에 선택 스타일 적용
-                    this.classList.add('selected');
-
-                    // 선택한 날짜 정보 저장
-                    const day = parseInt(this.getAttribute('data-date'));
-                    selectedDate = new Date(currentYear, currentMonth, day);
-
-                    // 선택한 날짜 표시 업데이트
-                    updateSelectedDateHeader();
-
-                    // 해당 날짜의 시간대 정보 로드
-                    loadTimeSlots(selectedDate, selectedTeacherId);
-                });
             });
         }
 
-        // 선택한 날짜 표시 업데이트
-        function updateSelectedDateHeader() {
-            if (selectedDate) {
-                const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-                const dayOfWeek = dayNames[selectedDate.getDay()];
-                const formattedDate = `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일 (${dayOfWeek})`;
-                document.getElementById('selected-date-header').textContent = formattedDate;
-            } else {
-                document.getElementById('selected-date-header').textContent = '날짜를 선택해주세요';
-            }
-        }
-
-        // 시간대 로드 함수 (실제로는 서버에서 가져와야 함)
-        function loadTimeSlots(date, teacherId) {
-            // Ajax 요청을 통해 서버에서 시간대 정보를 가져오는 로직
-            // 예시 데이터 - 실제로는 서버에서 받아오는 데이터로 대체
-            const timeSlotsContainer = document.querySelector('.time-slots');
-
-            // 예시 데이터 - 실제로는 서버에서 받아온 데이터
-            let timeSlotHTML = '';
-
-            // 요일에 따라 다른 시간대 제공 (예시)
-            const dayOfWeek = date.getDay(); // 0: 일요일, 1: 월요일, ...
-
-            // 강사 ID에 따라 서로 다른 시간대 제공 (예시)
-            if (teacherId === '1') { // 김강사
-                if (dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5) { // 월, 수, 금
-                    timeSlotHTML = `
-                            <div class="time-slot available">9:00 - 10:00</div>
-                            <div class="time-slot available">10:00 - 11:00</div>
-                            <div class="time-slot available">11:00 - 12:00</div>
-                            <div class="time-slot unavailable">13:00 - 14:00</div>
-                            <div class="time-slot unavailable">14:00 - 15:00</div>
-                            <div class="time-slot unavailable">15:00 - 16:00</div>
-                        `;
-                } else {
-                    timeSlotHTML = `
-                            <div class="time-slot unavailable">9:00 - 10:00</div>
-                            <div class="time-slot unavailable">10:00 - 11:00</div>
-                            <div class="time-slot unavailable">11:00 - 12:00</div>
-                            <div class="time-slot unavailable">13:00 - 14:00</div>
-                            <div class="time-slot unavailable">14:00 - 15:00</div>
-                            <div class="time-slot unavailable">15:00 - 16:00</div>
-                        `;
+        const btnTimeUnspecificBooking2 = document.getElementById('btnTimeUnspecificBooking2');
+        if (btnTimeUnspecificBooking2) {
+            btnTimeUnspecificBooking2.addEventListener('click', function() {
+                if (confirm('강사님과 시간 조율이 필요한 방식입니다. 계속하시겠습니까?')) {
+                    document.getElementById('unspecificForm').submit();
                 }
-            } else if (teacherId === '2') { // 이강사
-                if (dayOfWeek === 2 || dayOfWeek === 4) { // 화, 목
-                    timeSlotHTML = `
-                            <div class="time-slot unavailable">9:00 - 10:00</div>
-                            <div class="time-slot unavailable">10:00 - 11:00</div>
-                            <div class="time-slot unavailable">11:00 - 12:00</div>
-                            <div class="time-slot available">13:00 - 14:00</div>
-                            <div class="time-slot available">14:00 - 15:00</div>
-                            <div class="time-slot available">15:00 - 16:00</div>
-                        `;
-                } else {
-                    timeSlotHTML = `
-                            <div class="time-slot unavailable">9:00 - 10:00</div>
-                            <div class="time-slot unavailable">10:00 - 11:00</div>
-                            <div class="time-slot unavailable">11:00 - 12:00</div>
-                            <div class="time-slot unavailable">13:00 - 14:00</div>
-                            <div class="time-slot unavailable">14:00 - 15:00</div>
-                            <div class="time-slot unavailable">15:00 - 16:00</div>
-                        `;
-                }
-            } else if (teacherId === '3') { // 박강사
-                if (dayOfWeek >= 1 && dayOfWeek <= 5) { // 월-금
-                    timeSlotHTML = `
-                            <div class="time-slot available">9:00 - 10:00</div>
-                            <div class="time-slot available">10:00 - 11:00</div>
-                            <div class="time-slot available">11:00 - 12:00</div>
-                            <div class="time-slot available">13:00 - 14:00</div>
-                            <div class="time-slot available">14:00 - 15:00</div>
-                            <div class="time-slot available">15:00 - 16:00</div>
-                        `;
-                } else {
-                    timeSlotHTML = `
-                            <div class="time-slot unavailable">9:00 - 10:00</div>
-                            <div class="time-slot unavailable">10:00 - 11:00</div>
-                            <div class="time-slot unavailable">11:00 - 12:00</div>
-                            <div class="time-slot unavailable">13:00 - 14:00</div>
-                            <div class="time-slot unavailable">14:00 - 15:00</div>
-                            <div class="time-slot unavailable">15:00 - 16:00</div>
-                        `;
-                }
-            }
-
-            timeSlotsContainer.innerHTML = timeSlotHTML;
-
-            // 시간대 선택 이벤트 다시 초기화
-            initTimeSlots();
+            });
         }
     });
 </script>
+
 </body>
 </html>
