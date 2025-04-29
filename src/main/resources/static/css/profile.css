@@ -20,7 +20,7 @@ body {
 }
 
 .tab-button {
-    width: 90%;
+    width: 90%; / 기존 설정 그대로 /
 padding: 16px 0;
     font-size: 20px;
     border: 2px solid #ccc;
@@ -46,17 +46,17 @@ padding: 16px 0;
 }
 
 .member-button {
-    width: 40%;
+    width: 40%; / 반 버튼의 절반 정도로 줄임 */
 height: 40px;
     padding: 5px;
     background-color: white;
     border: 1px solid #bbb;
     border-radius: 8px;
     font-size: 14px;
-cursor: pointer;
+    cursor: pointer;
     text-align: center;
     line-height: 30px;
-transition: all 0.2s;
+    transition: all 0.2s;
 }
 
 .member-button:hover {

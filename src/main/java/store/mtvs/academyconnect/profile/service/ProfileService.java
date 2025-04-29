@@ -59,8 +59,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public void updateProfile(String userId, String name, String email, String github, String blog) {
-        log.info("Updating profile for user: {}", name);
+    public void updateProfile(String userId, String email, String github, String blog,String markdown, String profileImagePath) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
@@ -68,10 +67,11 @@ public class ProfileService {
         if (profile == null) {
             throw new IllegalArgumentException("Profile not found for user: " + userId);
         }
-        user.changeName(name);
         profile.setEmail(email);
         profile.setGithub(github);
         profile.setBlog(blog);
+        profile.setFilePath(profileImagePath);
+        profile.setMd(markdown);
 
         // 3. 저장은 트랜잭션 덕분에 자동 (JPA 변경 감지)
         log.info("Profile updated successfully for user: {}", userId);

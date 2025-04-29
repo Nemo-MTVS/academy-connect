@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>상세 프로필</title>
+    <link th:href="@{/css/header.css}" rel="stylesheet">
+    <link rel="stylesheet" href="/css/profile-detail.css">
+    <link th:href="@{/css/footer.css}" rel="stylesheet">
     <style>
         .profile-container {
             max-width: 800px;
@@ -48,10 +51,18 @@
 
     <div class="profile-content">
         <div class="profile-section">
+
+            <!-- 프로필 사진 -->
+            <div class="profile-section" th:if="${profile.filePath}">
+                <h3>프로필 사진</h3>
+                <img th:src="@{${profile.filePath}}" alt="Profile Image" style="max-width: 200px; border-radius: 10px;">
+            </div>
             <h3>기본 정보</h3>
             <p th:if="${profile.github}">GitHub: <a th:href="${profile.github}" target="_blank" th:text="${profile.github}"></a></p>
             <p th:if="${profile.blog}">Blog: <a th:href="${profile.blog}" target="_blank" th:text="${profile.blog}"></a></p>
             <p th:if="${profile.email}">Email: <span th:text="${profile.email}"></span></p>
+
+
         </div>
 
         <div class="profile-section" th:if="${profile.md}">
@@ -69,10 +80,10 @@
     <script>
         function goEdit(btn) {
             var userId = btn.getAttribute('data-userid');
-            location.href = '/profile/' + userId + '/edit';
+            location.href = '/student/profile/' + userId + '/edit';
         }
     </script>
-    <a th:href="@{/profile}" class="back-button">목록으로 돌아가기</a>
+    <a th:href="@{/student/profile}" class="back-button">목록으로 돌아가기</a>
 </div>
 </body>
 </html> 
