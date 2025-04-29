@@ -24,6 +24,7 @@ public class CounselingResultService {
     private final UserRepository userRepository;
     private final ConsultingBookingRepository consultingBookingRepository;
 
+    // 상담 결과 조회
     public CounselingResultDTO.Response findById(Long id) {
         return CounselingResultDTO.Response.from(
                 counselingResultRepository.findByIdWithUsers(id)
@@ -31,6 +32,7 @@ public class CounselingResultService {
         );
     }
 
+    // 학생 ID로 상담 결과 조회
     public List<CounselingResultDTO.Response> findByStudentId(String studentId) {
         return counselingResultRepository.findByStudentIdWithUsers(studentId)
                 .stream()
@@ -38,6 +40,7 @@ public class CounselingResultService {
                 .collect(Collectors.toList());
     }
 
+    // 강사 ID로 상담 결과 조회
     public List<CounselingResultDTO.Response> findByInstructorId(String instructorId) {
         return counselingResultRepository.findByInstructorIdWithUsers(instructorId)
                 .stream()
@@ -45,6 +48,7 @@ public class CounselingResultService {
                 .collect(Collectors.toList());
     }
 
+    // 상담 결과 생성
     @Transactional
     public CounselingResultDTO.Response create(CounselingResultDTO.CreateRequest request) {
         User student = userRepository.findById(request.getStudentId())

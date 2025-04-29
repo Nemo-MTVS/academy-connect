@@ -29,6 +29,14 @@ academy-connect/
 │       │   │   ├── infrastructure/
 │       │   │   └── service/
 │       │   │
+│       │   ├── counselingresult/     # Counseling results management
+│       │   │   ├── domain/
+│       │   │   │   └── entity/       # CounselingResult entity
+│       │   │   ├── dto/              # DTOs for counseling results
+│       │   │   ├── infrastructure/
+│       │   │   │   └── repository/   # CounselingResult repository
+│       │   │   └── service/          # Counseling results business logic
+│       │   │
 │       │   ├── lunchmatching/        # Lunch matching feature
 │       │   │   ├── domain/
 │       │   │   ├── infrastructure/
@@ -76,20 +84,27 @@ academy-connect/
 - Consulting session booking
 - Time slot management
 - Undefined consulting requests
-- Counseling results tracking
-- Support for both scheduled and impromptu sessions
+- Integration with counseling results
 
-### 4. Lunch Matching (`lunchmatching/`)
+### 4. Counseling Results (`counselingresult/`)
+- Recording and managing counseling session outcomes
+- Support for both scheduled and impromptu sessions
+- Markdown-based content storage
+- Relationships with users (student and instructor)
+- Optional linking with consulting bookings
+- Complete audit trail (creation, updates, deletion)
+
+### 5. Lunch Matching (`lunchmatching/`)
 - Lunch group matching
 - Class-based matching rules
 - Matching history
 
-### 5. Class Group Management (`classgroup/`)
+### 6. Class Group Management (`classgroup/`)
 - Class group organization
 - Class membership
 - Class period management
 
-### 6. Global Configuration (`global/`)
+### 7. Global Configuration (`global/`)
 - Application-wide settings
 - Security configurations
 - Common utilities
@@ -102,7 +117,10 @@ The database schema is documented in `sql_tables.dbml` and includes:
   - Booking management
   - Time slot availability
   - Counseling results tracking
-  - Support for both scheduled and impromptu sessions
+    - Support for both scheduled and impromptu sessions
+    - Student-Instructor relationships
+    - Markdown content storage
+    - Temporal tracking (counsel date, creation, updates)
 - Lunch matching system
 - Class group organization
 
@@ -135,6 +153,10 @@ The database schema is documented in `sql_tables.dbml` and includes:
 
 ## Recent Changes
 - Added counseling results tracking system
+  - Entity with proper JPA mappings
+  - Repository with optimized queries
+  - Service layer with transaction management
+  - DTOs for data transfer
 - Support for both scheduled and impromptu counseling sessions
 - Enhanced documentation structure with CURSOR_RULES.md
 - Updated project structure documentation 
