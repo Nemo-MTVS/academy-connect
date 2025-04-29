@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import store.mtvs.academyconnect.consulting.domain.entity.ConsultingBooking;
 import store.mtvs.academyconnect.consulting.domain.entity.UndefinedConsulting;
+import store.mtvs.academyconnect.consulting.dto.InstructorUndefinedConsultingDto;
 import store.mtvs.academyconnect.consulting.dto.UndefinedConsultingDto;
 import store.mtvs.academyconnect.consulting.dto.UndefinedConsultingRequestDto;
 import store.mtvs.academyconnect.consulting.infrastructure.repository.UndefinedConsultingRepository;
@@ -17,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -126,5 +129,71 @@ public class UndefinedConsultingService {
     private Long getNextId() {
         // 현재 저장된 마지막 ID + 1 반환
         return undefinedConsultingRepository.count() + 1;
+    }
+
+
+
+
+
+
+    /**
+     * 강사 미지정 상담 요청 목록 조회
+     * @param instructorId 강사 ID
+     * @return 요청 목록 DTO
+     */
+    public List<InstructorUndefinedConsultingDto> getInstructorConsultationRequests(String instructorId) {
+        log.info("미지정 상담 요청 목록 조회 서비스 호출: instructorId={}", instructorId);
+
+        // 강사 ID 존재 여부 확인
+        log.debug("강사 ID 조회 시작: {}", instructorId);
+        Optional<User> instructorOpt = userRepository.findById(instructorId);
+
+        // 학생이 없으면 빈 목록 반환
+        if (instructorOpt.isEmpty()) {
+            log.warn("강사를 찾을 수 없음 (빈 목록 반환): instructorId={}", instructorId);
+            return Collections.emptyList();
+        }
+
+        User instructor = instructorOpt.get();
+        log.debug("강사 조회 성공: name={}", instructor.getName());
+
+        List<UndefinedConsulting> requests = undefinedConsultingRepository.findByInstructor(instructor);
+        log.debug("미지정 상담 요청 조회 결과: {} 건", requests.size());
+
+        List<UndefinedConsulting> waiting = requests.stream()
+                .filter(r -> r.getStatus() == UndefinedConsulting.RequestStatus.WAITING)
+                .sorted(Comparator.comparing(UndefinedConsulting::getRequestAt).reversed())
+                .collect(Collectors.toList());
+
+        List<UndefinedConsulting> completed = requests.stream()
+                .filter(r -> r.getStatus() == UndefinedConsulting.RequestStatus.DONE)
+                .sorted(Comparator.comparing(UndefinedConsulting::getRequestAt).reversed())
+                .collect(Collectors.toList());
+
+        List<UndefinedConsulting> sortedRequests = new ArrayList<>();
+        sortedRequests.addAll(waiting);
+        sortedRequests.addAll(completed);
+
+        log.info("정렬된 미지정 상담 요청 수: {}", sortedRequests.size());
+
+        return convertToDtoIns(sortedRequests);
+    }
+
+    /**
+     * Entity를 DTO로 변환
+     */
+    private List<InstructorUndefinedConsultingDto> convertToDtoIns(List<UndefinedConsulting> requests) {
+        return requests.stream()
+                .map(request -> InstructorUndefinedConsultingDto.builder()
+                        .id(request.getId())
+                        .studentName(request.getStudent().getName())
+                        .classGroup(request.getStudent().getClassGroup().getName())
+                        .filePath(request.getStudent().getProfile().getFilePath())
+                        .status(request.getStatus().toString())
+                        .comment(request.getComment())
+                        .requestAt(request.getRequestAt())
+                        .updatedAt(request.getUpdatedAt())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

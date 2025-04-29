@@ -344,10 +344,10 @@
             font-weight: 500;
         }
         
-        .status-badge.completed {
-            background-color: var(--light-blue);
-            color: var(--accent-color);
-        }
+        /*.status-badge.completed {*/
+        /*    background-color: var(--light-blue);*/
+        /*    color: var(--accent-color);*/
+        /*}*/
         
         .status-badge.upcoming {
             background-color: #e6f7ff;
@@ -355,8 +355,8 @@
         }
         
         .status-badge.waiting {
-            background-color: #fff7e6;
-            color: #fa8c16;
+            background-color: #EAE2FF;
+            color: #4A1DB8;
         }
         
         .status-badge.canceled {
@@ -364,9 +364,9 @@
             color: #f5222d;
         }
         
-        .status-badge.waiting-confirm {
-            background-color: #f6ffed;
-            color: #52c41a;
+        .status-badge.completed {
+            background-color: #D4F8D3;
+            color: #073B05;
         }
         
         .action-btn {
@@ -384,8 +384,8 @@
         }
         
         .action-btn.success {
-            background-color: #f6ffed;
-            color: #52c41a;
+            background-color: #EAE2FF;
+            color: #4A1DB8;
         }
         
         /* 모바일 Bottom Navigation */
@@ -458,13 +458,13 @@
             백엔드 / 홍길동 강사
         </div>
         <div class="menu-container">
-            <a href="/teacher/schedule" class="menu-item" th:classappend="${activeMenu == 'schedule'} ? 'active' : ''">
+            <a href="/teacher/scheduling" class="menu-item" th:classappend="${activeMenu == 'schedule'} ? 'active' : ''">
                 <i class="bi bi-calendar-check"></i> 스케줄 확인
             </a>
             <a href="/teacher/recurring" class="menu-item" th:classappend="${activeMenu == 'recurring'} ? 'active' : ''">
                 <i class="bi bi-arrow-repeat"></i> 반복 스케줄 설정
             </a>
-            <a href="/teacher/reservations" class="menu-item" th:classappend="${activeMenu == 'reservations'} ? 'active' : ''">
+            <a href="/teacher/reservation" class="menu-item" th:classappend="${activeMenu == 'reservations'} ? 'active' : ''">
                 <i class="bi bi-list-check"></i> 전체 예약 내역
             </a>
             <a href="/teacher/notifications" class="menu-item" th:classappend="${activeMenu == 'notifications'} ? 'active' : ''">
@@ -483,7 +483,7 @@
     
     <!-- 모바일 Bottom Navigation -->
     <div th:fragment="bottomnav(activeMenu)" class="bottom-nav">
-        <a href="/teacher/schedule" class="bottom-nav-item" th:classappend="${activeMenu == 'schedule'} ? 'active' : ''">
+        <a href="/teacher" class="bottom-nav-item" th:classappend="${activeMenu == 'schedule'} ? 'active' : ''">
             <i class="bi bi-calendar-check"></i>
             <span>스케줄</span>
         </a>
@@ -491,7 +491,7 @@
             <i class="bi bi-arrow-repeat"></i>
             <span>반복</span>
         </a>
-        <a href="/teacher/reservations" class="bottom-nav-item" th:classappend="${activeMenu == 'reservations'} ? 'active' : ''">
+        <a href="/teacher/reservation" class="bottom-nav-item" th:classappend="${activeMenu == 'reservations'} ? 'active' : ''">
             <i class="bi bi-list-check"></i>
             <span>예약</span>
         </a>
