@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!--<html xmlns:th="http://www.thymeleaf.org">-->
+
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>Header</title>
@@ -68,7 +68,9 @@
 
             <!-- 로그인 한 상태 -->
             <div sec:authorize="isAuthenticated()">
-                <a class="nav-link" th:href="@{/logout}">로그아웃</a>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="nav-link btn btn-link logout-btn">로그아웃</button>
+                </form>
             </div>
         </div>
     </nav>
