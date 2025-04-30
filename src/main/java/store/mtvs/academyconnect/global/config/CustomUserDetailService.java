@@ -40,7 +40,8 @@ public class CustomUserDetailService implements UserDetailsService {
                 authorities,
                 user.getName(),
                 user.getClassGroup().getName(),
-                user.getRole()
+                user.getRole(),
+                user.getId()
         );
     }
 }
