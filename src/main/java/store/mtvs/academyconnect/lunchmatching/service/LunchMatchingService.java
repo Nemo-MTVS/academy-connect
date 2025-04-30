@@ -74,7 +74,7 @@ public class LunchMatchingService {
                 .orElseThrow(() -> new IllegalArgumentException("매칭 클래스가 존재하지 않습니다."));
 
         // 본인의 전공이 매칭 클래스 이름에 포함되어 있어야 신청 가능
-        String userMajor = user.getClassGroup().getName();
+        String userMajor = user.getClassGroup().getName().toUpperCase();
         String matchName = lunchClass.getName();
         if(!matchName.contains(userMajor)) {
             throw new IllegalArgumentException("본인 전공과 관련된 매칭만 신청할 수 있습니다.");
@@ -183,11 +183,21 @@ public class LunchMatchingService {
 
             // 신청자 이름 + 전공 + 사용자 ID 추출
             List<StudentInfo> students = matchings.stream()
-                    .map(matching -> new StudentInfo(
-                            matching.getUser().getName(),                      // 이름
-                            matching.getUser().getClassGroup().getName(),     // 전공
-                            matching.getUser().getId()                         // userId 추가
-                    ))
+                    .map(matching -> {
+                        String originalMajor = matching.getUser().getClassGroup().getName();
+                        String shortMajor = switch (originalMajor.toUpperCase()) {
+                            case "BACKEND" -> "BE";
+                            case "UNITY" -> "U";
+                            case "TA" -> "TA";
+                            default -> "UNKNOWN";
+                        };
+
+                        return new StudentInfo(
+                                matching.getUser().getName(),
+                                shortMajor,
+                                matching.getUser().getId()
+                        );
+                    })
                     .toList();
 
             // 현재 신청 인원 수

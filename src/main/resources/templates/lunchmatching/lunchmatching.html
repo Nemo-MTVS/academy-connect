@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout :: html(~{::title}, ~{::link}, ~{::section}, ~{::script})}">
+<!--<html xmlns:th="http://www.thymeleaf.org"-->
+<!--      th:replace="~{layout :: html(~{::title}, ~{::link}, ~{::section}, ~{::script})}">-->
 
 <head>
     <meta charset="UTF-8">
@@ -18,7 +18,7 @@
 
 <body>
 
-<section class="lunch-matching-section">
+<section class="lunch-matching-section" th:attr="data-user-id=${currentUserId}, data-user-role=${currentUserRole}">
     <div class="container">
         <div class="lunch-matching-inner">
 
@@ -181,6 +181,9 @@
 <script>
     let selectedClassId = null; // 현재 선택된 매칭 클래스 ID
 
+    const currentUserId = document.querySelector('[data-user-id]').dataset.userId;
+    const currentUserRole = document.querySelector('[data-user-role]').dataset.userRole;
+
     document.addEventListener("DOMContentLoaded", function() {
         loadMatchingStatus();   // 페이지 로드 시 매칭 현황 불러오기
         startCountdown();       // 타이머 시작
@@ -205,7 +208,7 @@
 
     // 서버에서 매칭 현황 불러와서 화면 업데이트하는 함수
     function loadMatchingStatus() {
-        fetch('/lunch/status')
+        fetch('/student/lunch/status')
             .then(response => response.json())
             .then(data => {
                 const cards = document.querySelectorAll('.matching-card');
@@ -249,15 +252,22 @@
                         if (emptySlot) {
                             const nameSpan = emptySlot.querySelector('.name');
                             nameSpan.innerText = name;
-                            nameSpan.style.cursor = 'pointer';
                             nameSpan.style.opacity = '1';
 
-                            nameSpan.onclick = function () {
-                                selectedClassId = matchInfo.classId;
-                                document.getElementById('cancelConfirmText').innerText = `매칭 신청을 취소하시겠습니까?`;
-                                const cancelModal = new bootstrap.Modal(document.getElementById('cancelConfirmModal'));
-                                cancelModal.show();
-                            };
+                            // 본인일 때만 클릭 가능
+                            if (student.userId === currentUserId) {
+                                nameSpan.style.cursor = 'pointer';
+                                nameSpan.onclick = function () {
+                                    selectedClassId = matchInfo.classId;
+                                    document.getElementById('cancelConfirmText').innerText = `매칭 신청을 취소하시겠습니까?`;
+                                    const cancelModal = new bootstrap.Modal(document.getElementById('cancelConfirmModal'));
+                                    cancelModal.show();
+                                };
+                            } else {
+                                // 남의 슬롯은 클릭 불가
+                                nameSpan.style.cursor = 'default';
+                                nameSpan.onclick = null;
+                            }
                         }
                     });
 
@@ -273,16 +283,26 @@
                     // 매칭하기 버튼 연결
                     const applyBtn = card.querySelector('.apply-btn');
                     const matchTitle = card.querySelector('.card-header span')?.innerText || '매칭';
-                    applyBtn.onclick = () => applyForLunch(matchInfo.classId, matchTitle);
 
-                    if (matchInfo.currentCount >= 6) {
-                        applyBtn.disabled = true;               // 버튼 비활성화
-                        applyBtn.style.backgroundColor = '#ccc'; // 회색 배경
-                        applyBtn.style.cursor = 'not-allowed';    // 커서 바꾸기
+                    // 학생(STUDENT)만 신청 가능
+                    if (currentUserRole !== 'STUDENT') {
+                        applyBtn.disabled = true;
+                        applyBtn.style.backgroundColor = '#ccc';      // 비활성화 시 회색
+                        applyBtn.style.cursor = 'not-allowed';        // 커서 변경
+                        applyBtn.onclick = null;                      // 클릭 이벤트 제거
                     } else {
-                        applyBtn.disabled = false;               // 버튼 활성화
-                        applyBtn.style.backgroundColor = 'black'; // 원래 스타일 복구
-                        applyBtn.style.cursor = 'pointer';        // 원래 커서 복구
+                        // 신청 인원 다 찼으면 비활성화
+                        if (matchInfo.currentCount >= 6) {
+                            applyBtn.disabled = true;
+                            applyBtn.style.backgroundColor = '#ccc';
+                            applyBtn.style.cursor = 'not-allowed';
+                            applyBtn.onclick = null;
+                        } else {
+                            applyBtn.disabled = false;
+                            applyBtn.style.backgroundColor = 'black';
+                            applyBtn.style.cursor = 'pointer';
+                            applyBtn.onclick = () => applyForLunch(matchInfo.classId, matchTitle);
+                        }
                     }
                 });
             })
@@ -305,9 +325,13 @@
         const confirmButton = document.getElementById('confirmMatchBtn');
         confirmButton.disabled = true; // 버튼 비활성화 (중복 클릭 방지)
 
-        fetch('/lunch/apply', {
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        fetch('/student/lunch/apply', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            [csrfHeader]: csrfToken,
             body: JSON.stringify({ lunchMatchingClassId: selectedClassId })
         })
             .then(response => {
@@ -393,7 +417,7 @@
         const cancelButton = document.getElementById('confirmCancelBtn');
         cancelButton.disabled = true; // 버튼 비활성화 (중복 클릭 방지)
 
-        fetch('/lunch/cancel', {
+        fetch('/student/lunch/cancel', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ lunchMatchingClassId: lunchMatchingClassId })
