@@ -37,6 +37,17 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
+    private Profile createProfile(User user){
+        return new Profile(
+                "# " + user.getName() + "의 프로필입니다",
+                "",
+                "",
+                "",
+                "",
+                user
+        );
+    }
+
     // 사용자 등록
     @Transactional
     public User registerUser(String loginId, String className, String password, String name) {
@@ -69,6 +80,9 @@ public class UserService {
                     "STUDENT"
             );
             entityManager.persist(user);
+
+            Profile profile = createProfile(user);
+            entityManager.persist(profile);
 
             log.info("유저 생성 완료: 유저 ID {}", user.getId());
             return user;

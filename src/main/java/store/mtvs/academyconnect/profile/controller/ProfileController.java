@@ -1,16 +1,25 @@
 package store.mtvs.academyconnect.profile.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import store.mtvs.academyconnect.global.config.CustomUserDetails;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
+import store.mtvs.academyconnect.profile.dto.ProfileDTO;
 import store.mtvs.academyconnect.profile.service.ProfileService;
 import store.mtvs.academyconnect.user.domain.entity.User;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import store.mtvs.academyconnect.user.domain.entity.User;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +27,12 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/student/profile")
 public class ProfileController {
+    public String renderMarkdownToHtml(String markdown) {
+        Parser parser = Parser.builder().build();
+        Node document = parser.parse(markdown);
+        HtmlRenderer renderer = HtmlRenderer.builder().build();
+        return renderer.render(document);
+    }
 
     private final ProfileService profileService;
 
@@ -68,13 +83,18 @@ public class ProfileController {
 
     // 학생 프로필 수정 폼
     @GetMapping("/{userId}/edit")
-    public String editProfile(@PathVariable String userId, Model model) {
+    public String editProfile(@PathVariable String userId, Model model, @AuthenticationPrincipal CustomUserDetails customUserDetails) throws  AccessDeniedException {
         try {
+            String userUuid = customUserDetails.getId();
+            if (!userUuid.equals(userId)) {
+                throw new AccessDeniedException("권한이 없습니다");
+            }
             User user = profileService.getUserById(userId);
             Profile profile = profileService.getProfileByUserId(userId);
 
             model.addAttribute("student", user);
             model.addAttribute("profile", profile);
+
 
             return "profile/profile-edit";
         } catch (Exception e) {
@@ -86,27 +106,47 @@ public class ProfileController {
     // 학생 프로필 수정 저장
     @PostMapping("/{userId}/update")
     public String updateProfile(@PathVariable String userId,
-                                @RequestParam String email,
-                                @RequestParam String github,
-                                @RequestParam String blog,
-                                @RequestParam String bio,
-                                @RequestParam(required = false) MultipartFile profileImage,
-                                Model model) throws IOException {
-        // 1) 먼저 기존 프로필을 조회
+                                @ModelAttribute ProfileDTO form,
+                                @AuthenticationPrincipal CustomUserDetails customUserDetails
+                                ) throws IOException {
+        String userUuid = customUserDetails.getId();
+        if (!userUuid.equals(userId)) {
+            throw new AccessDeniedException("권한이 없습니다");
+        }
+//        // 현재 로그인한 유저의 ID 확인
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String loggedInUserId = authentication.getName(); // 필요 시 커스텀 UserDetails로 교체
+//
+//        // 본인 확인: userId가 로그인한 사람의 ID가 아니면 수정 못 함
+//        if (!userId.equals(loggedInUserId)) {
+//            // 권한 없음 처리
+//            return "redirect:/access-denied"; // 또는 403 페이지
+//        }
+
+        String email = form.getEmail();
+        String github = form.getGithub();
+        String blog = form.getBlog();
+        String bio = form.getBio();
+        MultipartFile profileImage = form.getProfileImage();
+
         Profile existing = profileService.getProfileByUserId(userId);
-        String profileImagePath = existing.getFilePath();  // 기존 경로로 초기화
-        // 2) 새 이미지가 있으면 덮어쓰기
+        String profileImagePath = existing.getFilePath();
+
         if (profileImage != null && !profileImage.isEmpty()) {
             String uploadDir = "C:/upload/profile/";
             String fileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
             File saveFile = new File(uploadDir, fileName);
             saveFile.getParentFile().mkdirs();
             profileImage.transferTo(saveFile);
-            profileImagePath = "/student/profile-images/" + fileName;  // 앞에 슬래시를 붙여서 URL 매핑과 일치시키기
-            profileService.updateProfile(userId, email, github, blog, bio, profileImagePath);
+            profileImagePath = "/student/profile-images/" + fileName;
         }
 
-            // 수정 후 해당 학생 상세 페이지로 리다이렉트
-            return "redirect:/student/profile/" + userId;
+        profileService.updateProfile(userId, email, github, blog, bio, profileImagePath);
+
+        return "redirect:/student/profile/" + userId;
+    }
+    @GetMapping("/access-denied")
+    public String accessDenied() {
+        return "error/403"; // 에러 페이지로 이동
     }
 }

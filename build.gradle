@@ -20,7 +20,7 @@ repositories {
 dependencies {
     // 개발용
     implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
-
+    implementation 'org.commonmark:commonmark:0.21.0'
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
