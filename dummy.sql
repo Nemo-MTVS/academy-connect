@@ -3,7 +3,7 @@ VALUES
     (1, 'Backend', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH)),
     (2, 'Unity', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH)),
     (3, 'TA', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH));
-
+UPDATE users SET role = 'INSTRUCTOR' WHERE id = '1145d1f5-7fb2-43d1-8777-00b9fbe2b43a'
 
 INSERT INTO users (id, class_group_id, login_id, passwd, name, created_at, updated_at, deleted_at, role)
 VALUES

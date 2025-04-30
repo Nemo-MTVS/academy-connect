@@ -117,7 +117,7 @@ The database schema is documented in `sql_tables.dbml` and includes:
   - Booking management
   - Time slot availability
   - Counseling results tracking
-    - Support for both scheduled and impromptu sessions
+  - Support for both scheduled and impromptu sessions
     - Student-Instructor relationships
     - Markdown content storage
     - Temporal tracking (counsel date, creation, updates)

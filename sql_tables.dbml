@@ -83,3 +83,4 @@ Table undefined_consultings {
   updated_at datetime [not null]
   comment varchar(255) [null]
 }
+ 
