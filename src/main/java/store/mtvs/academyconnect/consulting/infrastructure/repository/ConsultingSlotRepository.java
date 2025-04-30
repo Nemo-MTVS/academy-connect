@@ -23,6 +23,9 @@ public interface ConsultingSlotRepository extends JpaRepository<ConsultingSlot, 
     // 특정 상태의 상담 슬롯 조회
     List<ConsultingSlot> findByStatus(ConsultingSlot.SlotStatus status);
 
+    // 특정 강사의 상담 슬롯을 예약 취소할 때 상태 변경 위해 필요
+    List<ConsultingSlot> findByInstructorAndStartTimeAndEndTime(User instructor, LocalDateTime startTime, LocalDateTime endTime);
+
     // 특정 강사의 특정 시작 시간에 해당하는 '사용가능' 슬롯을 조회하며 비관적 쓰기 락 획득
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT cs FROM ConsultingSlot cs WHERE cs.instructor.id = :instructorId " +
