@@ -8,6 +8,7 @@ import java.util.List;
 
 @Getter
 public class CustomUserDetails implements UserDetails {
+    private final String id;
     private final String username;
     private final String password;
     private final List<GrantedAuthority> authorities;
@@ -16,7 +17,8 @@ public class CustomUserDetails implements UserDetails {
     private final String role;
 
     public CustomUserDetails(String username, String password, List<GrantedAuthority> authorities,
-                             String name, String classGroupName, String role) {
+                             String name, String classGroupName, String role, String id) {
+        this.id = id;
         this.username = username;
         this.password = password;
         this.authorities = authorities;
