@@ -7,12 +7,13 @@ import store.mtvs.academyconnect.user.domain.entity.User;
 import java.util.List;
 
 public interface UndefinedConsultingRepository extends JpaRepository<UndefinedConsulting, Long> {
-    // 학생별 미지정 상담 요청 조회
-    List<UndefinedConsulting> findByStudent(User student);
-    
-    // 강사별 미지정 상담 요청 조회
-    List<UndefinedConsulting> findByInstructor(User instructor);
-    
+
+    // 학생 ID로 미지정 상담 요청 조회
+    List<UndefinedConsulting> findByStudentId(String studentId);
+
+    // 강사 ID로 미지정 상담 요청 조회
+    List<UndefinedConsulting> findByInstructorId(String instructorId);
+
     // 상담 상태별 조회
     List<UndefinedConsulting> findByStatus(UndefinedConsulting.RequestStatus status);
 }

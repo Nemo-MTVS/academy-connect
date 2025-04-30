@@ -1,12 +1,11 @@
 package store.mtvs.academyconnect.consulting.domain.entity;
 
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import store.mtvs.academyconnect.user.domain.entity.User;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,36 +15,35 @@ import java.time.LocalDateTime;
 public class UndefinedConsulting {
 
     @Id
-    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false)
-    private User student;
+    @Column(name = "student_id", nullable = false, length = 255)
+    private String studentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "instructor_id", nullable = false)
-    private User instructor;
+    @Column(name = "instructor_id", nullable = false, length = 255)
+    private String instructorId;
 
     @Column(name = "request_at", nullable = false)
     private LocalDateTime requestAt;
-    
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, length = 20)
     private RequestStatus status;
-    
+
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-    
-    @Column(name = "comment")
+
+    @Lob
+    @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
 
     @Builder
-    public UndefinedConsulting(Long id, User student, User instructor, LocalDateTime requestAt, 
-                              RequestStatus status, LocalDateTime updatedAt, String comment) {
-        this.id = id;
-        this.student = student;
-        this.instructor = instructor;
+    public UndefinedConsulting(String studentId, String instructorId, LocalDateTime requestAt,
+                               RequestStatus status, LocalDateTime updatedAt, String comment) {
+        this.studentId = studentId;
+        this.instructorId = instructorId;
         this.requestAt = requestAt;
         this.status = status;
         this.updatedAt = updatedAt;
