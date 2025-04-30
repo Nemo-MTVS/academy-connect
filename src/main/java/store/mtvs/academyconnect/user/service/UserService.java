@@ -9,9 +9,12 @@ import store.mtvs.academyconnect.classgroup.domain.entity.ClassGroup;
 import store.mtvs.academyconnect.classgroup.service.ClassGroupService;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
 import store.mtvs.academyconnect.user.domain.entity.User;
+import store.mtvs.academyconnect.user.domain.enums.UserRole;
+import store.mtvs.academyconnect.user.dto.InstructorDTO;
 import store.mtvs.academyconnect.user.dto.UserResponseDTO;
 import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,11 +23,13 @@ public class UserService {
     private final ClassGroupService classGroupService;
     private final EntityManager entityManager; // EntityManager 주입
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserService(ClassGroupService classGroupService, EntityManager entityManager, UserRepository userRepository) {
+    public UserService(ClassGroupService classGroupService, EntityManager entityManager, UserRepository userRepository, UserMapper userMapper) {
         this.classGroupService = classGroupService;
         this.entityManager = entityManager;
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     private Profile createProfile(User user){
@@ -87,6 +92,16 @@ public class UserService {
             return null;
         }
         return new UserResponseDTO(user.getId(), user.getName(), user.getClassGroup().getName(), user.getRole());
+    }
+
+    public List<InstructorDTO> getInstructorDTO() {
+        List<User> users = userRepository.findByRoleWithClassGroupWithProfile(UserRole.INSTRUCTOR.name());
+        if (users.isEmpty()) {
+            return List.of();
+        }
+        return users.stream()
+                .map(userMapper::toInstructorDTO)
+                .toList();
     }
 
 }
