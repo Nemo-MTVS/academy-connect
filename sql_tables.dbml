@@ -47,9 +47,9 @@ Table counseling_results {
   student_id varchar(255) [not null, ref: > users.id]
   instructor_id varchar(255) [not null, ref: > users.id]
   md longtext [null, note: '상담 내용']
-  counsel_at datetime [not null]
+  counsel_at datetime [null]
   created_at datetime [not null]
-  updated_at datetime [not null]
+  updated_at datetime [null]
   deleted_at datetime [null]
 }
 
@@ -83,4 +83,3 @@ Table undefined_consultings {
   updated_at datetime [not null]
   comment varchar(255) [null]
 }
- 

@@ -46,4 +46,14 @@ public interface CounselingResultRepository extends JpaRepository<CounselingResu
         WHERE cr.booking.id = :bookingId AND cr.deletedAt IS NULL
     """)
     Optional<CounselingResult> findByBookingIdWithUsers(@Param("bookingId") Long bookingId);
+
+    @Query("""
+        SELECT cr FROM CounselingResult cr
+        JOIN FETCH cr.student
+        JOIN FETCH cr.instructor
+        LEFT JOIN FETCH cr.booking
+        WHERE cr.deletedAt IS NULL
+        ORDER BY cr.id DESC
+    """)
+    List<CounselingResult> findAllWithUsers();
 } 

@@ -27,10 +27,11 @@ public class CreateCounselingView {
         while (true) {
             System.out.println("\n=== Counseling Result Management ===");
             System.out.println("1. Create Counseling Result");
-            System.out.println("2. View Counseling Result");
-            System.out.println("3. Update Counseling Result");
-            System.out.println("4. Delete Counseling Result");
-            System.out.println("5. Exit");
+            System.out.println("2. View Single Counseling Result");
+            System.out.println("3. View All Counseling Results");
+            System.out.println("4. Update Counseling Result");
+            System.out.println("5. Delete Counseling Result");
+            System.out.println("6. Exit");
             System.out.print("\nEnter your choice: ");
 
             int choice = scanner.nextInt();
@@ -44,12 +45,15 @@ public class CreateCounselingView {
                     viewCounselingResult();
                     break;
                 case 3:
-                    updateCounselingResult();
+                    viewAllCounselingResult();
                     break;
                 case 4:
-                    deleteCounselingResult();
+                    updateCounselingResult();
                     break;
                 case 5:
+                    deleteCounselingResult();
+                    break;
+                case 6:
                     System.out.println("Exiting...");
                     return;
                 default:
@@ -211,6 +215,56 @@ public class CreateCounselingView {
         System.out.println("Created At: " + result.getCreatedAt());
         System.out.println("Updated At: " + result.getUpdatedAt());
         System.out.println("Deleted At: " + result.getDeletedAt());
+    }
+
+    @Transactional(readOnly = true)
+    protected void viewAllCounselingResult() {
+        try {
+            System.out.println("\n=== View All Counseling Results ===");
+            System.out.println("Fetching results from database...");
+            
+            // Use findAll with eager loading of associations
+            List<CounselingResult> results = counselingResultRepository.findAllWithUsers();
+            
+            if (results.isEmpty()) {
+                System.out.println("No counseling results found.");
+                System.out.println("\nPress Enter to return to menu...");
+                scanner.nextLine();
+                return;
+            }
+            
+            System.out.println("\nTotal results: " + results.size());
+            System.out.println("\n----------------------------------------");
+            
+            for (CounselingResult result : results) {
+                try {
+                    System.out.println("\nCounseling Result Details:");
+                    System.out.println("ID: " + result.getId());
+                    System.out.println("Student: " + result.getStudent().getName());
+                    System.out.println("Instructor: " + result.getInstructor().getName());
+                    if (result.getBooking() != null) {
+                        System.out.println("Booking ID: " + result.getBooking().getId());
+                    } else {
+                        System.out.println("Booking ID: N/A (Impromptu session)");
+                    }
+                    System.out.println("Content: " + result.getMd());
+                    System.out.println("Counsel At: " + result.getCounselAt());
+                    System.out.println("----------------------------------------");
+                } catch (Exception e) {
+                    System.out.println("Error displaying result: " + e.getMessage());
+                }
+            }
+            
+            System.out.println("\nPress Enter to return to menu...");
+            scanner.nextLine(); // Wait for user input before returning
+            System.out.println("Returning to menu..."); // Debug log
+            
+        } catch (Exception e) {
+            System.out.println("❌ Error fetching counseling results: " + e.getMessage());
+            e.printStackTrace();
+            System.out.println("\nPress Enter to return to menu...");
+            scanner.nextLine();
+        }
     }
 
     @Transactional
