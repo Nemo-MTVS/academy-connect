@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: html(~{::title}, ~{::link}, ~{::section}, ~{::script})}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>점심 메이트</title>
+
+    <!-- 점심 매칭 스타일 -->
+    <link th:href="@{/css/lunchmatching.css}" rel="stylesheet">
+
+    <!-- Bootstrap 아이콘 라이브러리 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Pretendard 폰트 적용 -->
+    <link href="https://cdn.jsdelivr.net/npm/pretendard@latest/dist/web/static/pretendard.css" rel="stylesheet">
+</head>
+
+<body>
+
+<section class="lunch-matching-section">
+    <div class="container">
+        <div class="lunch-matching-inner">
+
+            <!-- 메인 제목 -->
+            <h1 class="title">그룹 간 매칭 서비스</h1>
+
+            <!-- 타이머 박스 -->
+            <div class="timer-box" style="flex-direction: column; align-items: center;">
+                <div id="timerRow" style="display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-clock" style="font-size: 24px;"></i>
+                    <span>다음 마감까지 남은 시간:</span>
+                    <span id="countdown" class="countdown"></span> <!-- 타이머 숫자 -->
+                </div>
+
+                <!-- 제한 시간 문구 -->
+                <span id="limitMessage" style="display: none; color: red; font-size: 22px; font-weight: bold; margin-top: 5px;">
+                    11:30~13:00 동안은 점심 매칭 신청이 제한됩니다.
+                </span>
+            </div>
+
+            <!-- 매칭 카드 전체 영역 -->
+            <div class="matching-container">
+                <div class="matching-row">
+
+                    <!-- 카드 1 (TA, BE 매치) -->
+                    <div class="matching-card pink">
+                        <div class="card-header">
+                            <span>TA, BE 매치</span>
+                            <div class="count-badge">
+                                <i class="bi bi-people-fill" style="font-size: 16px; margin-right: 5px;"></i> 잔여 6/6
+                            </div>
+                        </div>
+
+                        <!-- 슬롯 영역 -->
+                        <div class="slots">
+                            <div class="slot ta">
+                                <span class="major">TA</span><br>
+                                <span class="name"></span> <!-- 학생 이름 채워질 자리 -->
+                            </div>
+                            <div class="slot ta"><span class="major">TA</span><br><span class="name"></span></div>
+                            <div class="slot ta"><span class="major">TA</span><br><span class="name"></span></div>
+                            <div class="slot be"><span class="major">BE</span><br><span class="name"></span></div>
+                            <div class="slot be"><span class="major">BE</span><br><span class="name"></span></div>
+                            <div class="slot be"><span class="major">BE</span><br><span class="name"></span></div>
+                        </div>
+
+                        <!-- 매칭하기 버튼 -->
+                        <button class="apply-btn">매칭하기</button>
+                    </div>
+
+                    <!-- 카드 2 (U, BE 매치) -->
+                    <div class="matching-card blue">
+                        <div class="card-header">
+                            <span>U, BE 매치</span>
+                            <div class="count-badge">
+                                <i class="bi bi-people-fill" style="font-size: 16px; margin-right: 5px;"></i> 잔여 6/6
+                            </div>
+                        </div>
+
+                        <div class="slots">
+                            <div class="slot u"><span class="major">U</span><br><span class="name"></span></div>
+                            <div class="slot u"><span class="major">U</span><br><span class="name"></span></div>
+                            <div class="slot u"><span class="major">U</span><br><span class="name"></span></div>
+                            <div class="slot be"><span class="major">BE</span><br><span class="name"></span></div>
+                            <div class="slot be"><span class="major">BE</span><br><span class="name"></span></div>
+                            <div class="slot be"><span class="major">BE</span><br><span class="name"></span></div>
+                        </div>
+
+                        <button class="apply-btn">매칭하기</button>
+                    </div>
+
+                </div>
+
+                <!-- 카드 3 (U, TA 매치) -->
+                <div class="matching-card green mt-4">
+                    <div class="card-header">
+                        <span>U, TA 매치</span>
+                        <div class="count-badge">
+                            <i class="bi bi-people-fill" style="font-size: 16px; margin-right: 5px;"></i> 잔여 6/6
+                        </div>
+                    </div>
+
+                    <div class="slots">
+                        <div class="slot ta"><span class="major">TA</span><br><span class="name"></span></div>
+                        <div class="slot ta"><span class="major">TA</span><br><span class="name"></span></div>
+                        <div class="slot ta"><span class="major">TA</span><br><span class="name"></span></div>
+                        <div class="slot u"><span class="major">U</span><br><span class="name"></span></div>
+                        <div class="slot u"><span class="major">U</span><br><span class="name"></span></div>
+                        <div class="slot u"><span class="major">U</span><br><span class="name"></span></div>
+                    </div>
+
+                    <button class="apply-btn">매칭하기</button>
+                </div>
+
+            </div> <!-- 매칭 카드 컨테이너 종료 -->
+
+        </div> <!-- lunch-matching-inner 종료 -->
+    </div> <!-- container 종료 -->
+
+    <!-- 매칭 진행 확인 모달 -->
+    <div class="modal fade" id="matchingConfirmModal" tabindex="-1" aria-labelledby="matchingConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <p id="matchingConfirmText" style="font-weight: bold;">매칭을 진행하시겠습니까?</p>
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-primary me-2" id="confirmMatchBtn">확인</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 매칭 신청 완료 모달 -->
+    <div class="modal fade" id="matchingSuccessModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <p style="font-weight: bold;">신청이 완료되었습니다.</p>
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 매칭 신청 실패 모달 -->
+    <div class="modal fade" id="matchingFailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <p id="matchingFailText" style="font-weight: bold; color: red;">신청에 실패했습니다.</p>
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">확인</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 매칭 취소 확인 모달 -->
+    <div class="modal fade" id="cancelConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <p id="cancelConfirmText" style="font-weight: bold;">매칭 신청을 취소하시겠습니까?</p>
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-primary me-2" id="confirmCancelBtn">확인</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- JS 로직 -->>
+<script>
+    let selectedClassId = null; // 현재 선택된 매칭 클래스 ID
+
+    document.addEventListener("DOMContentLoaded", function() {
+        loadMatchingStatus();   // 페이지 로드 시 매칭 현황 불러오기
+        startCountdown();       // 타이머 시작
+
+        // 매칭 신청 확인 버튼 클릭 이벤트 등록
+        document.getElementById('confirmMatchBtn').addEventListener('click', confirmMatch);
+
+        setInterval(loadMatchingStatus, 60000); // 1분마다 매칭 현황 갱신
+
+        // 매칭 취소 확정 버튼 클릭 이벤트 등록
+        document.getElementById('confirmCancelBtn').addEventListener('click', function() {
+            if (selectedClassId) {
+                cancelMatch(selectedClassId);  // 선택된 매칭 취소
+                selectedClassId = null;        // 초기화
+            }
+            const modal = bootstrap.Modal.getInstance(document.getElementById('cancelConfirmModal'));
+            if (modal) {
+                modal.hide(); // 취소 확인 모달 닫기
+            }
+        });
+    });
+
+    // 서버에서 매칭 현황 불러와서 화면 업데이트하는 함수
+    function loadMatchingStatus() {
+        fetch('/lunch/status')
+            .then(response => response.json())
+            .then(data => {
+                const cards = document.querySelectorAll('.matching-card');
+
+                // 슬롯 초기화
+                document.querySelectorAll('.slot').forEach(slot => {
+                    const nameSpan = slot.querySelector('.name');
+                    const majorSpan = slot.querySelector('.major');
+                    if (nameSpan) {
+                        nameSpan.innerText = '';
+                        nameSpan.style.opacity = '0';
+                        nameSpan.onclick = null;
+                        nameSpan.style.cursor = 'default';
+                    }
+                    if (majorSpan) {
+                        majorSpan.style.display = 'block';
+                    }
+                });
+
+                // 잔여 인원 초기화
+                document.querySelectorAll('.count-badge').forEach(badge => {
+                    badge.innerHTML = `
+                <i class="bi bi-people-fill" style="font-size: 16px; margin-right: 5px;"></i> 잔여 6/6
+                `;
+                });
+
+                // 매칭 정보 채우기
+                data.forEach((matchInfo, index) => {
+                    const card = cards[index];
+                    const slots = card.querySelectorAll('.slot');
+
+                    matchInfo.students.forEach(student => {
+                        const major = student.major;
+                        const name = student.name;
+
+                        const emptySlot = Array.from(slots).find(slot =>
+                            slot.classList.contains(major.toLowerCase()) &&
+                            slot.querySelector('.name')?.innerText.trim() === ''
+                        );
+
+                        if (emptySlot) {
+                            const nameSpan = emptySlot.querySelector('.name');
+                            nameSpan.innerText = name;
+                            nameSpan.style.cursor = 'pointer';
+                            nameSpan.style.opacity = '1';
+
+                            nameSpan.onclick = function () {
+                                selectedClassId = matchInfo.classId;
+                                document.getElementById('cancelConfirmText').innerText = `매칭 신청을 취소하시겠습니까?`;
+                                const cancelModal = new bootstrap.Modal(document.getElementById('cancelConfirmModal'));
+                                cancelModal.show();
+                            };
+                        }
+                    });
+
+                    // 잔여 인원 갱신
+                    const remain = 6 - matchInfo.currentCount;
+                    const countBadge = card.querySelector('.count-badge');
+                    if (countBadge) {
+                        countBadge.innerHTML = `
+                    <i class="bi bi-people-fill" style="font-size: 16px; margin-right: 5px;"></i> 잔여 ${remain}/6
+                    `;
+                    }
+
+                    // 매칭하기 버튼 연결
+                    const applyBtn = card.querySelector('.apply-btn');
+                    const matchTitle = card.querySelector('.card-header span')?.innerText || '매칭';
+                    applyBtn.onclick = () => applyForLunch(matchInfo.classId, matchTitle);
+
+                    if (matchInfo.currentCount >= 6) {
+                        applyBtn.disabled = true;               // 버튼 비활성화
+                        applyBtn.style.backgroundColor = '#ccc'; // 회색 배경
+                        applyBtn.style.cursor = 'not-allowed';    // 커서 바꾸기
+                    } else {
+                        applyBtn.disabled = false;               // 버튼 활성화
+                        applyBtn.style.backgroundColor = 'black'; // 원래 스타일 복구
+                        applyBtn.style.cursor = 'pointer';        // 원래 커서 복구
+                    }
+                });
+            })
+            .catch(error => console.error('매칭 현황 불러오기 실패:', error));
+    }
+
+    // 매칭하기 버튼 클릭 시: 매칭 확인 모달 열기
+    function applyForLunch(classId, matchTitle) {
+        selectedClassId = classId;
+        document.getElementById('matchingConfirmText').innerText = `${matchTitle}를 진행하시겠습니까?`;
+
+        const modal = new bootstrap.Modal(document.getElementById('matchingConfirmModal'));
+        modal.show();
+    }
+
+    // 매칭 신청 최종 확인 후 서버에 신청 요청하는 함수
+    function confirmMatch() {
+        if (!selectedClassId) return;
+
+        const confirmButton = document.getElementById('confirmMatchBtn');
+        confirmButton.disabled = true; // 버튼 비활성화 (중복 클릭 방지)
+
+        fetch('/lunch/apply', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lunchMatchingClassId: selectedClassId })
+        })
+            .then(response => {
+                if (response.ok) {
+                    const successModal = new bootstrap.Modal(document.getElementById('matchingSuccessModal'));
+                    successModal.show();
+                    setTimeout(() => {
+                        loadMatchingStatus(); // 0.5초 후 부드럽게 갱신
+                        confirmButton.disabled = false; // 버튼 다시 활성화
+                    }, 500);
+                } else {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+            })
+            .catch(error => {
+                console.error('신청 실패:', error);
+
+                const failModalText = document.getElementById('matchingFailText');
+                if (failModalText) {
+                    failModalText.innerText = error.message || '신청에 실패했습니다.';
+                }
+
+                const failModal = new bootstrap.Modal(document.getElementById('matchingFailModal'));
+                failModal.show();
+                confirmButton.disabled = false; // 실패해도 버튼 다시 활성화
+            });
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('matchingConfirmModal'));
+        if (modal) {
+            modal.hide();
+        }
+    }
+
+    // 11:30까지 카운트다운 + 11:30~13:00 제한 문구 + 이후 다시 타이머
+    let alreadyResetToday = false; // 하루에 딱 1번만 초기화
+
+    function startCountdown() {
+        setInterval(() => {
+            const now = new Date();
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+            const timerRow = document.getElementById('timerRow');
+            const countdownElement = document.getElementById('countdown');
+            const limitMessage = document.getElementById('limitMessage');
+
+            // 11:30 정각에 프론트 초기화
+            if (now.getHours() === 11 && now.getMinutes() === 30 && !alreadyResetToday) {
+                loadMatchingStatus();        // 프론트 슬롯 초기화
+                alreadyResetToday = true;   // 하루에 한 번만 실행
+            }
+
+            // 자정 지나면 다시 초기화 허용
+            if (now.getHours() === 0 && now.getMinutes() === 0) {
+                alreadyResetToday = false;
+            }
+
+            // 제한 시간 문구 표시 (11:30 ~ 12:59)
+            if (nowMinutes >= 690 && nowMinutes < 780) {
+                timerRow.style.display = 'none';         // 타이머 숨김
+                limitMessage.style.display = 'block';    // 제한 문구 표시
+            } else {
+                // 타이머 표시
+                let target = new Date();
+                target.setHours(11, 30, 0, 0);
+                if (now > target) {
+                    target.setDate(target.getDate() + 1);
+                }
+
+                const diff = target - now;
+                const hours = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, '0');
+                const minutes = String(Math.floor((diff / (1000 * 60)) % 60)).padStart(2, '0');
+                const seconds = String(Math.floor((diff / 1000) % 60)).padStart(2, '0');
+
+                timerRow.style.display = 'flex';
+                countdownElement.innerText = `${hours}:${minutes}:${seconds}`;
+                limitMessage.style.display = 'none';
+            }
+        }, 1000);
+    }
+
+    // 매칭 신청 취소하는 함수
+    function cancelMatch(lunchMatchingClassId) {
+        const cancelButton = document.getElementById('confirmCancelBtn');
+        cancelButton.disabled = true; // 버튼 비활성화 (중복 클릭 방지)
+
+        fetch('/lunch/cancel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lunchMatchingClassId: lunchMatchingClassId })
+        })
+            .then(response => {
+                if (response.ok) {
+                    setTimeout(() => {
+                        loadMatchingStatus(); // 0.5초 후 부드럽게 갱신
+                        cancelButton.disabled = false; // 버튼 다시 활성화
+                    }, 500);
+                } else {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+            })
+            .catch(error => {
+                alert('취소 실패: ' + error.message);
+                cancelButton.disabled = false; // 실패해도 버튼 다시 활성화
+            });
+    }
+</script>
+
+</body>
+</html>
