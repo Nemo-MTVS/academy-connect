@@ -11,6 +11,7 @@ import store.mtvs.academyconnect.user.domain.entity.User;
 import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Scanner;
 
 @Component
@@ -61,36 +62,74 @@ public class CreateCounselingView {
     protected void createCounselingResult() {
         try {
             System.out.println("\n=== Create Counseling Result ===");
-
-            // Get Student name
+            
+            // Get Student name and handle multiple results
             System.out.print("Enter student name: ");
             String studentName = scanner.nextLine();
-            User student = userRepository.findByName(studentName)
-                .orElse(null);
-            if (student == null) {
-                System.out.println("❌ Student not found!");
+            List<User> matchingStudents = userRepository.findAllByName(studentName);
+            
+            if (matchingStudents.isEmpty()) {
+                System.out.println("❌ No students found with that name!");
                 return;
             }
-            System.out.println("✅ Found student: " + studentName);
+            
+            User student;
+            if (matchingStudents.size() > 1) {
+                System.out.println("\nMultiple students found with that name. Please select one:");
+                for (int i = 0; i < matchingStudents.size(); i++) {
+                    User s = matchingStudents.get(i);
+                    System.out.printf("%d. %s (UUID: %s)%n", i + 1, s.getName(), s.getId());
+                }
+                
+                System.out.print("\nEnter the number of the correct student: ");
+                int selection = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+                
+                if (selection < 1 || selection > matchingStudents.size()) {
+                    System.out.println("❌ Invalid selection!");
+                    return;
+                }
+                
+                student = matchingStudents.get(selection - 1);
+            } else {
+                student = matchingStudents.get(0);
+            }
+            
+            System.out.println("✅ Selected student: " + student.getName() + " (UUID: " + student.getId() + ")");
 
-            // Get Student UUID from student name
-            String studentUuid = student.getId();
-            System.out.println("✅ Found student UUID: " + studentUuid);
-
-            // Get instructor name
-            System.out.print("Enter instructor name: ");
+            // Get instructor name and handle multiple results
+            System.out.print("\nEnter instructor name: ");
             String instructorName = scanner.nextLine();
-            User instructor = userRepository.findByName(instructorName)
-                .orElse(null);
-            if (instructor == null) {
-                System.out.println("❌ Instructor not found!");
+            List<User> matchingInstructors = userRepository.findAllByName(instructorName);
+            
+            if (matchingInstructors.isEmpty()) {
+                System.out.println("❌ No instructors found with that name!");
                 return;
             }
-            System.out.println("✅ Found instructor: " + instructorName);
-
-            // Get instructor UUID from instructor name
-            String instructorUuid = instructor.getId();
-            System.out.println("✅ Found instructor UUID: " + instructorUuid);
+            
+            User instructor;
+            if (matchingInstructors.size() > 1) {
+                System.out.println("\nMultiple instructors found with that name. Please select one:");
+                for (int i = 0; i < matchingInstructors.size(); i++) {
+                    User ins = matchingInstructors.get(i);
+                    System.out.printf("%d. %s (UUID: %s)%n", i + 1, ins.getName(), ins.getId());
+                }
+                
+                System.out.print("\nEnter the number of the correct instructor: ");
+                int selection = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+                
+                if (selection < 1 || selection > matchingInstructors.size()) {
+                    System.out.println("❌ Invalid selection!");
+                    return;
+                }
+                
+                instructor = matchingInstructors.get(selection - 1);
+            } else {
+                instructor = matchingInstructors.get(0);
+            }
+            
+            System.out.println("✅ Selected instructor: " + instructor.getName() + " (UUID: " + instructor.getId() + ")");
 
             // Get booking ID
             System.out.print("Enter booking ID (e.g., 101) or press Enter to skip: ");
