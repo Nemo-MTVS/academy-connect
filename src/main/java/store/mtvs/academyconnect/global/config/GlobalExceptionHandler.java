@@ -1,4 +1,4 @@
-package store.mtvs.academyconnect.config;
+package store.mtvs.academyconnect.global.config;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
