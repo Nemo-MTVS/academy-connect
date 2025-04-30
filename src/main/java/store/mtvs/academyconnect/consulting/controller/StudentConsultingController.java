@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import store.mtvs.academyconnect.consulting.domain.entity.ConsultingBooking;
 import store.mtvs.academyconnect.consulting.dto.*;
 import store.mtvs.academyconnect.consulting.service.*;
+import store.mtvs.academyconnect.global.config.CustomUserDetails;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -41,10 +43,11 @@ public class StudentConsultingController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             Model model) {
 
-        // 임시 학생 ID 설정 (추후 로그인 기능 구현 시 수정 필요)
-        String studentId = "uuid-be-001";
+        // 학생 ID 설정 (추후 로그인 기능 구현 시 수정 필요)
+        String studentId = customUserDetails.getId();
         model.addAttribute("studentId", studentId);
 
         log.info("상담 예약 페이지 요청: studentId={}, instructorId={}, date={}, year={}, month={}",
@@ -173,9 +176,9 @@ public class StudentConsultingController {
      * @return 뷰 이름
      */
     @GetMapping("/consulting-my-bookings")
-    public String myBookings(@RequestParam(defaultValue = "upcoming") String view, Model model) {
+    public String myBookings(@RequestParam(defaultValue = "upcoming") String view, Model model, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         // 임시로 고정된 학생 ID 사용 (로그인 구현 후 세션에서 가져오도록 수정 필요)
-        String studentId = "uuid-be-001";
+        String studentId = customUserDetails.getId();
         log.info("예약 목록 조회 요청: studentId={}, view={}", studentId, view);
 
         try {
@@ -209,9 +212,9 @@ public class StudentConsultingController {
      * @return 리다이렉트 URL 또는 에러 페이지
      */
     @PostMapping("/consulting-bookings/{bookingId}/cancel")
-    public String cancelBooking(@PathVariable Long bookingId, Model model) {
+    public String cancelBooking(@PathVariable Long bookingId, Model model, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         // 임시로 고정된 학생 ID 사용 (로그인 구현 후 세션에서 가져오도록 수정 필요)
-        String studentId = "uuid-be-001";
+        String studentId = customUserDetails.getId();
         log.info("예약 취소 요청: bookingId={}, studentId={}", bookingId, studentId);
 
         try {
@@ -269,7 +272,8 @@ public class StudentConsultingController {
     @PostMapping("/consulting-booking/specific")
     public String handleSpecificBooking(
             @ModelAttribute StudentBookingRequestDto requestDto,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         // 디버깅: 전달된 데이터 출력
         log.info("Received booking request: instructorId={}, startTime={}, message={}",
@@ -277,7 +281,7 @@ public class StudentConsultingController {
                 requestDto.getStartTime() != null ? requestDto.getStartTime() : "null",
                 requestDto.getMessage() != null ? requestDto.getMessage() : "null");
 
-        String studentId = "uuid-be-001";
+        String studentId = customUserDetails.getId();
         try {
             log.debug("BookingService.createBookingFromSlot 호출 시도: studentId={}, requestDto={}",
                     studentId, requestDto);
