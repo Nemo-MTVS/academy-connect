@@ -6,17 +6,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class TeacherTempController {
 
-    @GetMapping("/teacher")
+    @GetMapping("/teacherss")
     public String test() {
-        return "teacher";
+        return "instructor/schedule";
     }
 
-    @GetMapping("/teacher/reservation")
+    @GetMapping("/teacherss/reservation")
     public String test2() {
-        return "reservation";
+        return "instructor/reservation";
     }
 
-    @GetMapping("/teacher/schedule")
+    @GetMapping("/teacherss/schedule")
     public String test3() {
         return "teacher";
     }

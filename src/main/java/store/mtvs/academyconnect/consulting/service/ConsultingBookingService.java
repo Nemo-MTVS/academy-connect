@@ -14,9 +14,7 @@ import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -226,10 +224,12 @@ public class ConsultingBookingService {
         List<ConsultingBooking> upcomingBookings = bookings.stream()
                 .filter(booking -> booking.getStartTime().isAfter(now) &&
                         booking.getStatus() == ConsultingBooking.BookingStatus.예약됨)
+                        .sorted(Comparator.comparing(ConsultingBooking::getStartTime))
                 .collect(Collectors.toList());
 
         log.info("예정된 예약 필터링 결과: {} 건", upcomingBookings.size());
         return convertToDtoIns (upcomingBookings);
+
     }
 
 
@@ -260,15 +260,28 @@ public class ConsultingBookingService {
         // ClockConfiguration을 통해 현재 시간 조회
         LocalDateTime now = LocalDateTime.now(clock);
 
-        // 지난 예약은 현재 시간 이전의 예약 또는 '상담완료'나 '취소됨' 상태인 것
-        List<ConsultingBooking> pastBookings = bookings.stream()
-                .filter(booking -> booking.getStartTime().isBefore(now) ||
-                        booking.getStatus() == ConsultingBooking.BookingStatus.상담완료 ||
-                        booking.getStatus() == ConsultingBooking.BookingStatus.취소됨)
+        List<ConsultingBooking> waiting = bookings.stream()
+                .filter(booking -> booking.getStatus() == ConsultingBooking.BookingStatus.예약됨 &&
+                        booking.getStartTime().isBefore(now)) // 지난 예약 중 예약됨
+                .sorted(Comparator.comparing(ConsultingBooking::getStartTime).reversed())
                 .collect(Collectors.toList());
 
-        log.info("지난 예약 필터링 결과: {} 건", pastBookings.size());
+        List<ConsultingBooking> complete = bookings.stream()
+                .filter(booking ->
+                        booking.getStatus() == ConsultingBooking.BookingStatus.상담완료 ||
+                                booking.getStatus() == ConsultingBooking.BookingStatus.취소됨)
+                .sorted(Comparator.comparing(ConsultingBooking::getStartTime).reversed())
+                .collect(Collectors.toList());
+
+// 두 리스트 이어붙이기
+        List<ConsultingBooking> pastBookings = new ArrayList<>();
+        pastBookings.addAll(waiting);
+        pastBookings.addAll(complete);
+
+        log.info("정렬된 지난 예약 결과: {} 건", pastBookings.size());
+
         return convertToDtoIns(pastBookings);
+
     }
 
     /**
@@ -280,6 +293,7 @@ public class ConsultingBookingService {
                         .id(booking.getId())
                         .studentName(booking.getStudent().getName())
                         .classGroup(booking.getStudent().getClassGroup().getName())
+                        .filePath(booking.getStudent().getProfile().getFilePath())
                         .status(booking.getStatus().toString())
                         .message(booking.getMessage()) // message는 null일 수 있음
                         .startTime(booking.getStartTime())
@@ -291,7 +305,7 @@ public class ConsultingBookingService {
     /**
      * 예약 취소
      * @param bookingId 예약 ID
-     * @param instructorId 학생 ID
+     * @param instructorId 강사 ID
      */
     @Transactional
     public void cancelInstructorBooking(Long bookingId, String instructorId) {
@@ -332,13 +346,6 @@ public class ConsultingBookingService {
         // ClockConfiguration을 통해 현재 시간 조회
         LocalDateTime now = LocalDateTime.now(clock);
 
-        // 예약 시작 시간이 현재보다 이전인지 확인
-        if (booking.getStartTime().isBefore(now)) {
-            log.error("이미 시작된 상담: bookingId={}, startTime={}, now={}",
-                    bookingId, booking.getStartTime(), now);
-            throw new IllegalArgumentException("이미 시작된 상담은 취소할 수 없습니다.");
-        }
-
         // 서비스 계층에서 직접 상태 변경
         ConsultingBooking updatedBooking = ConsultingBooking.builder()
                 .id(booking.getId())
@@ -354,5 +361,74 @@ public class ConsultingBookingService {
 
         consultingBookingRepository.save(updatedBooking);
         log.info("예약 취소 성공: bookingId={}", bookingId);
+    }
+
+
+    /**
+     * 예약 처리
+     * @param bookingId 예약 ID
+     * @param instructorId 강사 ID
+     */
+    @Transactional
+    public void confirmInstructorBooking(Long bookingId, String instructorId) {
+        log.info("예약 처리 서비스 호출: bookingId={}, instructorId={}", bookingId, instructorId);
+
+        // 강사 ID 존재 여부 확인
+        log.debug("강사 ID 조회 시작: {}", instructorId);
+        Optional<User> instructorOpt = userRepository.findById(instructorId);
+
+        if (instructorOpt.isEmpty()) {
+            log.error("강사를 찾을 수 없음: instructorId={}", instructorId);
+            throw new IllegalArgumentException("강사를 찾을 수 없습니다. ID: " + instructorId);
+        }
+
+        User instructor = instructorOpt.get();
+        log.debug("강사 조회 성공: name={}", instructor.getName());
+
+        ConsultingBooking booking = consultingBookingRepository.findById(bookingId)
+                .orElseThrow(() -> {
+                    log.error("예약을 찾을 수 없음: bookingId={}", bookingId);
+                    return new IllegalArgumentException("예약을 찾을 수 없습니다.");
+                });
+
+        // 예약의 강사 ID와 현재 강사 ID 비교
+        if (!booking.getInstructor().getId().equals(instructorId)) {
+            log.error("본인의 예약이 아님: bookingId={}, ownerId={}, requesterId={}",
+                    bookingId, booking.getInstructor().getId(), instructorId);
+            throw new IllegalArgumentException("본인의 예약만 처리할 수 있습니다.");
+        }
+
+        // 이미 취소되었거나 완료된 예약인지 확인
+        if (booking.getStatus() != ConsultingBooking.BookingStatus.예약됨) {
+            log.error("예약 상태가 취소 가능한 상태가 아님: bookingId={}, status={}",
+                    bookingId, booking.getStatus());
+            throw new IllegalArgumentException("예약된 상태의 상담만 취소할 수 있습니다.");
+        }
+
+        // ClockConfiguration을 통해 현재 시간 조회
+        LocalDateTime now = LocalDateTime.now(clock);
+
+        // 예약 시작 시간이 현재보다 이후인지 확인
+        if (booking.getStartTime().isAfter(now)) {
+            log.error("아직 시간이 지나지 않은 상담: bookingId={}, startTime={}, now={}",
+                    bookingId, booking.getStartTime(), now);
+            throw new IllegalArgumentException("시간이 지나지 않은 상담은 처리할 수 없습니다.");
+        }
+
+        // 서비스 계층에서 직접 상태 변경
+        ConsultingBooking updatedBooking = ConsultingBooking.builder()
+                .id(booking.getId())
+                .student(booking.getStudent())
+                .instructor(booking.getInstructor())
+                .status(ConsultingBooking.BookingStatus.상담완료)
+                .message(booking.getMessage())
+                .createdAt(booking.getCreatedAt())
+                .updateAt(now)
+                .startTime(booking.getStartTime())
+                .endTime(booking.getEndTime())
+                .build();
+
+        consultingBookingRepository.save(updatedBooking);
+        log.info("상담 처리 성공: bookingId={}", bookingId);
     }
 }

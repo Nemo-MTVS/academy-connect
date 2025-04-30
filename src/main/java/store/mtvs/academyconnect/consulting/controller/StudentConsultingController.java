@@ -7,11 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import store.mtvs.academyconnect.consulting.dto.AvailableSlotDto;
-import store.mtvs.academyconnect.consulting.dto.MyBookingListItemDto;
-import store.mtvs.academyconnect.consulting.dto.InstructorInfoForListDto;
-import store.mtvs.academyconnect.consulting.dto.InstructorProfileDto;
-import store.mtvs.academyconnect.consulting.dto.UndefinedConsultingDto;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import store.mtvs.academyconnect.consulting.dto.*;
 import store.mtvs.academyconnect.consulting.service.ConsultingBookingService;
 import store.mtvs.academyconnect.consulting.service.InstructorInfoService;
 import store.mtvs.academyconnect.consulting.service.StudentBookingViewService;
@@ -229,4 +226,41 @@ public class StudentConsultingController {
             return "error/consulting-student-error";
         }
     }
+
+    /**
+     * S05: 시간 미지정 상담 요청 처리
+     * 학생이 강사를 선택하고 시간 지정 없이 상담을 요청하는 기능
+     */
+    @PostMapping("/consulting-booking/unspecific")
+    public String handleUnspecificBooking(
+            @RequestParam("instructorId") String instructorId,
+            @RequestParam("studentId") String studentId,
+            @RequestParam(value = "message", required = false) String message,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // 유효성 검사
+            if (studentId == null || studentId.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "학생 정보가 없습니다. 다시 로그인해주세요.");
+                return "redirect:/student/consulting-booking?instructorId=" + instructorId;
+            }
+
+            UndefinedConsultingRequestDto requestDto = UndefinedConsultingRequestDto.builder()
+                    .studentId(studentId)
+                    .instructorId(instructorId)
+                    .message(message)
+                    .build();
+
+            undefinedConsultingService.createConsultationRequest(requestDto);
+
+            redirectAttributes.addFlashAttribute("successMessage", "상담 요청이 성공적으로 등록되었습니다.");
+            return "redirect:/student/consulting-my-bookings?view=requests";
+
+        } catch (Exception e) {
+            log.error("미지정 상담 요청 처리 중 오류 발생: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "상담 요청 중 오류가 발생했습니다.");
+            return "redirect:/student/consulting-booking?instructorId=" + instructorId;
+        }
+    }
+
 }

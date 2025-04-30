@@ -16,10 +16,12 @@ public class InstructorBookingListItemDto {
     private Long id;
     private String studentName;
     private String classGroup;
+    private String filePath;
     private String status;
     private String message;
     private LocalDateTime startTime;
     private LocalDateTime createdAt;
+
 
     // 날짜 포맷팅 메서드 (뷰에서 사용) - ClockConfiguration 활용
     public String getFormattedStartTime() {
@@ -28,10 +30,6 @@ public class InstructorBookingListItemDto {
     
     public String getFormattedStartTimeOnly() {
         return ClockConfiguration.formatTime(startTime);
-    }
-
-    public String getFormattedCreatedAt() {
-        return ClockConfiguration.formatDateTime(createdAt);
     }
     
     // 메시지가 null일 경우 빈 문자열 반환 (뷰에서 사용)
@@ -43,15 +41,16 @@ public class InstructorBookingListItemDto {
     public String getStatusClass() {
         switch (status) {
             case "예약됨":
-                return "badge bg-primary";
+                return "status-badge upcoming";
             case "상담완료":
-                return "badge bg-success";
+                return "status-badge completed";
             case "취소됨":
-                return "badge bg-danger";
+                return "status-badge canceled";
             default:
-                return "badge bg-secondary";
+                return "status-badge upcoming";
         }
     }
+
 
     // 예약 취소 가능 여부 (뷰에서 사용)
     public boolean isCancellable() {
