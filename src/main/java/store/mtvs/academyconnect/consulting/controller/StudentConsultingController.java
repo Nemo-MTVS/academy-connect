@@ -30,7 +30,6 @@ public class StudentConsultingController {
     private final UndefinedConsultingService undefinedConsultingService;
     private final StudentBookingViewService studentBookingViewService;
     private final InstructorInfoService instructorInfoService;
-    private final BookingService bookingService;
     private final Clock clock;
 
     /**
@@ -283,7 +282,7 @@ public class StudentConsultingController {
             log.debug("BookingService.createBookingFromSlot 호출 시도: studentId={}, requestDto={}",
                     studentId, requestDto);
 
-            ConsultingBooking booking = bookingService.createBookingFromSlot(studentId, requestDto);
+            ConsultingBooking booking = consultingBookingService.createBookingFromSlot(studentId, requestDto);
 
             log.info("시간 지정 예약 처리 성공: bookingId={}, studentId={}, instructorId={}, startTime={}",
                     booking.getId(), studentId, requestDto.getInstructorId(), requestDto.getStartTime());
