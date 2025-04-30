@@ -31,9 +31,9 @@ public class CounselingResultDTO {
                     .instructorName(result.getInstructor().getName())
                     .bookingId(result.getBooking() != null ? result.getBooking().getId() : null)
                     .md(result.getMd())
-                    .counselAt(result.getCounselAt())
+                    .counselAt(result.getCounselAt() != null ? result.getCounselAt() : null)
                     .createdAt(result.getCreatedAt())
-                    .updatedAt(result.getUpdatedAt())
+                    .updatedAt(result.getUpdatedAt() != null ? result.getUpdatedAt() : null)
                     .build();
         }
     }

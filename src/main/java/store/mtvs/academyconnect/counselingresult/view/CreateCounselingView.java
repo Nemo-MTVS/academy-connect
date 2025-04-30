@@ -22,7 +22,6 @@ public class CreateCounselingView {
     private final ConsultingBookingRepository consultingBookingRepository;
     private final Scanner scanner = new Scanner(System.in);
 
-    @Transactional
     public void showMenu() {
         while (true) {
             System.out.println("\n=== Counseling Result Management ===");
@@ -87,8 +86,10 @@ public class CreateCounselingView {
 
             // Get booking ID
             System.out.print("Enter booking ID (e.g., 101) or press Enter to skip: ");
-            String bookingInput = scanner.nextLine();
             ConsultingBooking booking = null;
+            LocalDateTime counselAt = null;
+            String bookingInput = scanner.nextLine();
+            
             if (!bookingInput.trim().isEmpty()) {
                 Long bookingId = Long.parseLong(bookingInput);
                 booking = consultingBookingRepository.findById(bookingId)
@@ -97,7 +98,9 @@ public class CreateCounselingView {
                     System.out.println("❌ Booking not found!");
                     return;
                 }
-                System.out.println("✅ Found booking with ID: " + booking.getId());
+                counselAt = booking.getStartTime();
+                System.out.println("✅ Found booking with ID: " + bookingId);
+                System.out.println("✅ Using counseling time: " + counselAt);
             }
 
             // Get counseling result content
@@ -111,14 +114,20 @@ public class CreateCounselingView {
                 instructor,
                 booking,
                 md,
-                LocalDateTime.now()
+                counselAt
             );
 
             System.out.println("Saving to database...");
             counselingResult = counselingResultRepository.save(counselingResult);
+            counselingResultRepository.flush(); // Force flush changes to DB
             System.out.println("Save completed.");
             
             System.out.println("✅ Created counseling result with ID: " + counselingResult.getId());
+            if (counselAt != null) {
+                System.out.println("✅ Saved with counseling time: " + counselingResult.getCounselAt());
+            } else {
+                System.out.println("ℹ️ No counseling time was set");
+            }
 
         } catch (Exception e) {
             System.out.println("❌ Error creating counseling result");
@@ -162,7 +171,7 @@ public class CreateCounselingView {
         System.out.println("\n=== Update Counseling Result ===");
         System.out.print("Enter counseling result ID: ");
         Long id = scanner.nextLong();
-        scanner.nextLine(); // Consume newline
+        scanner.nextLine(); 
 
         CounselingResult result = counselingResultRepository.findByIdWithUsers(id)
             .orElse(null);
@@ -178,6 +187,7 @@ public class CreateCounselingView {
         if (!newContent.trim().isEmpty()) {
             result.updateContent(newContent);
             counselingResultRepository.save(result);
+            counselingResultRepository.flush(); // Force flush changes to DB
             System.out.println("✅ Counseling result updated successfully!");
         } else {
             System.out.println("No changes made.");
@@ -200,6 +210,7 @@ public class CreateCounselingView {
 
         result.delete();
         counselingResultRepository.save(result);
+        counselingResultRepository.flush(); // Force flush changes to DB
         System.out.println("✅ Counseling result deleted successfully!");
     }
 }

@@ -34,13 +34,13 @@ public class CounselingResult {
     @Column(columnDefinition = "LONGTEXT")
     private String md;
 
-    @Column(name = "counsel_at", nullable = false)
+    @Column(name = "counsel_at")
     private LocalDateTime counselAt;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @Column(name = "deleted_at")
@@ -60,7 +60,6 @@ public class CounselingResult {
         result.md = md;
         result.counselAt = counselAt;
         result.createdAt = LocalDateTime.now();
-        result.updatedAt = LocalDateTime.now();
         return result;
     }
 
@@ -72,4 +71,4 @@ public class CounselingResult {
     public void delete() {
         this.deletedAt = LocalDateTime.now();
     }
-} 
+}
