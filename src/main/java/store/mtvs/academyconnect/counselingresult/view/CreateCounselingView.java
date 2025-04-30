@@ -61,28 +61,36 @@ public class CreateCounselingView {
     protected void createCounselingResult() {
         try {
             System.out.println("\n=== Create Counseling Result ===");
-            
-            // Get student UUID
-            System.out.print("Enter student UUID (e.g., uuid-be-001): ");
-            String studentUuid = scanner.nextLine();
-            User student = userRepository.findById(studentUuid)
+
+            // Get Student name
+            System.out.print("Enter student name: ");
+            String studentName = scanner.nextLine();
+            User student = userRepository.findByName(studentName)
                 .orElse(null);
             if (student == null) {
                 System.out.println("❌ Student not found!");
                 return;
             }
-            System.out.println("✅ Found student: " + student.getName());
+            System.out.println("✅ Found student: " + studentName);
 
-            // Get instructor UUID
-            System.out.print("Enter instructor UUID (e.g., uuid-be-ins): ");
-            String instructorUuid = scanner.nextLine();
-            User instructor = userRepository.findById(instructorUuid)
+            // Get Student UUID from student name
+            String studentUuid = student.getId();
+            System.out.println("✅ Found student UUID: " + studentUuid);
+
+            // Get instructor name
+            System.out.print("Enter instructor name: ");
+            String instructorName = scanner.nextLine();
+            User instructor = userRepository.findByName(instructorName)
                 .orElse(null);
             if (instructor == null) {
                 System.out.println("❌ Instructor not found!");
                 return;
             }
-            System.out.println("✅ Found instructor: " + instructor.getName());
+            System.out.println("✅ Found instructor: " + instructorName);
+
+            // Get instructor UUID from instructor name
+            String instructorUuid = instructor.getId();
+            System.out.println("✅ Found instructor UUID: " + instructorUuid);
 
             // Get booking ID
             System.out.print("Enter booking ID (e.g., 101) or press Enter to skip: ");
