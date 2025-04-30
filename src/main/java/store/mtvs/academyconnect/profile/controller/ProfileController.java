@@ -89,44 +89,24 @@ public class ProfileController {
                                 @RequestParam String email,
                                 @RequestParam String github,
                                 @RequestParam String blog,
-                                @RequestParam(required = false) MultipartFile readmeFile,
+                                @RequestParam String bio,
                                 @RequestParam(required = false) MultipartFile profileImage,
                                 Model model) throws IOException {
-        try {
-            String profileImagePath = null;
-            String readmeFilePath = null;
-
-            if (profileImage != null && !profileImage.isEmpty()) {
-                String uploadDir = "C:/upload/profile/";
-                String fileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
-                File saveFile = new File(uploadDir, fileName);
-                File parentDir = saveFile.getParentFile();
-                if (!parentDir.exists()) {
-                    boolean created = parentDir.mkdirs();
-                    if (!created) {
-                        throw new IOException("업로드 폴더 생성 실패: " + parentDir.getAbsolutePath());
-                    }
-                }
-
-                profileImage.transferTo(saveFile);
-                profileImagePath = "student/profile-images/" + fileName;
-            }
-            if(readmeFile != null && !readmeFile.isEmpty()) {
-                String uploadDir = "C:/upload/profile/";
-                String fileName = UUID.randomUUID() + "_" + readmeFile.getOriginalFilename();
-                File saveFile = new File(uploadDir, fileName);
-                saveFile.getParentFile().mkdirs();
-                readmeFile.transferTo(saveFile);
-                readmeFilePath = "student/markdown/" + fileName;
-            }
-
-            profileService.updateProfile(userId, email, github, blog, readmeFilePath, profileImagePath);
+        // 1) 먼저 기존 프로필을 조회
+        Profile existing = profileService.getProfileByUserId(userId);
+        String profileImagePath = existing.getFilePath();  // 기존 경로로 초기화
+        // 2) 새 이미지가 있으면 덮어쓰기
+        if (profileImage != null && !profileImage.isEmpty()) {
+            String uploadDir = "C:/upload/profile/";
+            String fileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
+            File saveFile = new File(uploadDir, fileName);
+            saveFile.getParentFile().mkdirs();
+            profileImage.transferTo(saveFile);
+            profileImagePath = "/student/profile-images/" + fileName;  // 앞에 슬래시를 붙여서 URL 매핑과 일치시키기
+            profileService.updateProfile(userId, email, github, blog, bio, profileImagePath);
+        }
 
             // 수정 후 해당 학생 상세 페이지로 리다이렉트
             return "redirect:/student/profile/" + userId;
-        } catch (Exception e) {
-            log.error("Error in updateProfile: ", e);
-            throw e;
-        }
     }
 }

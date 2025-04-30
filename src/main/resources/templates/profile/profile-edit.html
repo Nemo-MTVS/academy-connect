@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <link th:href="@{/css/header.css}" rel="stylesheet">
+    <link th:href="@{/css/profile-edit.css}" rel="stylesheet">
+    <link th:href="@{/css/footer.css}" rel="stylesheet">
     <meta charset="UTF-8">
     <title>프로필 수정</title>
     <style>
@@ -132,21 +135,22 @@
                 <label for="profileImage">프로필 사진 업로드</label><br>
                 <input type="file" id="profileImage" name="profileImage">
                 <div class="profile-image">
-                    <img th:if="${profile.filePath != null}" th:src="@{${profile.filePath}}" alt="프로필 사진" width="100" height="100">
+                    <img id="previewImg"
+                         th:if="${profile.filePath != null}"
+                         th:src="@{${profile.filePath}}"
+                         alt="프로필 사진 미리보기"
+                         width="100" height="100"
+                         style="border-radius:50%; object-fit:cover;" />
                     <p th:unless="${profile.filePath != null}">등록된 사진이 없습니다.</p>
                 </div>
             </div>
-
-            <div class="profile-info">
-                <label for="readmeFile">README 업로드</label><br>
-                <input type="file" id="readmeFile" accept=".md" onchange="uploadReadme()" class="upload-button"/>
-            </div>
-
-            <div class="profile-info">
-                <label for="markdown">소개글 (Markdown)</label><br>
-                <textarea id="markdown" name="markdown" rows="8" th:text="${profile.md}"></textarea>
-            </div>
-
+            <label for="bio">자기소개 (Markdown)</label>
+            <textarea name="bio"
+                      id="bio"
+                      rows="10"
+                      cols="80"
+                      placeholder="여기에 마크다운 내용을 입력하세요"
+                      th:text="${profile.md}"></textarea>
             <div class="button-group">
                 <button type="submit" class="change-button">저장</button>
                 <a th:href="@{/student/profile/{userId}(userId=${student.id})}" class="change-button" style="background-color:#6c757d;">취소</a>
@@ -160,39 +164,14 @@
 </div>
 
 <script>
-    // README 파일 서버로 업로드하고 마크다운 렌더링
-    function uploadReadme() {
-        const fileInput = document.getElementById('readmeFile');
-        const file = fileInput.files[0];
+        function previewImage(event)
+        const file = event.target.files[0];
+        if (!file) return;
 
-        if (!file) {
-            alert("파일을 선택해주세요!");
-            return;
-        }
+        const preview = document.getElementById('previewImg');
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
 
-        const formData = new FormData();
-        formData.append("file", file);
-
-        fetch("/upload-readme", {
-            method: "POST",
-            body: formData
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("업로드 실패");
-                }
-                return response.text();
-            })
-            .then(text => {
-                const previewBox = document.getElementById('markdownPreview');
-                previewBox.innerHTML = marked.parse(text);
-            })
-            .catch(error => {
-                console.error("에러 발생:", error);
-                alert("파일 업로드 중 오류가 발생했습니다.");
-            });
-    }
 </script>
-<div class ="footer"></div>
 </body>
 </html>

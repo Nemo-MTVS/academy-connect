@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout :: html(~{::title}, ~{::link}, ~{::section}, ~{::script})}">
+      th:replace="~{instructor-layout :: html(~{::title}, ~{::link}, ~{this::section}, ~{::script})}">
 <head>
-    <title>내 예약 보기</title>
+    <title>강사 개인정보 관리</title>
     <link th:href="@{/css/consulting.css}" rel="stylesheet">
 </head>
 <body>
 <section>
     <div class="container mt-4">
         <div class="card">
-            <div class="card-header bg-info text-white">
-                <h3>내 상담 예약 내역</h3>
+            <div class="card-header bg-primary text-white">
+                <h3>강사 개인정보 관리</h3>
             </div>
             <div class="card-body">
-                <!-- 여기에 상담 예약 내역 관련 내용 -->
-                <p>아직 예약된 상담이 없습니다.</p>
+                <!-- 여기에 개인정보 관련 내용 -->
+                <p>강사 비밀번호 변경</p>
             </div>
         </div>
     </div>
@@ -23,7 +23,7 @@
 <script>
     // 페이지 특정 자바스크립트
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('내 예약 목록 페이지 로드됨');
+        console.log('강사 개인정보 관리 페이지 로드됨');
     });
 </script>
 </body>

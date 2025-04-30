@@ -44,6 +44,8 @@
     </style>
 </head>
 <body>
+<div th:replace="fragments/header :: header"></div>
+
 <div class="profile-container">
     <div class="profile-header">
         <h1 th:text="${user.name} + ' 님의 프로필'"></h1>
@@ -53,7 +55,7 @@
         <div class="profile-section">
 
             <!-- 프로필 사진 -->
-            <div class="profile-section" th:if="${profile.filePath}">
+            <div class="profile-section" th:if="${profile.filePath != null}">
                 <h3>프로필 사진</h3>
                 <img th:src="@{${profile.filePath}}" alt="Profile Image" style="max-width: 200px; border-radius: 10px;">
             </div>
@@ -85,5 +87,6 @@
     </script>
     <a th:href="@{/student/profile}" class="back-button">목록으로 돌아가기</a>
 </div>
+<div th:replace="fragments/footer :: footer"></div>
 </body>
 </html> 

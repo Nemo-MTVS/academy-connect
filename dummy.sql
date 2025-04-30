@@ -25,13 +25,14 @@ VALUES
 INSERT INTO users (id, class_group_id, login_id, passwd, name, created_at, updated_at, deleted_at, role)
 VALUES
 -- BackEnd 반 강사
-('uuid-be-ins', 1, 'login_be_ins', 'pass_be_ins', '백엔드강사', NOW(), NOW(),NULL, 'INSTRUCTOR'),
+# ('uuid-be-ins', 1, 'login_be_ins', 'pass_be_ins', '백엔드강사', NOW(), NOW(),NULL, 'INSTRUCTOR'),
+('uuid-be-ins', 1, 'login_be_ins', 'pass_be_ins', '백엔드강사', NOW(), NOW(),NULL, 'TEACHER'),
 
 -- Unity 반 강사
-('uuid-unity-ins', 2, 'login_unity_ins', 'pass_unity_ins', '유니티강사', NOW(), NOW(),NULL, 'INSTRUCTOR'),
+('uuid-unity-ins', 2, 'login_unity_ins', 'pass_unity_ins', '유니티강사', NOW(), NOW(),NULL, 'TEACHER'),
 
 -- TA 반 강사
-('uuid-ta-ins', 3, 'login_ta_ins', 'pass_ta_ins', 'TA강사', NOW(), NOW(),NULL, 'INSTRUCTOR');
+('uuid-ta-ins', 3, 'login_ta_ins', 'pass_ta_ins', 'TA강사', NOW(), NOW(),NULL, 'TEACHER');
 
 
 

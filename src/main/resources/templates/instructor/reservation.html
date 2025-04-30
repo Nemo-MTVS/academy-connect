@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+
+<head th:replace="fragments/layout :: head('NimoVerse - 전체 예약 내역')">
+</head>
+
+<body>
+    <!-- 왼쪽 메뉴 -->
+    <div th:replace="fragments/layout :: sidebar('reservations')"></div>
+    
+    <!-- 모바일 Bottom Navigation -->
+    <div th:replace="fragments/layout :: bottomnav('reservations')"></div>
+    
+    <div class="content-wrapper">
+        <div class="main-content">
+            <h4 class="mb-4">전체 예약 내역</h4>
+
+            <div class="tab-container">
+                <ul class="nav nav-tabs" id="reservationTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab" aria-controls="upcoming" aria-selected="true" th:classappend="${activeTab == 'upcoming' ? 'active' : ''}" th:href="@{/teacher/reservation?view=upcoming}">예정된 예약</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="past-tab" data-bs-toggle="tab" data-bs-target="#past" type="button" role="tab" aria-controls="past" aria-selected="false" th:classappend="${activeTab == 'past' ? 'active' : ''}" th:href="@{/teacher/reservation?view=past}">지난 예약</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="request-tab" data-bs-toggle="tab" data-bs-target="#request" type="button" role="tab" aria-controls="request" aria-selected="false">예약 요청</button>
+                    </li>
+                </ul>
+            </div>
+
+
+
+            <div class="tab-content" id="reservationTabContent">
+                <!-- 예정된 예약 -->
+                <div class="tab-pane fade"  th:classappend="${activeTab == 'upcoming'} ? ' show active' : ''" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
+                    <div class="table-container">
+                        <table class="reservation-table">
+                            <thead>
+                                <tr>
+                                    <th>학생</th>
+                                    <th>날짜</th>
+                                    <th>시간</th>
+                                    <th>상태</th>
+                                    <th>코멘트</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr  th:if="${upcomingBookings != null && !upcomingBookings.isEmpty()}" th:each="booking : ${upcomingBookings}">
+                                <td>
+                                    <div class="student-info">
+                                        <img th:src="${booking.filePath}"  alt="프로필 사진" class="avatar">
+                                        <div>
+                                            <div th:text="${booking.studentName}">이름</div>
+                                            <div class="text-muted small" th:text="${booking.classGroup}">전공</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td th:text="${booking.formattedStartTime}">2025-05-01</td>
+                                <td th:text="${booking.formattedStartTimeOnly}">10:00</td>
+                                <td><span th:class="${booking.isFixable} ? 'status-badge waiting' : ${booking.statusClass}" th:text="${booking.isFixable} ? '처리 대기중' : ${booking.status}">상태</span></td>
+                                <td th:text="${booking.safeMessage}">상담 메세지</td>
+                                <td>
+                                    <div th:if="${booking.cancellable}">
+                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id})}" method="post"
+                                              onsubmit="return confirm('예약을 취소하시겠습니까?');">
+                                            <button type="submit" class="action-btn danger" style="border: none;">취소</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 지난 예약 -->
+                <div class="tab-pane fade" th:classappend="${activeTab == 'past'} ? ' show active' : ''" id="past" role="tabpanel" aria-labelledby="past-tab">
+                    <div class="table-container">
+                        <table class="reservation-table">
+                            <thead>
+                            <tr>
+                                <th>학생</th>
+                                <th>날짜</th>
+                                <th>시간</th>
+                                <th>상태</th>
+                                <th>코멘트</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr  th:if="${pastBookings != null && !pastBookings.isEmpty()}" th:each="booking : ${pastBookings}">
+                                <td>
+                                    <div class="student-info">
+                                        <img th:src="${booking.filePath}" alt="프로필 사진" class="avatar">
+                                        <div>
+                                            <div th:text="${booking.studentName}">이름</div>
+                                            <div class="text-muted small" th:text="${booking.classGroup}">전공</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td th:text="${booking.formattedStartTime}">2025-05-01</td>
+                                <td th:text="${booking.formattedStartTimeOnly}">10:00</td>
+                                <td><span th:class="${booking.isFixable} ? 'status-badge waiting' : ${booking.statusClass}" th:text="${booking.isFixable} ? '처리 대기중' : ${booking.status}">상태</span></td>
+                                <td th:text="${booking.safeMessage}">상담 메세지</td>
+                                <td>
+                                    <div th:if="${booking.cancellable}">
+                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id})}" method="post"
+                                              onsubmit="return confirm('예약을 취소하시겠습니까?');">
+                                            <button type="submit" class="action-btn danger" style="border: none;">취소</button>
+                                        </form>
+                                    </div>
+                                    <div th:if="${booking.isFixable}" style="display: flex; gap: 8px;">
+                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id})}" method="post"
+                                              onsubmit="return confirm('상담을 취소하시겠습니까?');">
+                                            <button type="submit" class="action-btn danger" style="border: none;">상담 취소</button>
+                                        </form>
+                                        <form th:action="@{/teacher/consulting/{id}/confirm(id=${booking.id})}" method="post"
+                                              onsubmit="return confirm('상담을 완료하시겠습니까?');">
+                                            <button type="submit" class="action-btn success" style="border: none;">상담 완료</button>
+                                        </form>
+<!--                                        <a href="#" class="action-btn danger">상담 취소</a>-->
+<!--                                        <a href="#" class="action-btn success">상담 완료</a>-->
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 예약 요청 -->
+                <div class="tab-pane fade"  th:classappend="${activeTab == 'request'} ? ' show active' : ''" id="request" role="tabpanel" aria-labelledby="request-tab">
+                    <div class="table-container">
+                        <table class="reservation-table">
+                            <thead>
+                                <tr>
+                                    <th>학생</th>
+                                    <th>상담 요청 날짜</th>
+                                    <th></th>
+                                    <th>상태</th>
+                                    <th>코멘트</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${requestsBookings != null && !requestsBookings.isEmpty()}" th:each="booking : ${requestsBookings}">
+                                    <td>
+                                        <div class="student-info">
+                                            <img  th:src="${booking.filePath}" alt="프로필 사진" class="avatar">
+                                            <div>
+                                                <div th:text="${booking.studentName}" >이름</div>
+                                                <div class="text-muted small" th:text="${booking.classGroup}">전공</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td th:text="${booking.formattedRequestDay}">2025-04-17</td>
+                                    <td></td>
+                                    <td><span th:class="${booking.statusClass}" th:text="${booking.formattedStatus}">대기중</span></td>
+                                    <td th:text="${booking.comment}">코멘트</td>
+                                    <td th:if="${booking.isAssignable}">
+                                        <a href="#" class="action-btn success">시간 배정</a>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <th:block th:replace="fragments/layout :: scripts"></th:block>
+</body>
+</html> 

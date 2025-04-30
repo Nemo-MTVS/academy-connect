@@ -1,0 +1,98 @@
+/* consulting-card.css */
+.consulting-card {
+    width: 100%;
+    padding: 6.4px 12.81px;
+    border-top: 0.8px solid #D1D1D1;
+    border-bottom: 0.8px solid #D1D1D1;
+    display: flex;
+    align-items: center;
+}
+
+.consulting-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 요소 간격 조절 */
+    width: 100%;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 6.4px;
+    width: 183px;
+}
+
+.avatar {
+    width: 28.82px;
+    height: 28.82px;
+    border-radius: 50%;
+    background: black;
+}
+
+.user-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3.2px;
+}
+
+.name {
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: black;
+}
+
+.role {
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    color: #7F7F7F;
+}
+
+.date-box,
+.time-box,
+.status-box,
+.message-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6.4px;
+    height: 40px;
+}
+
+.date-box, .time-box {
+    width: 140px;
+    font-size: 12.81px;
+    font-family: 'DM Sans', sans-serif;
+    color: #333333;
+}
+
+.status-box {
+    width: 144px;
+    gap: 8px;
+}
+
+.status {
+    background: #D3E9F8;
+    padding: 3.2px 9.61px;
+    border-radius: 16px;
+    font-size: 11.21px;
+    font-family: 'DM Sans', sans-serif;
+    color: #222222;
+}
+
+.cancel-btn {
+    background: #FF3939;
+    border: none;
+    color: white;
+    font-size: 9.61px;
+    padding: 3.36px 6.24px;
+    border-radius: 50px;
+    font-family: 'Actor', sans-serif;
+    cursor: pointer;
+}
+
+.message-box {
+    width: 226px;
+    font-size: 11.21px;
+    font-family: 'DM Sans', sans-serif;
+    color: black;
+}
