@@ -252,7 +252,7 @@
                             nameSpan.style.cursor = 'pointer';
                             nameSpan.style.opacity = '1';
 
-                            nameSpan.onclick = function() {
+                            nameSpan.onclick = function () {
                                 selectedClassId = matchInfo.classId;
                                 document.getElementById('cancelConfirmText').innerText = `매칭 신청을 취소하시겠습니까?`;
                                 const cancelModal = new bootstrap.Modal(document.getElementById('cancelConfirmModal'));
@@ -285,18 +285,6 @@
                         applyBtn.style.cursor = 'pointer';        // 원래 커서 복구
                     }
                 });
-
-                // 서버 데이터 다 채우고 나서 제한 시간 체크
-                const now = new Date();
-                const currentHour = now.getHours();
-                const currentMinute = now.getMinutes();
-                const isRestrictedTime = (currentHour === 11 && currentMinute >= 30) || (currentHour === 12);
-
-                if (isRestrictedTime) {
-                    document.querySelectorAll('.slot .name').forEach(nameSpan => {
-                        nameSpan.innerText = '';
-                    });
-                }
             })
             .catch(error => console.error('매칭 현황 불러오기 실패:', error));
     }
@@ -365,16 +353,25 @@
             const countdownElement = document.getElementById('countdown');
             const limitMessage = document.getElementById('limitMessage');
 
-            // 11:30 ~ 12:59 사이
+            // 11:30 정각에 프론트 초기화
+            if (now.getHours() === 11 && now.getMinutes() === 30 && !alreadyResetToday) {
+                loadMatchingStatus();        // 프론트 슬롯 초기화
+                alreadyResetToday = true;   // 하루에 한 번만 실행
+            }
+
+            // 자정 지나면 다시 초기화 허용
+            if (now.getHours() === 0 && now.getMinutes() === 0) {
+                alreadyResetToday = false;
+            }
+
+            // 제한 시간 문구 표시 (11:30 ~ 12:59)
             if (nowMinutes >= 690 && nowMinutes < 780) {
-                timerRow.style.display = 'none';          // 타이머 숨김
-                limitMessage.style.display = 'block';     // 제한 문구 표시
+                timerRow.style.display = 'none';         // 타이머 숨김
+                limitMessage.style.display = 'block';    // 제한 문구 표시
             } else {
-                // 제한시간 외에는 타이머 정상 표시
+                // 타이머 표시
                 let target = new Date();
                 target.setHours(11, 30, 0, 0);
-
-                // 오늘 11:30이 지났으면 내일 11:30으로 설정
                 if (now > target) {
                     target.setDate(target.getDate() + 1);
                 }
@@ -384,20 +381,9 @@
                 const minutes = String(Math.floor((diff / (1000 * 60)) % 60)).padStart(2, '0');
                 const seconds = String(Math.floor((diff / 1000) % 60)).padStart(2, '0');
 
-                timerRow.style.display = 'flex';          // 타이머 보임
+                timerRow.style.display = 'flex';
                 countdownElement.innerText = `${hours}:${minutes}:${seconds}`;
-                limitMessage.style.display = 'none';      // 제한 문구 숨김
-            }
-
-            // 13:00 되자마자 프론트 화면 새로고침
-            if (now.getHours() === 13 && now.getMinutes() === 0 && !alreadyResetToday) {
-                loadMatchingStatus();   // 슬롯도 초기화
-                alreadyResetToday = true; // 하루에 딱 한 번만
-            }
-
-            // 자정 지나면 다시 초기화
-            if (now.getHours() === 0 && now.getMinutes() === 0) {
-                alreadyResetToday = false;
+                limitMessage.style.display = 'none';
             }
         }, 1000);
     }
