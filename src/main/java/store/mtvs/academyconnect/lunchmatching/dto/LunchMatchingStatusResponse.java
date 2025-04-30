@@ -9,21 +9,20 @@ import java.util.List;
  * - 클래스 ID
  * - 클래스 이름
  * - 현재 신청 인원 수
- * - 신청자 이름 목록
- * 을 포함한다.
+ * - 신청자 리스트 (이름 + 전공 + userId)
  */
 public class LunchMatchingStatusResponse {
 
     private Long classId;
     private String className;
     private int currentCount;
-    private List<String> studentNames;
+    private List<StudentInfo> students;
 
-    public LunchMatchingStatusResponse(Long classId, String className, int currentCount, List<String> studentNames) {
+    public LunchMatchingStatusResponse(Long classId, String className, int currentCount, List<StudentInfo> students) {
         this.classId = classId;
         this.className = className;
         this.currentCount = currentCount;
-        this.studentNames = studentNames;
+        this.students = students;
     }
 
     public Long getClassId() {
@@ -38,7 +37,7 @@ public class LunchMatchingStatusResponse {
         return currentCount;
     }
 
-    public List<String> getStudentNames() {
-        return studentNames;
+    public List<StudentInfo> getStudents() {
+        return students;
     }
 }

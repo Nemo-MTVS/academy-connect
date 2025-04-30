@@ -10,27 +10,26 @@ import store.mtvs.academyconnect.lunchmatching.service.LunchMatchingService;
 
 import java.util.List;
 
-@RestController // REST API 컨트롤러임을 나타냄 (JSON 형태로 응답)
-@RequiredArgsConstructor // 생성자를 통한 의존성 주입 자동 처리
-@RequestMapping("/lunch")  // 이 컨트롤러의 기본 URL 경로: /lunch
+@RestController // 이 클래스는 REST API를 처리하는 컨트롤러임 (JSON 반환)
+@RequiredArgsConstructor // 생성자 주입 자동 처리
+@RequestMapping("/lunch")  // 기본 경로: /lunch
 public class LunchMatchingController {
 
     private final LunchMatchingService lunchMatchingService;
 
     /**
      * 점심 매칭 신청 API
-     * POST /lunch/apply
+     * [POST] /lunch/apply
      *
-     * 요청 본문으로 매칭 클래스 ID(lunchMatchingClassId)만 받음.
-     * 사용자 ID는 서버 내부에서 임의로 고정하여 사용한다. (테스트용)
+     * 사용자가 매칭 클래스를 신청하는 기능.
+     * (현재는 테스트용으로 사용자 ID를 임의 고정하여 사용)
      *
-     * @param request ApplyRequestDto: lunchMatchingClassId 포함
-     * @return 성공 시 200 OK + "신청 완료" 메시지 반환
+     * @param request ApplyRequestDto (lunchMatchingClassId 포함)
+     * @return 성공 시 "신청 완료" 메시지 반환
      */
     @PostMapping("/apply")
     public ResponseEntity<String> apply(@RequestBody ApplyRequestDto request) {
-        // 임시 student 아이디 고정 (세션 없이)
-        String student = "uuid-be-001"; // 테스트용
+        String student = "uuid-be-001"; // 임시 고정 사용자 (테스트용)
 
         lunchMatchingService.apply(student, request.getLunchMatchingClassId());
 
@@ -39,18 +38,17 @@ public class LunchMatchingController {
 
     /**
      * 점심 매칭 신청 취소 API
-     * POST /lunch/cancel
+     * [POST] /lunch/cancel
      *
-     * 요청 본문으로 매칭 클래스 ID(lunchMatchingClassId)만 받음.
-     * 사용자 ID는 서버 내부에서 임의로 고정하여 사용한다. (테스트용)
+     * 사용자가 신청한 매칭을 취소하는 기능.
+     * (현재는 테스트용으로 사용자 ID를 임의 고정하여 사용)
      *
-     * @param request ApplyRequestDto: lunchMatchingClassId 포함
-     * @return 성공 시 200 OK + "신청 취소 완료" 메시지 반환
+     * @param request ApplyRequestDto (lunchMatchingClassId 포함)
+     * @return 성공 시 "신청 취소 완료" 메시지 반환
      */
     @PostMapping("/cancel")
     public ResponseEntity<String> cancel(@RequestBody ApplyRequestDto request) {
-        // 임시 student 아이디 고정
-        String student = "uuid-be-001";
+        String student = "uuid-be-001"; // 임시 고정 사용자 (테스트용)
 
         lunchMatchingService.cancel(student, request.getLunchMatchingClassId());
 
@@ -58,11 +56,13 @@ public class LunchMatchingController {
     }
 
     /**
-     * 점심 매칭 전체 초기화 API (Soft Delete 처리)
-     * POST /lunch/reset
-     * 매일 오후 13시에 신청 내역을 초기화하는 기능 (수동 호출용)
+     * 점심 매칭 전체 초기화 API (Soft Delete 방식)
+     * [POST] /lunch/reset
      *
-     * @return 성공 시 200 OK + "초기화 완료" 메시지 반환
+     * - 매일 오후 13시에 자동 실행되는 초기화 기능을 수동으로 호출할 때 사용.
+     * - 모든 매칭 데이터를 Soft Delete 처리한다.
+     *
+     * @return 성공 시 "초기화 완료" 메시지 반환
      */
     @PostMapping("/reset")
     public ResponseEntity<String> reset() {
@@ -72,13 +72,12 @@ public class LunchMatchingController {
 
     /**
      * 점심 매칭 현황 조회 API
-     * GET /lunch/status
+     * [GET] /lunch/status
      *
-     * 각 매칭 클래스별로
-     * - 현재 신청 인원 수
-     * - 신청자 이름 리스트를 조회하여 반환한다.
+     * - 각 매칭 클래스별로 현재 신청 인원 수와
+     * - 신청자 이름/전공 리스트를 조회하여 반환한다.
      *
-     * @return 신청 현황 리스트
+     * @return 매칭 현황 리스트 반환
      */
     @GetMapping("/status")
     public ResponseEntity<List<LunchMatchingStatusResponse>> getLunchMatchingStatus() {

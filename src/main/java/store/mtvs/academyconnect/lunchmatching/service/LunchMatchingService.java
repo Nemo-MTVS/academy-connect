@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import store.mtvs.academyconnect.lunchmatching.domain.entity.LunchMatching;
 import store.mtvs.academyconnect.lunchmatching.domain.entity.LunchMatchingClass;
 import store.mtvs.academyconnect.lunchmatching.dto.LunchMatchingStatusResponse;
+import store.mtvs.academyconnect.lunchmatching.dto.StudentInfo;
 import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.LunchMatchingClassRepository;
 import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.LunchMatchingRepository;
 import store.mtvs.academyconnect.user.domain.entity.User;
@@ -37,6 +38,12 @@ public class LunchMatchingService {
 
     /**
      * 점심 매칭 신청 처리 메서드
+     * - 현재 시간이 제한 시간대(11:30~13:00)인지 체크하고 신청을 막는다.
+     * - 수강생(STUDENT)만 신청 가능.
+     * - 삭제된 사용자(탈퇴)는 신청 불가.
+     * - 본인 전공과 관련된 매칭만 신청 가능.
+     * - 중복 신청 방지 및 최대 인원 초과 방지.
+     *
      * @param userId 신청자 ID
      * @param lunchMatchingClassId 신청하려는 매칭 클래스 ID
      */
@@ -67,12 +74,12 @@ public class LunchMatchingService {
                 .orElseThrow(() -> new IllegalArgumentException("매칭 클래스가 존재하지 않습니다."));
 
         // 본인의 전공이 매칭 클래스 이름에 포함되어 있어야 신청 가능
-        String userMajor = mapMajor(user.getClassGroup().getName());
+        String userMajor = user.getClassGroup().getName();
         String matchName = lunchClass.getName();
         if(!matchName.contains(userMajor)) {
             throw new IllegalArgumentException("본인 전공과 관련된 매칭만 신청할 수 있습니다.");
         }
-        
+
         // 해당 클래스에 신청한 인원이 6명 이상이면 신청 불가
         int currentCount = lunchMatchingRepository.countByLunchMatchingClassIdAndDeletedAtIsNull(lunchMatchingClassId);
         if (currentCount >= 6) {
@@ -80,7 +87,7 @@ public class LunchMatchingService {
         }
 
         // 해당 유저가 이미 동일한 매칭 클래스에 신청했는지 확인 (중복 신청 방지)
-        if (lunchMatchingRepository.existsByUserIdAndLunchMatchingClassId(user.getId(), lunchMatchingClassId)) {
+        if (lunchMatchingRepository.existsByUserIdAndLunchMatchingClassIdAndDeletedAtIsNull(user.getId(), lunchMatchingClassId)) {
             throw new IllegalStateException("이미 신청한 매칭입니다.");
         }
 
@@ -96,21 +103,11 @@ public class LunchMatchingService {
     }
 
     /**
-     * 사용자 전공명을 매칭용 약어로 변환하는 메서드
-     */
-    private String mapMajor(String originalMajor) {
-        if ("Backend".equalsIgnoreCase(originalMajor)) {
-            return "BE";
-        } else if ("TA".equalsIgnoreCase(originalMajor)) {
-            return "TA";
-        } else if ("Unity".equalsIgnoreCase(originalMajor)) {
-            return "Unity";
-        }
-        return originalMajor; // 혹시 다른 전공 있으면 그대로 반환
-    }
-
-    /**
      * 점심 매칭 신청 취소 처리 (Soft Delete 방식)
+     * - deletedAt에 취소 시간 기록.
+     *
+     * @param userId 신청자 ID
+     * @param lunchMatchingClassId 신청한 매칭 클래스 ID
      */
     @Transactional
     public void cancel(String userId, Long lunchMatchingClassId) {
@@ -122,10 +119,9 @@ public class LunchMatchingService {
     }
 
     /**
-     * 11:30 ~ 12:59 사이인지 확인하는 유틸 메서드
-     * 이 시간대에는 신청 및 취소가 제한됨
+     * 현재 시간이 신청/취소 제한 시간대(11:30~13:00)인지 확인하는 메서드
      *
-     * @return true: 제한 시간대 / false: 가능 시간대
+     * @return true: 제한 시간대 / false: 신청 가능 시간대
      */
     private boolean isRestrictedTime() {
         LocalTime now = LocalTime.now(); // 현재 시간
@@ -136,8 +132,8 @@ public class LunchMatchingService {
     }
 
     /**
-     * 점심 매칭 전체 초기화 (Soft Delete 처리)
-     * - 13시 리셋용
+     * 전체 점심 매칭을 Soft Delete 처리
+     * - 13시에 자동 초기화할 때 사용.
      */
     @Transactional
     public void resetAllMatchings() {
@@ -148,8 +144,8 @@ public class LunchMatchingService {
     }
 
     /**
-     * 매일 오후 13시에 자동으로 신청 내역 초기화
-     * 운영환경용 자동 리셋 (@Scheduled 사용)
+     * 매일 오후 13시에 자동으로 점심 매칭 전체 초기화
+     * - 운영환경 스케줄러 (@Scheduled 사용)
      */
     @Scheduled(cron = "0 0 13 * * *", zone = "Asia/Seoul")
     @Transactional
@@ -170,8 +166,9 @@ public class LunchMatchingService {
 
     /**
      * 점심 매칭 현황 전체 조회 메서드
+     * - 매칭 클래스별 신청 인원과 신청자 목록 반환
      *
-     * @return 매칭 클래스별 신청 현황 리스트
+     * @return 매칭 현황 리스트
      */
     @Transactional
     public List<LunchMatchingStatusResponse> getLunchMatchingStatus() {
@@ -184,20 +181,24 @@ public class LunchMatchingService {
             // 각 클래스별 살아있는 신청자 목록 가져오기
             List<LunchMatching> matchings = lunchMatchingRepository.findByLunchMatchingClassIdAndDeletedAtIsNull(lunchClass.getId());
 
-            // 신청자 이름만 추출
-            List<String> studentNames = matchings.stream()
-                    .map(matching -> matching.getUser().getName())
+            // 신청자 이름 + 전공 + 사용자 ID 추출
+            List<StudentInfo> students = matchings.stream()
+                    .map(matching -> new StudentInfo(
+                            matching.getUser().getName(),                      // 이름
+                            matching.getUser().getClassGroup().getName(),     // 전공
+                            matching.getUser().getId()                         // userId 추가
+                    ))
                     .toList();
 
             // 현재 신청 인원 수
-            int currentCount = studentNames.size();
+            int currentCount = students.size();
 
             // 결과 리스트에 추가
             LunchMatchingStatusResponse response = new LunchMatchingStatusResponse(
                     lunchClass.getId(),
                     lunchClass.getName(),
                     currentCount,
-                    studentNames
+                    students
             );
             result.add(response);
         }
