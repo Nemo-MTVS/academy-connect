@@ -29,6 +29,7 @@ public class ConsultingBookingService {
     private final ConsultingSlotRepository slotRepository;
     private final ConsultingBookingRepository bookingRepository;
     private final ConsultingBookingRepository consultingBookingRepository;
+    private final ConsultingSlotRepository consultingSlotRepository;
     private final UserRepository userRepository;
     private final Clock clock; // 시스템 시계 주입
 
@@ -179,18 +180,37 @@ public class ConsultingBookingService {
         }
 
         // 서비스 계층에서 직접 상태 변경
-        ConsultingBooking updatedBooking = ConsultingBooking.builder()
-                .student(booking.getStudent())
-                .instructor(booking.getInstructor())
-                .status(ConsultingBooking.BookingStatus.취소됨)
-                .message(booking.getMessage())
-                .createdAt(booking.getCreatedAt())
-                .updateAt(now)
-                .startTime(booking.getStartTime())
-                .endTime(booking.getEndTime())
-                .build();
+        booking.setStatus(ConsultingBooking.BookingStatus.취소됨);
+        booking.setUpdateAt(now);
+        consultingBookingRepository.save(booking);
 
-        consultingBookingRepository.save(updatedBooking);
+        // 추가: 해당 시간의 강사 슬롯 상태를 '사용가능'으로 변경
+        log.debug("해당 시간의 강사 슬롯 조회 시작: instructorId={}, startTime={}, endTime={}",
+                booking.getInstructor().getId(), booking.getStartTime(), booking.getEndTime());
+
+        List<ConsultingSlot> slots = consultingSlotRepository.findByInstructorAndStartTimeAndEndTime(
+                booking.getInstructor(),
+                booking.getStartTime(),
+                booking.getEndTime()
+        );
+
+        if (slots.isEmpty()) {
+            log.warn("해당 시간의 강사 슬롯을 찾을 수 없음: instructorId={}, startTime={}, endTime={}",
+                    booking.getInstructor().getId(), booking.getStartTime(), booking.getEndTime());
+        } else {
+            ConsultingSlot slot = slots.get(0);
+            log.debug("강사 슬롯 조회 성공: slotId={}, 현재상태={}", slot.getId(), slot.getStatus());
+
+            if (slot.getStatus() == ConsultingSlot.SlotStatus.불가능) {
+                slot.setStatus(ConsultingSlot.SlotStatus.사용가능);
+                consultingSlotRepository.save(slot);
+                log.info("강사 슬롯 상태 변경 성공: slotId={}, 변경상태=사용가능", slot.getId());
+            } else {
+                log.warn("강사 슬롯이 이미 사용가능 상태임: slotId={}, status={}",
+                        slot.getId(), slot.getStatus());
+            }
+        }
+
         log.info("예약 취소 성공: bookingId={}", bookingId);
     }
 
