@@ -1,6 +1,8 @@
 package store.mtvs.academyconnect.consulting.infrastructure.repository;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import store.mtvs.academyconnect.consulting.domain.entity.ConsultingSlot;
@@ -9,6 +11,7 @@ import store.mtvs.academyconnect.user.domain.entity.User;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ConsultingSlotRepository extends JpaRepository<ConsultingSlot, Long> {
     // 특정 강사의 상담 슬롯 조회
@@ -19,6 +22,14 @@ public interface ConsultingSlotRepository extends JpaRepository<ConsultingSlot, 
 
     // 특정 상태의 상담 슬롯 조회
     List<ConsultingSlot> findByStatus(ConsultingSlot.SlotStatus status);
+
+    // 특정 강사의 특정 시작 시간에 해당하는 '사용가능' 슬롯을 조회하며 비관적 쓰기 락 획득
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT cs FROM ConsultingSlot cs WHERE cs.instructor.id = :instructorId " +
+            "AND cs.startTime = :startTime AND cs.status = '사용가능' AND cs.deletedAt IS NULL")
+    Optional<ConsultingSlot> findAvailableSlotForUpdate(
+            @Param("instructorId") String instructorId,
+            @Param("startTime") LocalDateTime startTime);
 
     // 특정 강사의 특정 날짜 범위의 사용 가능한 슬롯 조회 (S03 구현용)
     @Query("SELECT cs FROM ConsultingSlot cs WHERE cs.instructor.id = :instructorId " +

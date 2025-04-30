@@ -48,9 +48,8 @@ public class ConsultingBooking {
     private LocalDateTime endTime;
 
     @Builder
-    public ConsultingBooking(Long id, User student, User instructor, BookingStatus status, String message,
+    public ConsultingBooking(User student, User instructor, BookingStatus status, String message,
                              LocalDateTime createdAt, LocalDateTime updateAt, LocalDateTime startTime, LocalDateTime endTime) {
-        this.id = id;
         this.student = student;
         this.instructor = instructor;
         this.status = status;

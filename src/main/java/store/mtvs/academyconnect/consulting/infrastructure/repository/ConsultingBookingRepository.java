@@ -32,6 +32,12 @@ public interface ConsultingBookingRepository extends JpaRepository<ConsultingBoo
             @Param("startDateTime") LocalDateTime startDateTime,
             @Param("endDateTime") LocalDateTime endDateTime);
 
+    // 특정 강사의 특정 시작 시간에 '예약됨' 또는 '상담완료' 상태의 예약 존재 여부 확인
+    boolean existsByInstructor_IdAndStartTimeAndStatusIn(
+            String instructorId,
+            LocalDateTime startTime,
+            List<ConsultingBooking.BookingStatus> statuses);
+
     // 특정 강사의 특정 날짜의 예약된/완료된 상담 조회 (S03 구현용)
     @Query("SELECT cb FROM ConsultingBooking cb WHERE cb.instructor.id = :instructorId " +
             "AND FUNCTION('DATE', cb.startTime) = :date " +

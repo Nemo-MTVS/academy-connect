@@ -2,21 +2,22 @@ package store.mtvs.academyconnect.consulting.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import store.mtvs.academyconnect.consulting.domain.entity.ConsultingBooking;
 import store.mtvs.academyconnect.consulting.dto.*;
-import store.mtvs.academyconnect.consulting.service.ConsultingBookingService;
-import store.mtvs.academyconnect.consulting.service.InstructorInfoService;
-import store.mtvs.academyconnect.consulting.service.StudentBookingViewService;
-import store.mtvs.academyconnect.consulting.service.UndefinedConsultingService;
+import store.mtvs.academyconnect.consulting.service.*;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -53,7 +54,7 @@ public class StudentConsultingController {
             // S01: 강사 목록 조회
             List<InstructorInfoForListDto> instructors = instructorInfoService.getActiveTeachers();
             model.addAttribute("instructors", instructors);
-            
+
             // 강사 목록이 비어있는지 확인하고, 비어있다면 에러 페이지로 리디렉션
             if (instructors == null || instructors.isEmpty()) {
                 log.warn("등록된 강사가 없습니다.");
@@ -166,7 +167,8 @@ public class StudentConsultingController {
 
     /**
      * 학생의 예약 목록 조회
-     * @param view 활성화할 탭 (기본값: upcoming)
+     *
+     * @param view  활성화할 탭 (기본값: upcoming)
      * @param model 모델
      * @return 뷰 이름
      */
@@ -201,8 +203,9 @@ public class StudentConsultingController {
 
     /**
      * 예약 취소
+     *
      * @param bookingId 취소할 예약 ID
-     * @param model 모델
+     * @param model     모델
      * @return 리다이렉트 URL 또는 에러 페이지
      */
     @PostMapping("/consulting-bookings/{bookingId}/cancel")
@@ -263,4 +266,45 @@ public class StudentConsultingController {
         }
     }
 
+    @PostMapping("/consulting-booking/specific")
+    public String handleSpecificBooking(
+            @ModelAttribute StudentBookingRequestDto requestDto,
+            RedirectAttributes redirectAttributes) {
+
+        // 디버깅: 전달된 데이터 출력
+        log.info("Received booking request: instructorId={}, startTime={}, message={}",
+                requestDto.getInstructorId() != null ? requestDto.getInstructorId() : "null",
+                requestDto.getStartTime() != null ? requestDto.getStartTime() : "null",
+                requestDto.getMessage() != null ? requestDto.getMessage() : "null");
+
+        String studentId = "uuid-be-001";
+        try {
+            log.debug("BookingService.createBookingFromSlot 호출 시도: studentId={}, requestDto={}",
+                    studentId, requestDto);
+
+            ConsultingBooking booking = consultingBookingService.createBookingFromSlot(studentId, requestDto);
+
+            log.info("시간 지정 예약 처리 성공: bookingId={}, studentId={}, instructorId={}, startTime={}",
+                    booking.getId(), studentId, requestDto.getInstructorId(), requestDto.getStartTime());
+
+            // 성공 메시지 (예약 시간 포함)
+            String successMsg = String.format("%s 강사님과의 %s 예약이 완료되었습니다.",
+                    booking.getInstructor().getName(),
+                    booking.getStartTime().format(DateTimeFormatter.ofPattern("MM월 dd일 HH:mm")));
+            redirectAttributes.addFlashAttribute("successMessage", successMsg);
+
+            // 성공 시 '내 예약 보기'의 '예정된 예약' 탭으로 이동
+            return "redirect:/student/consulting-my-bookings?view=upcoming";
+
+        } catch (IllegalArgumentException | IllegalStateException ex) { // 예상된 실패 (예약 불가, 충돌 등)
+            log.warn("예약 처리 중 예상된 오류 발생: {}", ex.getMessage(), ex);
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            // 실패 시 원래 예약 화면으로 돌아가기 (강사 ID 유지)
+            return "redirect:/student/consulting-booking?instructorId=" + requestDto.getInstructorId();
+        } catch (Exception e) { // 예상치 못한 서버 오류
+            log.error("시간 지정 예약 처리 중 예상치 못한 오류 발생", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "예약 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+            return "redirect:/student/consulting-booking?instructorId=" + requestDto.getInstructorId();
+        }
+    }
 }
