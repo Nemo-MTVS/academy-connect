@@ -227,10 +227,27 @@
 </head>
 <body>
 <!-- 헤더 포함 -->
-<div th:replace="fragments/header :: header"></div>
+<div th:replace="~{fragments/header :: header}"></div>
 
 <!-- 메인 컨텐츠 -->
 <div class="main-content">
+    <!-- 알림 메시지 영역 추가 -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <!-- 성공 메시지 -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>성공!</strong> <span th:text="${successMessage}">상담 요청이 성공적으로 접수되었습니다.</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            
+            <!-- 오류 메시지 -->
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>오류!</strong> <span th:text="${errorMessage}">상담 요청 처리 중 오류가 발생했습니다.</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <!-- 좌측 영역: 강사 정보 -->
         <div class="col-md-3">
@@ -310,11 +327,11 @@
                     <tr th:each="week : ${calendarData}">
                         <td th:each="day : ${week}"
                             th:class="${day.isEmpty ? 'empty' : ''} +
-  ${day.isPast ? ' past' : ''} +
-  ${day.isToday ? ' today' : ''} +
-  ${day.isSelected ? ' selected' : ''} +
-  ${day.isAvailable ? ' available' : ' unavailable'} +
-  ${day.isWeekend ? ' weekend' : ''}"
+                              ${day.isPast ? ' past' : ''} +
+                              ${day.isToday ? ' today' : ''} +
+                              ${day.isSelected ? ' selected' : ''} +
+                              ${day.isAvailable ? ' available' : ' unavailable'} +
+                              ${day.isWeekend ? ' weekend' : ''}"
                             th:text="${day.isEmpty ? '' : day.dayOfMonth}"
                             th:data-date="${day.dateString}">
 
@@ -355,8 +372,9 @@
                         </div>
                     </div>
 
-                    <form id="bookingForm" action="/student/consulting-booking/specific" method="post" th:if="${hasAvailableSlots}">
+                    <form id="bookingForm" method="post" th:action="@{/student/consulting-booking/specific}" th:if="${hasAvailableSlots}">
                         <input type="hidden" name="instructorId" th:value="${selectedInstructorId}">
+                        <input type="hidden" name="studentId" th:value="${studentId}">
                         <input type="hidden" name="date" th:value="${selectedDateStr}">
                         <input type="hidden" name="slotId" id="selectedSlotId" value="">
 
@@ -372,8 +390,9 @@
                         </div>
                     </form>
 
-                    <form id="unspecificForm" action="/student/consulting-booking/unspecific" method="post" th:unless="${hasAvailableSlots}">
+                    <form id="unspecificForm" method="post" th:action="@{/student/consulting-booking/unspecific}" th:unless="${hasAvailableSlots}">
                         <input type="hidden" name="instructorId" th:value="${selectedInstructorId}">
+                        <input type="hidden" name="studentId" th:value="${studentId}">
 
                         <!-- 메시지 입력 -->
                         <div class="mt-4">
@@ -392,7 +411,7 @@
 </div>
 
 <!-- 푸터 포함 -->
-<div th:replace="fragments/footer :: footer"></div>
+<div th:replace="~{fragments/footer :: footer}"></div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -402,6 +421,7 @@
     const selectedInstructorId = /*[[${selectedInstructorId}]]*/ null;
     const selectedDateStr = /*[[${selectedDateStr}]]*/ null;
     const hasAvailableSlots = /*[[${hasAvailableSlots}]]*/ false;
+    const studentId = /*[[${studentId}]]*/ null;
 
     // 시간대 선택 함수
     function selectTimeSlot(element, slotId) {
@@ -435,6 +455,8 @@
 
     // 캘린더 날짜 셀 클릭 이벤트를 처리하는 함수 - 수정
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM 로드 완료 - 학생 ID: ' + studentId);
+        
         // 모든 available 클래스를 가진 캘린더 셀에 클릭 이벤트 추가
         document.querySelectorAll('.calendar-table td.available').forEach(cell => {
             cell.addEventListener('click', function() {
@@ -472,8 +494,30 @@
         if (btnTimeUnspecificBooking) {
             btnTimeUnspecificBooking.addEventListener('click', function() {
                 if (confirm('강사님과 시간 조율이 필요한 방식입니다. 계속하시겠습니까?')) {
-                    document.getElementById('bookingForm').action = '/student/consulting-booking/unspecific';
-                    document.getElementById('bookingForm').submit();
+                    console.log('===== 시간 미지정 예약 버튼 클릭 (가능한 슬롯이 있는 경우) =====');
+                    const form = document.getElementById('bookingForm');
+
+                    // 폼 내용 확인
+                    console.log('폼 액션(변경 전): ' + form.action);
+                    console.log('학생 ID: ' + form.elements.studentId.value);
+                    console.log('강사 ID: ' + form.elements.instructorId.value);
+                    console.log('메시지: ' + form.elements.message.value);
+                    
+                    // 학생 ID 확인
+                    if (!form.elements.studentId.value) {
+                        console.error('학생 ID가 비어있습니다. studentId 필드에 값 설정');
+                        form.elements.studentId.value = studentId;
+                        console.log('설정된 학생 ID: ' + form.elements.studentId.value);
+                    }
+                    
+                    // 액션 변경
+                    form.action = '/student/consulting-booking/unspecific';
+                    console.log('폼 액션(변경 후): ' + form.action);
+                    
+                    // 폼 제출
+                    console.log('폼 제출');
+                    form.method = 'post';
+                    form.submit();
                 }
             });
         }
@@ -482,10 +526,40 @@
         if (btnTimeUnspecificBooking2) {
             btnTimeUnspecificBooking2.addEventListener('click', function() {
                 if (confirm('강사님과 시간 조율이 필요한 방식입니다. 계속하시겠습니까?')) {
-                    document.getElementById('unspecificForm').submit();
+                    console.log('===== 시간 미지정 예약 버튼 클릭 (가능한 슬롯이 없는 경우) =====');
+                    const form = document.getElementById('unspecificForm');
+                    
+                    // 폼 내용 확인
+                    console.log('폼 액션: ' + form.action);
+                    console.log('학생 ID: ' + form.elements.studentId.value);
+                    console.log('강사 ID: ' + form.elements.instructorId.value);
+                    console.log('메시지: ' + form.elements.message.value);
+                    
+                    // 학생 ID 확인
+                    if (!form.elements.studentId.value) {
+                        console.error('학생 ID가 비어있습니다. studentId 필드에 값 설정');
+                        form.elements.studentId.value = studentId;
+                        console.log('설정된 학생 ID: ' + form.elements.studentId.value);
+                    }
+                    
+                    // 폼 제출
+                    console.log('날짜 시간 미지정 예약 폼 제출');
+                    form.method = 'post';
+                    form.submit();
                 }
             });
         }
+        
+        // 페이지 로드 시 메시지가 있으면 자동으로 5초 후 사라지도록 설정
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                setTimeout(function() {
+                    bsAlert.close();
+                }, 5000);
+            });
+        }, 200);
     });
 </script>
 
