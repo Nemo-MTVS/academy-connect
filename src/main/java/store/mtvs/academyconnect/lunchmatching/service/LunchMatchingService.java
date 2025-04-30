@@ -133,7 +133,7 @@ public class LunchMatchingService {
 
     /**
      * 전체 점심 매칭을 Soft Delete 처리
-     * - 13시에 자동 초기화할 때 사용.
+     * - 11시 30분에 자동 초기화할 때 사용.
      */
     @Transactional
     public void resetAllMatchings() {
@@ -144,10 +144,10 @@ public class LunchMatchingService {
     }
 
     /**
-     * 매일 오후 13시에 자동으로 점심 매칭 전체 초기화
+     * 매일 오전 11시 30분에 자동으로 점심 매칭 전체 초기화
      * - 운영환경 스케줄러 (@Scheduled 사용)
      */
-    @Scheduled(cron = "0 0 13 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 30 11 * * *", zone = "Asia/Seoul")
     @Transactional
     public void scheduledResetAllMatchings() {
         resetAllMatchings(); // 기존 리셋 로직 재사용
