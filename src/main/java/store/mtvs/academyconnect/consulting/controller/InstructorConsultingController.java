@@ -4,16 +4,17 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import store.mtvs.academyconnect.consulting.dto.*;
-import store.mtvs.academyconnect.consulting.infrastructure.repository.ConsultingSlotRepository;
 import store.mtvs.academyconnect.consulting.service.ConsultingBookingService;
 import store.mtvs.academyconnect.consulting.service.InstructorSchedulingService;
 import store.mtvs.academyconnect.consulting.service.UndefinedConsultingService;
 import store.mtvs.academyconnect.consulting.domain.entity.ConsultingBooking;
+import store.mtvs.academyconnect.global.config.CustomUserDetails;
 import store.mtvs.academyconnect.user.dto.UserResponseDTO;
 import store.mtvs.academyconnect.user.service.UserService;
 
@@ -33,9 +34,9 @@ public class InstructorConsultingController {
     private final UserService userService;
 
     @GetMapping("/scheduling")
-    public String scheduling(Model model) {
+    public String scheduling(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         // 임시로 고정된 강사 ID 사용 (로그인 구현 후 세션에서 가져오도록 수정 필요)
-        String instructorId = "uuid-be-ins";
+        String instructorId = userDetails.getId();
         log.info("강사 스케줄 조회 요청: instructorId={}", instructorId);
 
         try {
@@ -69,9 +70,9 @@ public class InstructorConsultingController {
      * @return 뷰 이름
      */
     @GetMapping("/reservation")
-    public String consultingBookings(@RequestParam(defaultValue = "upcoming") String view, Model model) {
+    public String consultingBookings(@RequestParam(defaultValue = "upcoming") String view, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         // 임시로 고정된 강사 ID 사용 (로그인 구현 후 세션에서 가져오도록 수정 필요)
-        String instructorId = "uuid-be-ins";
+        String instructorId = userDetails.getId();
         log.info("예약 목록 조회 요청: instructorId={}, view={}", instructorId, view);
 
         try {
@@ -106,9 +107,9 @@ public class InstructorConsultingController {
      * @return 리다이렉트 URL 또는 에러 페이지
      */
     @PostMapping("/consulting/{bookingId}/cancel")
-    public String cancelBooking(@PathVariable Long bookingId, @RequestParam(defaultValue = "schedule") String view, Model model) {
+    public String cancelBooking(@PathVariable Long bookingId, @RequestParam(defaultValue = "schedule") String view, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         // 임시로 고정된 강사 ID 사용 (로그인 구현 후 세션에서 가져오도록 수정 필요)
-        String instructorId = "uuid-be-ins";
+        String instructorId = userDetails.getId();
         log.info("예약 취소 요청: bookingId={}, instructorId={}", bookingId, instructorId);
 
         try {
@@ -140,9 +141,9 @@ public class InstructorConsultingController {
      * @return 리다이렉트 URL 또는 에러 페이지
      */
     @PostMapping("/consulting/{bookingId}/confirm")
-    public String confirmBooking(@PathVariable Long bookingId, Model model) {
+    public String confirmBooking(@PathVariable Long bookingId, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         // 임시로 고정된 강사 ID 사용 (로그인 구현 후 세션에서 가져오도록 수정 필요)
-        String instructorId = "uuid-be-ins";
+        String instructorId = userDetails.getId();
         log.info("예약 처리 요청: bookingId={}, instructorId={}", bookingId, instructorId);
 
         try {
@@ -166,7 +167,7 @@ public class InstructorConsultingController {
     @PostMapping("/consulting/reservation")
     public String handleSpecificBooking(
             @ModelAttribute InstructorBookingDto requestDto,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes, @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         // 디버깅: 전달된 데이터 출력
         log.info("Received booking request: getStudentId={}, startTime={}, slotId={}",
@@ -175,7 +176,7 @@ public class InstructorConsultingController {
                 requestDto.getSlotId() != null ? requestDto.getSlotId() : "null");
 
         // 임시로 고정된 강사 ID 사용 (로그인 구현 후 세션에서 가져오도록 수정 필요)
-        String instructorId = "uuid-be-ins";
+        String instructorId = userDetails.getId();
 
         try {
             log.debug("BookingService.createBookingFromSchedule 호출 시도: instructorId={}, requestDto={}",
@@ -210,10 +211,11 @@ public class InstructorConsultingController {
     @PostMapping("/schedule/update")
     public String updateSchedule(
             @RequestParam("createSlots") String createSlotsJson,
-            @RequestParam("deleteSlotIds") String deleteSlotIdsJson
-    ) {
+            @RequestParam("deleteSlotIds") String deleteSlotIdsJson,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+            ) {
         // 임시로 고정된 강사 ID 사용 (로그인 구현 후 세션에서 가져오도록 수정 필요)
-        String instructorId = "uuid-be-ins";
+        String instructorId = userDetails.getId();
         try {
             // ObjectMapper로 JSON 문자열을 List<String>으로 변환
             ObjectMapper objectMapper = new ObjectMapper();
