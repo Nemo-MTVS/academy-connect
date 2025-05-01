@@ -1,0 +1,26 @@
+/* 학생 목록 스타일 */
+.student-list-container {
+    margin-top: 5px;
+    font-size: 0.8em;
+    text-align: left;
+}
+
+.student-list-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+    color: #333;
+    font-size: 0.85em;
+}
+
+.more-students {
+    color: #1890ff;
+    font-weight: bold;
+    font-size: 0.85em;
+}
+
+/* 예약된 날짜 (학생 이름이 있는 셀) 스타일 */
+.has-bookings {
+    background-color: #e6f7ff;
+}

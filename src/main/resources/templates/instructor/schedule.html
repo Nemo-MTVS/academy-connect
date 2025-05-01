@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head th:replace="fragments/layout :: head('일정 관리')">
+    <link rel="stylesheet" href="/css/calendar-student-list.css">
 </head>
 
 <body>
@@ -196,7 +197,15 @@
             updateCalendar();
         }
 
-        // 캘린더 업데이트 함수
+// 로컬 기준 YYYY-MM-DD 문자열 포맷 함수
+        function formatDateToYMD(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+// 캘린더 업데이트 함수
         function updateCalendar() {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
@@ -214,7 +223,6 @@
 
             let date = 1;
             for (let i = 0; i < 6; i++) {
-                // 필요한 경우에만 행 추가
                 if (date > daysInMonth) break;
 
                 const row = document.createElement('tr');
@@ -224,20 +232,70 @@
 
                     if (i === 0 && j < startingDay) {
                         // 이전 달 날짜
-                        cell.classList.add('text-muted');
-                        cell.classList.add('disabled'); // 클릭 막기용 CSS 클래스
+                        cell.classList.add('text-muted', 'disabled');
                     } else if (date > daysInMonth) {
                         // 다음 달 날짜
-                        cell.classList.add('text-muted');
-                        cell.classList.add('disabled'); // 클릭 막기용 CSS 클래스
+                        cell.classList.add('text-muted', 'disabled');
                     } else {
-                        // 현재 달 날짜
-                        cell.innerHTML = `<div class="date-number">${date}</div>`;
+                        // 현재 달 날짜 셀 생성
+                        const dateDiv = document.createElement('div');
+                        dateDiv.className = 'date-number';
+                        dateDiv.textContent = date;
+                        cell.appendChild(dateDiv);
 
                         const cellDate = new Date(year, month, date);
+                        const dateStr = formatDateToYMD(cellDate); // 수정된 부분
+
+                        const studentListContainer = document.createElement('div');
+                        studentListContainer.className = 'student-list-container';
+                        cell.appendChild(studentListContainer);
+
+                        const studentNamesForThisDate = [];
+
+                        allSlots.forEach(slot => {
+                            if (!slot.startTime) return;
+                            const slotDate = new Date(slot.startTime);
+                            const slotDateStr = formatDateToYMD(slotDate); // 수정된 부분
+
+                            if (slotDateStr === dateStr && slot.studentName) {
+                                studentNamesForThisDate.push(slot.studentName);
+                            }
+                        });
+
+                        if (studentNamesForThisDate.length > 0) {
+                            console.log(`학생 이름 표시: ${dateStr}에 ${studentNamesForThisDate.length}명`, studentNamesForThisDate);
+                            cell.classList.add('has-bookings');
+
+                            for (let k = 0; k < Math.min(studentNamesForThisDate.length, 3); k++) {
+                                const studentNameDiv = document.createElement('div');
+                                studentNameDiv.className = 'student-list-name';
+                                studentNameDiv.textContent = studentNamesForThisDate[k];
+                                studentListContainer.appendChild(studentNameDiv);
+                            }
+
+                            if (studentNamesForThisDate.length > 3) {
+                                const moreStudentsDiv = document.createElement('div');
+                                moreStudentsDiv.className = 'more-students';
+                                moreStudentsDiv.textContent = `+${studentNamesForThisDate.length - 3}`;
+                                studentListContainer.appendChild(moreStudentsDiv);
+                            }
+                        }
+
+                        // 디버깅용 로그
+                        if (month === 4 && date === 30) {
+                            console.log('5월 30일 셀 생성:', {
+                                cellDate,
+                                dateStr,
+                                studentNamesForThisDate,
+                                slots: allSlots.filter(s => {
+                                    if (!s.startTime) return false;
+                                    const sd = new Date(s.startTime);
+                                    return sd.getMonth() === 4 && sd.getDate() === 30;
+                                })
+                            });
+                        }
 
                         // 오늘 날짜 표시
-                        //const today = new Date();
                         if (cellDate.getDate() === today.getDate() &&
                             cellDate.getMonth() === today.getMonth() &&
                             cellDate.getFullYear() === today.getFullYear()) {
@@ -245,10 +303,8 @@
                         }
 
                         if (j === 0 || j === 6) {
-                            cell.classList.add('disabled');
-                            cell.classList.add('text-muted');
+                            cell.classList.add('disabled', 'text-muted');
                         } else {
-                            // 날짜 선택 이벤트
                             cell.addEventListener('click', function () {
                                 const allCells = document.querySelectorAll('.calendar td');
                                 allCells.forEach(c => c.classList.remove('selected'));
@@ -270,6 +326,7 @@
                 calendarBody.appendChild(row);
             }
         }
+
 
         // 시간대 패널 업데이트 함수
         function updateTimeSlotsPanel() {
@@ -482,6 +539,32 @@
 
             // KST 기준 시간 반환 (ISO 문자열로 변환)
             return baseDate.toISOString(); // 예: "2025-05-01T16:00:00.000+09:00"
+        }
+
+        // 특정 날짜에 예약된 학생 이름 목록 가져오기
+        function getBookingsForDate(date) {
+            const studentNames = [];
+            // 날짜를 YYYY-MM-DD 형식으로 변환
+            const dateStr = date.toISOString().split('T')[0];
+            console.log('Checking bookings for date:', dateStr);
+
+            allSlots.forEach(slot => {
+                if (!slot.startTime) return; // 시작 시간이 없는 경우 건너뜀
+
+                const slotDate = new Date(slot.startTime);
+                const slotDateStr = slotDate.toISOString().split('T')[0];
+
+                console.log('Comparing slot:', slotDateStr, slot.status, slot.studentName);
+
+                // 날짜가 일치하고, 학생 이름이 있는 경우 (상태 조건 완화)
+                if (slotDateStr === dateStr && slot.studentName) {
+                    console.log('Found student:', slot.studentName);
+                    studentNames.push(slot.studentName);
+                }
+            });
+
+            console.log('Total students for date:', dateStr, studentNames.length, studentNames);
+            return studentNames;
         }
 
 
