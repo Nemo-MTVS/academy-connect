@@ -225,6 +225,9 @@
             .then(data => {
                 const cards = document.querySelectorAll('.matching-card');
 
+                // 내가 이미 매칭했는지 체크용
+                let isAlreadyMatched = false;
+
                 // 슬롯 초기화
                 document.querySelectorAll('.slot').forEach(slot => {
                     const nameSpan = slot.querySelector('.name');
@@ -277,6 +280,9 @@
                                     const cancelModal = new bootstrap.Modal(document.getElementById('cancelConfirmModal'));
                                     cancelModal.show();
                                 };
+
+                                // 내가 이미 매칭한 상태임을 체크
+                                isAlreadyMatched = true;
                             } else {
                                 nameSpan.style.cursor = 'default';
                                 nameSpan.onclick = null;
@@ -292,35 +298,33 @@
             <i class="bi bi-people-fill" style="font-size: 16px; margin-right: 5px;"></i> 잔여 ${remain}/6
         `;
                     }
+                });
 
-                    // 매칭하기 버튼 연결
-                    const applyBtn = card.querySelector('.apply-btn');
-                    const matchTitle = card.querySelector('.card-header span')?.innerText || '매칭';
-
-                    if (currentUserRole !== 'STUDENT') {
-                        applyBtn.disabled = true;
-                        applyBtn.style.backgroundColor = '#ccc';
-                        applyBtn.style.cursor = 'not-allowed';
-                        applyBtn.onclick = null;
+                // ✅ 매칭하기 버튼 처리 (이미 매칭했으면 모두 비활성화)
+                document.querySelectorAll('.apply-btn').forEach(btn => {
+                    if (currentUserRole !== 'STUDENT' || isAlreadyMatched) {
+                        btn.disabled = true;
+                        btn.style.backgroundColor = '#ccc';
+                        btn.style.cursor = 'not-allowed';
+                        btn.onclick = null;
                     } else {
-                        if (matchInfo.currentCount >= 6) {
-                            applyBtn.disabled = true;
-                            applyBtn.style.backgroundColor = '#ccc';
-                            applyBtn.style.cursor = 'not-allowed';
-                            applyBtn.onclick = null;
-                        } else {
-                            applyBtn.disabled = false;
-                            applyBtn.style.backgroundColor = 'black';
-                            applyBtn.style.cursor = 'pointer';
-                            applyBtn.onclick = function() {
-                                applyForLunch(matchInfo.classId, matchTitle);
-                            };
-                        }
+                        btn.disabled = false;
+                        btn.style.backgroundColor = 'black';
+                        btn.style.cursor = 'pointer';
+
+                        const card = btn.closest('.matching-card');
+                        const matchTitle = card.querySelector('.card-header span')?.innerText || '매칭';
+                        const index = Array.from(cards).indexOf(card);
+
+                        btn.onclick = function() {
+                            applyForLunch(index + 1, matchTitle);
+                        };
                     }
                 });
             })
             .catch(error => console.error('매칭 현황 불러오기 실패:', error));
     }
+
 
     // 매칭하기 버튼 클릭 시: 매칭 확인 모달 열기
     function applyForLunch(classId, matchTitle) {
