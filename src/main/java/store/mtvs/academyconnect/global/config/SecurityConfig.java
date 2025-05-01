@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import store.mtvs.academyconnect.global.filter.RequestDebugFilter;
 import store.mtvs.academyconnect.user.domain.enums.UserRole;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -30,6 +31,11 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public HiddenHttpMethodFilter hiddenHttpMethodFilter() {
+        return new HiddenHttpMethodFilter();
     }
 
     @Bean
@@ -57,7 +63,6 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain teacherSecurityFilterChain(HttpSecurity http) throws Exception {
-
         http.securityMatcher("/teacher/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -82,7 +87,9 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(ex -> ex
                         .accessDeniedPage("/haccess-denied")
-                );
+                )
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/teacher/counselingresult/**"));
                 // .csrf(AbstractHttpConfigurer::disable);
 
         /* 인증 관리자 구성 */

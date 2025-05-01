@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+
+<head th:replace="fragments/layout :: head('NimoVerse - 상담 결과 수정')">
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+
+<body>
+    <!-- 왼쪽 메뉴 -->
+    <div th:replace="fragments/layout :: sidebar('counselingresults')"></div>
+    
+    <!-- 모바일 Bottom Navigation -->
+    <div th:replace="fragments/layout :: bottomnav('counselingresults')"></div>
+    
+    <div class="content-wrapper">
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>상담 결과 수정</h4>
+                <a href="/teacher/counselingresults" class="btn btn-outline-secondary">목록으로 돌아가기</a>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form th:action="@{/teacher/counselingresult/{id}(id=${result.id})}" 
+                          method="post" 
+                          class="needs-validation" 
+                          novalidate>
+                        <!-- Student Name (Read-only) -->
+                        <div class="mb-3">
+                            <label class="form-label">학생 이름</label>
+                            <input type="text" class="form-control" th:value="${result.student.name}" readonly>
+                        </div>
+
+                        <!-- Booking Information (Read-only) -->
+                        <div class="mb-3">
+                            <label class="form-label">예약 정보</label>
+                            <input type="text" class="form-control" 
+                                   th:value="${result.booking != null ? 
+                                             result.booking.student.name + ' - ' + 
+                                             #temporals.format(result.booking.startTime, 'yyyy-MM-dd HH:mm') : 
+                                             '예약 없음'}" 
+                                   readonly>
+                        </div>
+
+                        <!-- Counseling Content with Preview -->
+                        <div class="mb-3">
+                            <label for="md" class="form-label">상담 내용 *</label>
+                            <div class="markdown-container">
+                                <div class="markdown-editor">
+                                    <textarea class="form-control" id="md" name="md" rows="10" required th:text="${result.md}"></textarea>
+                                    <div class="invalid-feedback">상담 내용을 입력해주세요.</div>
+                                </div>
+                                <div class="markdown-preview">
+                                    <div class="preview-header">미리보기</div>
+                                    <div id="preview" class="preview-content"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary" onclick="history.back()">취소</button>
+                            <button type="submit" class="btn btn-primary">저장</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <th:block th:replace="fragments/layout :: scripts"></th:block>
+
+    <!-- Add marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+    // Form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+
+    // Initialize markdown preview with existing content
+    window.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.getElementById('md');
+        const preview = document.getElementById('preview');
+        preview.innerHTML = marked.parse(textarea.value);
+    });
+
+    // Markdown preview
+    document.getElementById('md').addEventListener('input', function(e) {
+        const markdown = e.target.value;
+        const preview = document.getElementById('preview');
+        preview.innerHTML = marked.parse(markdown);
+    });
+    </script>
+
+    <style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: none;
+    }
+    
+    .form-label {
+        font-weight: 500;
+    }
+    
+    .markdown-container {
+        display: flex;
+        gap: 20px;
+        min-height: 300px;
+    }
+
+    .markdown-editor {
+        flex: 1;
+    }
+
+    .markdown-preview {
+        flex: 1;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        background-color: #f8f9fa;
+    }
+
+    .preview-header {
+        padding: 0.5rem 1rem;
+        background-color: #e9ecef;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 0.375rem 0.375rem 0 0;
+        font-weight: 500;
+    }
+
+    .preview-content {
+        padding: 1rem;
+        overflow-y: auto;
+        max-height: calc(300px - 40px);
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 300px;
+    }
+
+    /* Markdown Preview Styles */
+    .preview-content h1,
+    .preview-content h2,
+    .preview-content h3,
+    .preview-content h4,
+    .preview-content h5,
+    .preview-content h6 {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .preview-content p {
+        margin-bottom: 1rem;
+    }
+
+    .preview-content ul,
+    .preview-content ol {
+        margin-bottom: 1rem;
+        padding-left: 2rem;
+    }
+
+    .preview-content blockquote {
+        padding: 0.5rem 1rem;
+        margin: 0 0 1rem;
+        border-left: 4px solid #dee2e6;
+        color: #6c757d;
+    }
+
+    .preview-content code {
+        padding: 0.2em 0.4em;
+        background-color: #f1f3f5;
+        border-radius: 3px;
+        font-size: 85%;
+    }
+
+    .preview-content pre {
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        overflow-x: auto;
+    }
+
+    .preview-content table {
+        width: 100%;
+        margin-bottom: 1rem;
+        border-collapse: collapse;
+    }
+
+    .preview-content th,
+    .preview-content td {
+        padding: 0.5rem;
+        border: 1px solid #dee2e6;
+    }
+
+    .preview-content img {
+        max-width: 100%;
+        height: auto;
+    }
+    </style>
+</body>
+</html> 

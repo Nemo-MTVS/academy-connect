@@ -4,6 +4,7 @@
 <!-- 공통 헤드 영역 -->
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
@@ -29,6 +30,7 @@
             --danger-color: #dc3545;
         }
         
+
         body {
             font-family: 'Noto Sans KR', sans-serif;
             margin: 0;
@@ -476,6 +478,9 @@
             </a>
             <a href="/teacher/reservation" class="menu-item" th:classappend="${activeMenu == 'reservations'} ? 'active' : ''">
                 <i class="bi bi-list-check"></i> 전체 예약 내역
+            </a>
+            <a href="/teacher/counselingresults" class="menu-item" th:classappend="${activeMenu == 'counselingresults'} ? 'active' : ''">
+                <i class="bi bi-list-check"></i> 전체 상담 내역
             </a>
             <a href="/teacher/notifications" class="menu-item" th:classappend="${activeMenu == 'notifications'} ? 'active' : ''">
                 <i class="bi bi-bell"></i> 알림
