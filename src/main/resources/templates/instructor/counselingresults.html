@@ -38,10 +38,11 @@
                                 <div class="student-info">
                                     <img th:if="${result.student.profile != null && result.student.profile.filePath != null}"
                                          th:src="${result.student.profile.filePath}"
-                                         alt="프로필 사진" class="avatar">
+                                         th:onerror="this.src='/images/sample_profile_1.png'"
+                                         alt="img" class="avatar">
                                     <img th:unless="${result.student.profile != null && result.student.profile.filePath != null}"
-                                         src="/images/default-profile.png"
-                                         alt="기본 프로필 사진" class="avatar">
+                                         th:src="@{/images/sample_profile_1.png}"
+                                         alt="img" class="avatar">
                                     <div>
                                         <div th:text="${result.student.name}">이름</div>
                                         <div class="text-muted small" th:text="${result.student.classGroup.name}">전공</div>
