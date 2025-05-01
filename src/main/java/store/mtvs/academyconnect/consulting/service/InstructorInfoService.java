@@ -8,6 +8,7 @@ import store.mtvs.academyconnect.consulting.dto.InstructorProfileDto;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
 import store.mtvs.academyconnect.profile.infrastructure.repository.ProfileRepository;
 import store.mtvs.academyconnect.user.domain.entity.User;
+import store.mtvs.academyconnect.user.domain.enums.UserRole;
 import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
 import java.util.List;
@@ -30,8 +31,8 @@ public class InstructorInfoService {
      * 활성화된 모든 강사 목록 조회
      */
     public List<InstructorInfoForListDto> getActiveTeachers() {
-        List<User> instructors = userRepository.findByRoleWithClassGroupWithProfile("INSTRUCTOR");
-        
+        List<User> instructors = userRepository.findByRoleWithClassGroupWithProfile(UserRole.TEACHER.name());
+
         return instructors.stream()
                 .filter(instructor -> instructor.getDeletedAt() == null)
                 .map(instructor -> {
@@ -55,7 +56,7 @@ public class InstructorInfoService {
         User instructor = userRepository.findById(instructorId)
                 .orElseThrow(() -> new IllegalArgumentException("강사를 찾을 수 없습니다."));
         
-        if (instructor.getDeletedAt() != null || !"INSTRUCTOR".equals(instructor.getRole())) {
+        if (instructor.getDeletedAt() != null || !UserRole.TEACHER.name().equals(instructor.getRole())) {
             throw new IllegalArgumentException("유효하지 않은 강사입니다.");
         }
         

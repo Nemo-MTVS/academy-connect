@@ -10,6 +10,7 @@ import store.mtvs.academyconnect.lunchmatching.dto.StudentInfo;
 import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.LunchMatchingClassRepository;
 import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.LunchMatchingRepository;
 import store.mtvs.academyconnect.user.domain.entity.User;
+import store.mtvs.academyconnect.user.domain.enums.UserRole;
 import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -60,7 +61,7 @@ public class LunchMatchingService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
 
         // 수강생(STUDENT)만 신청 가능
-        if (!"STUDENT".equalsIgnoreCase(user.getRole())) {
+        if (!UserRole.STUDENT.name().equalsIgnoreCase(user.getRole())) {
             throw new IllegalArgumentException("수강생만 신청할 수 있습니다.");
         }
 

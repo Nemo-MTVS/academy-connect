@@ -61,4 +61,8 @@ public class ConsultingBooking {
     public enum BookingStatus {
         취소됨, 상담완료, 예약됨
     }
+
+    public void cancelConsulting(){
+        this.status = BookingStatus.취소됨;
+    }
 }

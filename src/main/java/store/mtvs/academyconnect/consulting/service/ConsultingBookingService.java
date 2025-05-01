@@ -468,18 +468,8 @@ public class ConsultingBookingService {
         LocalDateTime now = LocalDateTime.now(clock);
 
         // 서비스 계층에서 직접 상태 변경
-        ConsultingBooking updatedBooking = ConsultingBooking.builder()
-                .student(booking.getStudent())
-                .instructor(booking.getInstructor())
-                .status(ConsultingBooking.BookingStatus.취소됨)
-                .message(booking.getMessage())
-                .createdAt(booking.getCreatedAt())
-                .updateAt(now)
-                .startTime(booking.getStartTime())
-                .endTime(booking.getEndTime())
-                .build();
+        booking.cancelConsulting();
 
-        consultingBookingRepository.save(updatedBooking);
         Optional<ConsultingSlot> slotOpt = consultingSlotRepository
                 .findByInstructorIdAndStartTimeAndEndTime(
                         booking.getInstructor().getId(),
