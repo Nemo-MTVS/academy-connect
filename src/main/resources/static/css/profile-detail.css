@@ -1,0 +1,74 @@
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 40px;
+    display: flex;
+    gap: 40px;
+}
+
+.profile-card {
+    width: 50%;
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.profile-header {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.profile-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #ddd;
+    margin-bottom: 20px;
+}
+
+.profile-info {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.change-button {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background-color: #3d56cc;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.change-button:hover {
+    background-color: #2c41a8;
+}
+
+.md-file {
+    width: 40%;
+    background: #e0e3f0;
+    padding: 30px;
+    border-radius: 16px;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-line;
+}
+
+.footer {
+    margin-top: 60px;
+    padding: 20px;
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+}

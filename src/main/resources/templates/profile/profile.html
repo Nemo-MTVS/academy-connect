@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>학생 프로필</title>
+    <link th:href="@{/css/header.css}" rel="stylesheet">
+    <link th:href="@{/css/profile.css}" rel="stylesheet">
+    <link th:href="@{/css/footer.css}" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 2500px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .page-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        /* 반 버튼 영역 */
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            width: 150px;
+            padding: 16px 0;
+            font-size: 18px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            background-color: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .tab-button.selected {
+            background-color: #3d56cc;
+            color: white;
+            font-weight: bold;
+            border-color: #3d56cc;
+        }
+        .class-title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .member-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            height:400px;
+        }
+
+        /* 학생 개별 버튼 */
+        .member-button {
+            width: 120px;
+            height: 40px;
+            padding: 5px;
+            background-color: white;
+            border: 1px solid #bbb;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 30px;
+            transition: all 0.2s;
+        }
+
+        .member-button:hover {
+            background-color: #e8e8e8;
+        }
+    </style>
+</head>
+
+<body>
+<div class = "container" th:replace="fragments/header :: header"></div>
+
+    <div class="page-title">
+        <h1 class="container" >학생 프로필</h1>
+
+<!-- 반 버튼 -->
+<div class="tab-container">
+    <form th:action="@{/student/profile}" method="get" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+        <button type="submit" name="className" value="Backend" th:classappend="${selectedClass} == 'Backend' ? 'selected' : ''" class="tab-button">Back-end</button>
+        <button type="submit" name="className" value="TA" th:classappend="${selectedClass} == 'TA' ? 'selected' : ''" class="tab-button">TA</button>
+        <button type="submit" name="className" value="Unity" th:classappend="${selectedClass} == 'Unity' ? 'selected' : ''" class="tab-button">Unity</button>
+        <button type="submit" name="className" value="AI" th:classappend="${selectedClass} == 'AI' ? 'selected' : ''" class="tab-button">AI</button>
+        <button type="submit" name="className" value="Unreal" th:classappend="${selectedClass} == 'Unreal' ? 'selected' : ''" class="tab-button">Unreal</button>
+    </form>
+</div>
+</div>
+
+
+<!-- 학생 리스트 -->
+<div th:if="${students}" class="member-list">
+    <h2 class="class-title" th:text="${selectedClass} + ' 수강생'"></h2>
+    <div class="member-list">
+        <div th:each="student : ${students}">
+            <a th:href="@{/student/profile/{id}(id=${student.id})}" class="member-button" th:text="${student.name}"></a>
+        </div>
+    </div>
+</div>
+
+<!-- 푸터 fragment include -->
+<div class="container" th:replace="fragments/footer :: footer"></div>
+
+</body>
+</html>

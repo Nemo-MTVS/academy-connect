@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import store.mtvs.academyconnect.user.domain.entity.User;
-
 import jakarta.persistence.*;
 
 @Entity
@@ -47,4 +46,35 @@ public class Profile {
         this.filePath = filePath;
         this.user = user;
     }
-} 
+
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+
+    public void setMd(String md) {
+        this.md = md;
+    }
+    public void setGithub(String github) {
+        this.github = github;
+    }
+
+
+    public void setBlog(String blog) {
+        this.blog = blog;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+}

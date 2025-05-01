@@ -64,4 +64,8 @@ public class User {
         this.name = name;
         this.role = role;
     }
-} 
+
+    public void changeName(String name){
+    this.name = name;
+    }
+}

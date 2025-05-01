@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상세 프로필</title>
+    <link th:href="@{/css/header.css}" rel="stylesheet">
+    <link rel="stylesheet" href="/css/profile-detail.css">
+    <link th:href="@{/css/footer.css}" rel="stylesheet">
+    <style>
+        footer{
+            height: auto; /* 필요 시 설정하되, 고정 높이는 피하세요 */
+            max-width: 100%; /* 전체 너비 사용 */
+            margin: 0 auto;
+        }
+        body {
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+
+        }
+
+        .profile-wrapper {
+            display: flex;
+            max-width: 1200px;
+            margin: 40px auto;
+            gap: 40px;
+        }
+
+        .profile-left {
+            flex: 1;
+            background: #f1f2f7;
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .profile-left img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            background-color: #c3c6dc;
+        }
+        .profile-left h1 {  <!-- 프로필 사진 -->
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #2c3e75;
+        }
+
+        .profile-left h2 {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2b2b2b;
+        }
+
+        .profile-info p {
+            font-size: 22px;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .profile-info a {
+            color: #007acc;
+            text-decoration: none;
+        }
+
+        .profile-info a:hover {
+            text-decoration: underline;
+        }
+
+        .button-group {
+            margin-top: 30px;
+        }
+
+        .edit-button {
+            background-color: #2c3e75;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .edit-button:hover {
+            background-color: #1a2852;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #fcfcfd;
+            color: #f10909;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+
+        .profile-right {
+            flex: 2;
+            background-color: #d9dceb;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+            overflow-y: auto;
+        }
+
+        .markdown-content {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #222;
+            white-space: pre-wrap;
+        }
+        .profile-container{
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+
+<div class="profile-container">
+    <div class="profile-wrapper">
+        <div class="profile-header">
+        </div>
+        <div class="profile-left">
+            <h1 th:text="${user.name} + ' 님의 프로필'"></h1>
+            <!--                    <input type="file" id="profileImage">-->
+            <!--                    <textarea id="bio"></textarea>-->
+            <!--                    <div id="markdownPreview"></div>-->
+            <!-- @{} 구문 안에는 ${}을 사용 하는 것이 타임리프 문법상 불안정하거나 오류를 발생 시킬 수 있음-->
+            <img th:if="${profile.filePath != null}" th:src="${profile.filePath}" alt="Profile Image">
+            <h2 th:text="${user.name} + ' 님'"></h2>academy_connect
+            <div class="profile-info">
+                <p th:if="${profile.email}">📧 <span th:text="${profile.email}"></span></p>
+                <p th:if="${profile.github}">🐙 GitHub: <a th:href="${profile.github}" target="_blank" th:text="${profile.github}"></a></p>
+                <p th:if="${profile.blog}">📝 Blog: <a th:href="${profile.blog}" target="_blank" th:text="${profile.blog}"></a></p>
+
+                <div class="button-group">
+                    <th:block th:if="${IsMyProfile.booleanValue}">
+                    <button class = "edit-button" type="button"
+                            th:attr="data-userid=${userId}"
+                            onclick="goEdit(this)"
+                            style="padding: 8px 16px; margin-top: 10px;">
+                        수정
+                    </button>
+                    </th:block>
+                    <a class="back-button" th:href="@{/student/profile}">목록으로 돌아가기</a>
+                </div>
+            </div>
+
+            </div>
+        <div class="profile-right" th:if="${profile.md}">
+            <h3>자기소개</h3>
+            <div class="markdown-content" th:utext="${profile.md}"></div>
+        </div>
+
+        <div class="profile-content">
+            <div class="profile-section">
+
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script>
+    function goEdit(btn) {
+        var userId = btn.getAttribute('data-userid');
+        location.href = '/student/profile/' + userId + '/edit';
+    }
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const preview = document.getElementById('previewImg');
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+    }
+
+    document.getElementById('profileImage').addEventListener('change', previewImage);
+    const bioInput = document.getElementById('bio');
+    const preview = document.getElementById('markdownPreview');
+
+    bioInput.addEventListener('input', () => {
+        const markdown = bioInput.value;
+        preview.innerHTML = marked.parse(markdown);
+    });
+
+    // 초기 로드 시에도 반영
+    preview.innerHTML = marked.parse(bioInput.value);
+
+</script>
+</body>
+</html>

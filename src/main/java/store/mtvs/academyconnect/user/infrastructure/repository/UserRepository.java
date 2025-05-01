@@ -35,4 +35,8 @@ public interface UserRepository extends JpaRepository<User, String> {
         AND u.deletedAt IS NULL
     """)
     List<User> findAllActiveStudents();
+
+
+    @Query("SELECT u FROM User u JOIN FETCH u.classGroup c WHERE c.name = :className")
+    List<User> findByClassGroupName(@Param("className") String className);
 }

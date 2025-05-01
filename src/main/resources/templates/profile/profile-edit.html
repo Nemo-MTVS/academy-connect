@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link th:href="@{/css/header.css}" rel="stylesheet">
+    <link th:href="@{/css/profile-edit.css}" rel="stylesheet">
+    <link th:href="@{/css/footer.css}" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>프로필 수정</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f6fc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 60px;
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        .profile-card {
+            width: 55%;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+
+        .profile-header {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            color: #2b3674;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+        }
+
+        .profile-info {
+            margin-bottom: 20px;
+        }
+
+        .profile-info label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .profile-info input[type="text"],
+        .profile-info input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #fdfdfd;
+            transition: border 0.2s ease;
+        }
+
+        .profile-info input:focus,
+        textarea:focus {
+            border-color: #3d56cc;
+            outline: none;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #ddd;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .button-group {
+            margin-top: 30px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .change-button {
+            padding: 12px 24px;
+            background-color: #3d56cc;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            transition: background-color 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .change-button:hover {
+            background-color: #2c41a8;
+        }
+
+        .md-file {
+            width: 45%;
+            background: #e9ecf8;
+            padding: 30px;
+            border-radius: 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            height: 600px;
+            white-space: pre-wrap;
+        }
+        footer {
+            min-height: 100px;
+            padding: 40px 0;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<div class="container">
+    <div class="profile-card">
+        <div class="profile-header">프로필 수정</div>
+
+        <form th:action="@{/student/profile/{userId}/update(userId=${student.id})}" method="post" enctype="multipart/form-data">
+            <div class="profile-info">
+                <label for="email">이메일</label><br>
+                <input type="email" id="email" name="email" th:value="${profile.email}" required>
+            </div>
+
+            <div class="profile-info">
+                <label for="github">GitHub</label><br>
+                <input type="text" id="github" name="github" th:value="${profile.github}">
+            </div>
+
+            <div class="profile-info">
+                <label for="blog">블로그</label><br>
+                <input type="text" id="blog" name="blog" th:value="${profile.blog}">
+            </div>
+
+            <div class="profile-info">
+                <label for="profileImage">프로필 사진 업로드</label><br>
+                <input type="file" id="profileImage" name="profileImage">
+                <div class="profile-image">
+                    <img id="previewImg"
+                         th:if="${profile.filePath != null}"
+                         th:src="@{${profile.filePath}}"
+                         alt="프로필 사진 미리보기"
+                         width="100" height="100"
+                         style="border-radius:50%; object-fit:cover;" />
+
+                    <!-- 프로필 사진 없을 때 -->
+                    <p th:unless="${profile.filePath != null}">등록된 사진이 없습니다.</p>
+                </div>
+            </div>
+            <label for="bio">자기소개 (Markdown)</label>
+            <textarea id="bio" name="bio" rows="10" cols="80" th:text="${profile.md}"></textarea>
+            <div class="button-group">
+                <button type="submit" class="change-button">저장</button>
+                <a th:href="@{/student/profile/{userId}(userId=${student.id})}" class="change-button" style="background-color:#6c757d;">취소</a>
+            </div>
+            <div th:utext="${renderedBio}"></div>
+        </form>
+    </div>
+
+    <div id="markdownPreview" class="md-file">
+    </div>
+</div>
+
+<script>
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const preview = document.getElementById('previewImg');
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+    }
+
+    document.getElementById('profileImage').addEventListener('change', previewImage);
+    const bioInput = document.getElementById('bio');
+    const preview = document.getElementById('markdownPreview');
+
+    bioInput.addEventListener('input', () => {
+        const markdown = bioInput.value;
+        preview.innerHTML = marked.parse(markdown);
+    });
+
+    // 초기 로드 시에도 반영
+    preview.innerHTML = marked.parse(bioInput.value);
+
+</script>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>
