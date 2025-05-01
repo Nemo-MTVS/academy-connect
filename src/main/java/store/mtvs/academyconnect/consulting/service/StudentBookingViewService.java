@@ -49,15 +49,35 @@ public class StudentBookingViewService {
         List<LocalDateTime> availableStartTimes = consultingSlotRepository.findAvailableStartTimesInMonthByInstructor(
                 instructorId, year, month);
 
-        // Set으로 변환하여 중복 날짜 제거
-        Set<LocalDate> availableDateSet = availableStartTimes.stream()
-                .map(LocalDateTime::toLocalDate)
+        // 현재 시간 가져오기
+        LocalDateTime now = LocalDateTime.now(clock);
+        LocalDate today = now.toLocalDate();
+
+        // 날짜별로 그룹화하고 각 날짜마다 미래 시간 슬롯이 있는지 확인
+        Map<LocalDate, List<LocalDateTime>> timesByDate = availableStartTimes.stream()
+                .collect(Collectors.groupingBy(LocalDateTime::toLocalDate));
+
+        // 실제 예약 가능한 날짜만 필터링 (과거 날짜 제외 + 오늘은 미래 시간만)
+        Set<LocalDate> availableDateSet = timesByDate.entrySet().stream()
+                .filter(entry -> {
+                    LocalDate date = entry.getKey();
+                    if (date.isBefore(today)) {
+                        return false; // 과거 날짜는 제외
+                    }
+                    if (date.equals(today)) {
+                        // 오늘인 경우, 현재 시간 이후의 슬롯이 있는지 확인
+                        return entry.getValue().stream()
+                                .anyMatch(time -> time.isAfter(now));
+                    }
+                    return true; // 미래 날짜는 모두 포함
+                })
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
 
         // 디버그 로깅 추가
         log.debug("조회된 예약 가능 날짜 ({}년 {}월, 강사 ID: {}): {}", year, month, instructorId, availableDateSet);
+        log.debug("현재 시간 필터링 후 실제 예약 가능 날짜: {}", availableDateSet);
 
-        LocalDate today = LocalDate.now(clock);
         // --- 데이터 조회 끝 ---
 
         List<List<CalendarDayDto>> calendarWeeks = new ArrayList<>();
@@ -115,42 +135,60 @@ public class StudentBookingViewService {
         LocalDateTime startOfDay = date.atStartOfDay(); // 예: 2025-05-07T00:00:00
         LocalDateTime startOfNextDay = date.plusDays(1).atStartOfDay(); // 예: 2025-05-08T00:00:00
 
+        // 현재 시간 가져오기
+        LocalDateTime now = LocalDateTime.now(clock);
+
+        log.debug("현재 시간: {}, 조회 날짜: {}", now, date);
+
         // 날짜 범위 사용 조회로 수정한 Repository 메소드 호출
         List<ConsultingSlot> potentialSlots = consultingSlotRepository
                 .findAvailableSlotsByInstructorAndDayRange(instructorId, startOfDay, startOfNextDay);
 
         log.debug("날짜 [{}] 강사 [{}]의 사용가능 슬롯 조회 결과: {} 개", date, instructorId, potentialSlots.size());
 
+        // 각 슬롯 상세 정보 로깅
+        for (ConsultingSlot slot : potentialSlots) {
+            log.debug("슬롯 ID: {}, 시간: {} ~ {}, 상태: {}",
+                    slot.getId(), slot.getStartTime(), slot.getEndTime(), slot.getStatus());
+        }
+
         // 해당 날짜에 이미 예약된 상담들 조회
-        // ConsultingBookingRepository에 findBookedOrCompletedByInstructorAndDate 메소드가 정의되어 있어야 함
         List<ConsultingBooking> existingBookings = consultingBookingRepository
                 .findBookedOrCompletedByInstructorAndDate(instructorId, date);
 
         log.debug("날짜 [{}] 강사 [{}]의 기존 예약 조회 결과: {} 개", date, instructorId, existingBookings.size());
-
 
         // 예약된 시간 범위들 추출
         Set<TimeRange> bookedTimeRanges = existingBookings.stream()
                 .map(booking -> new TimeRange(booking.getStartTime(), booking.getEndTime()))
                 .collect(Collectors.toSet());
 
-        LocalDateTime now = LocalDateTime.now(clock); // 주입받은 Clock 사용
-
         // 예약 가능한 슬롯만 필터링
         List<AvailableSlotDto> resultSlots = potentialSlots.stream()
                 .filter(slot -> {
+                    // 1. 슬롯이 '사용가능' 상태인지 확인
+                    boolean isAvailable = slot.getStatus() == ConsultingSlot.SlotStatus.사용가능;
+
+                    // 2. 슬롯이 이미 예약된 시간과 겹치지 않는지 확인
                     TimeRange slotRange = new TimeRange(slot.getStartTime(), slot.getEndTime());
                     boolean isOverlapping = bookedTimeRanges.stream().anyMatch(slotRange::overlaps);
+
+                    // 3. 슬롯의 시작 시간이 현재 시간 이후인지 확인
                     boolean isFuture = slot.getStartTime().isAfter(now);
-                    // 로그 추가: 각 슬롯 필터링 결과 확인
-                    // log.trace("슬롯: {} ~ {}, 예약겹침: {}, 미래시간: {}", slot.getStartTime(), slot.getEndTime(), isOverlapping, isFuture);
-                    return !isOverlapping && isFuture;
+
+                    // 상세 로깅
+                    log.debug("슬롯 ID: {}, 시간: {} ~ {}, 상태: {}, 사용가능: {}, 예약겹침: {}, 미래시간: {}, 최종결과: {}",
+                            slot.getId(), slot.getStartTime(), slot.getEndTime(), slot.getStatus(),
+                            isAvailable, isOverlapping, isFuture, (isAvailable && !isOverlapping && isFuture));
+
+                    // 세 조건 모두 만족해야 함
+                    return isAvailable && !isOverlapping && isFuture;
                 })
                 .map(slot -> AvailableSlotDto.builder()
-                        .slotId(slot.getId()) // 슬롯 ID 추가
+                        .slotId(slot.getId())
                         .startTime(slot.getStartTime())
                         .endTime(slot.getEndTime())
-                        .isSelected(false) // isSelected는 UI 상태이므로 false 초기화
+                        .isSelected(false)
                         .build())
                 .sorted(Comparator.comparing(AvailableSlotDto::getStartTime))
                 .collect(Collectors.toList());
