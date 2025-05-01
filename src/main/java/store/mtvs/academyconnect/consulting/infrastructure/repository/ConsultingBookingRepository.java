@@ -50,4 +50,22 @@ public interface ConsultingBookingRepository extends JpaRepository<ConsultingBoo
             @Param("instructorId") String instructorId,
             @Param("year") int year,
             @Param("month") int month);
+
+    //
+    @Query("SELECT cb FROM ConsultingBooking cb " +
+            "WHERE cb.instructor.id = :instructorId " +
+            "AND cb.startTime >= :startTime " +
+            "AND cb.endTime <= :endTime " +
+            "AND cb.status IN ('예약됨', '상담완료')")
+    List<ConsultingBooking> findBookingByInstructorAndTime(
+            @Param("instructorId") String instructorId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime);
+
+    // 특정 강사의 특정 시작 시간에 '예약됨' 또는 '상담완료' 상태의 예약 존재 여부 확인
+    boolean existsByInstructor_IdAndStartTimeAndStatusIn(
+            String instructorId,
+            LocalDateTime startTime,
+            List<ConsultingBooking.BookingStatus> statuses);
+
 }

@@ -1,9 +1,6 @@
 package store.mtvs.academyconnect.consulting.domain.entity;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import store.mtvs.academyconnect.user.domain.entity.User;
 
 import jakarta.persistence.*;
@@ -16,6 +13,7 @@ import java.time.LocalDateTime;
 public class ConsultingSlot {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
@@ -32,9 +30,11 @@ public class ConsultingSlot {
     @Column(name = "created_at", nullable = false, columnDefinition = "DATETIME NOT NULL COMMENT '등록시간 기준'")
     private LocalDateTime createdAt;
 
+    @Setter
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private SlotStatus status;

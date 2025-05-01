@@ -7,6 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import store.mtvs.academyconnect.classgroup.domain.entity.ClassGroup;
 import store.mtvs.academyconnect.classgroup.service.ClassGroupService;
+import store.mtvs.academyconnect.consulting.domain.entity.ConsultingBooking;
+import store.mtvs.academyconnect.consulting.dto.InstructorBookingListItemDto;
+import store.mtvs.academyconnect.consulting.dto.MyBookingListItemDto;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
 import store.mtvs.academyconnect.user.domain.entity.User;
 import store.mtvs.academyconnect.user.domain.enums.UserRole;
@@ -14,8 +17,9 @@ import store.mtvs.academyconnect.user.dto.InstructorDTO;
 import store.mtvs.academyconnect.user.dto.UserResponseDTO;
 import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -93,6 +97,42 @@ public class UserService {
         }
         return new UserResponseDTO(user.getId(), user.getName(), user.getClassGroup().getName(), user.getRole());
     }
+    /**
+     * 학생 목록 조회
+     * @return 학생 목록 DTO
+     */
+    public List<UserResponseDTO> getAllUsers() {
+        log.info("학생 목록 조회 서비스 호출");
+
+        // 학생 존재 여부 확인
+        log.debug("전체 학생 목록 조회 시작");
+        List<User> studentOpt = userRepository.findAllActiveStudents();
+
+        // 학생이 없으면 빈 목록 반환 (예외 발생 대신)
+        if (studentOpt.isEmpty()) {
+            log.warn("학생을 찾을 수 없음 (빈 목록 반환)");
+            return Collections.emptyList();
+        }
+        log.debug("전체 학생 조회 결과: {} 건", studentOpt.size());
+
+
+        return convertToDto(studentOpt);
+    }
+
+    /**
+     * User Entity를 UserResponseDTO로 변환
+     */
+    private List<UserResponseDTO> convertToDto (List<User> users) {
+        return users.stream()
+                .map(user -> UserResponseDTO.builder()
+                        .userId(user.getId())
+                        .name(user.getName())
+                        .classGroupName(user.getClassGroup().getName())
+                        .role(user.getRole())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
 
     public List<InstructorDTO> getInstructorDTO() {
         List<User> users = userRepository.findByRoleWithClassGroupWithProfile(UserRole.INSTRUCTOR.name());
