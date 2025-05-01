@@ -8,6 +8,9 @@
     <title>프로필 수정</title>
     <style>
         body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
             font-family: 'Noto Sans KR', sans-serif;
             background-color: #f4f6fc;
             margin: 0;
@@ -31,6 +34,7 @@
             border-radius: 20px;
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
         }
+
 
         .profile-header {
             font-size: 28px;
@@ -125,6 +129,10 @@
             overflow-y: auto;
             height: 600px;
             white-space: pre-wrap;
+        }
+        footer {
+            min-height: 100px;
+            padding: 40px 0;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>

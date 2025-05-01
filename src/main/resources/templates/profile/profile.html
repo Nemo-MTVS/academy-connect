@@ -15,9 +15,9 @@
         }
 
         .container {
-            width: 90%;
+            max-width: 2500px;
             margin: 0 auto;
-            padding-top: 40px;
+            padding: 40px 20px;
         }
         .page-title {
             text-align: center;
@@ -66,6 +66,7 @@
             justify-content: center;
             gap: 12px;
             margin-bottom: 40px;
+            height:400px;
         }
 
         /* 학생 개별 버튼 */
@@ -90,10 +91,10 @@
 </head>
 
 <body>
-<!-- 헤더 fragment include -->
-<div th:replace="fragments/header :: header"></div>
+<div class = "container" th:replace="fragments/header :: header"></div>
 
-    <div class="page-title"> <h1 class="container" style="text-align: center; margin-top: 40px;">학생 프로필</h1>
+    <div class="page-title">
+        <h1 class="container" >학생 프로필</h1>
 
 <!-- 반 버튼 -->
 <div class="tab-container">
@@ -119,7 +120,7 @@
 </div>
 
 <!-- 푸터 fragment include -->
-<div th:replace="fragments/footer :: footer"></div>
+<div class="container" th:replace="fragments/footer :: footer"></div>
 
 </body>
 </html>

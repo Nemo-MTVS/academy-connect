@@ -7,11 +7,19 @@
     <link rel="stylesheet" href="/css/profile-detail.css">
     <link th:href="@{/css/footer.css}" rel="stylesheet">
     <style>
+        footer{
+            height: auto; /* 필요 시 설정하되, 고정 높이는 피하세요 */
+            max-width: 100%; /* 전체 너비 사용 */
+            margin: 0 auto;
+        }
         body {
+            flex-direction: column;
+            min-height: 100vh;
             font-family: 'Noto Sans KR', sans-serif;
             background-color: #ffffff;
             margin: 0;
             padding: 0;
+
         }
 
         .profile-wrapper {
@@ -116,6 +124,9 @@
             color: #222;
             white-space: pre-wrap;
         }
+        .profile-container{
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -132,21 +143,21 @@
             <!--                    <div id="markdownPreview"></div>-->
             <!-- @{} 구문 안에는 ${}을 사용 하는 것이 타임리프 문법상 불안정하거나 오류를 발생 시킬 수 있음-->
             <img th:if="${profile.filePath != null}" th:src="${profile.filePath}" alt="Profile Image">
-            <h2 th:text="${user.name} + ' 님'"></h2>
+            <h2 th:text="${user.name} + ' 님'"></h2>academy_connect
             <div class="profile-info">
                 <p th:if="${profile.email}">📧 <span th:text="${profile.email}"></span></p>
                 <p th:if="${profile.github}">🐙 GitHub: <a th:href="${profile.github}" target="_blank" th:text="${profile.github}"></a></p>
                 <p th:if="${profile.blog}">📝 Blog: <a th:href="${profile.blog}" target="_blank" th:text="${profile.blog}"></a></p>
 
                 <div class="button-group">
-                    <button th:if="${IsMyProfile.booleanValue}">
+                    <th:block th:if="${IsMyProfile.booleanValue}">
                     <button class = "edit-button" type="button"
                             th:attr="data-userid=${userId}"
                             onclick="goEdit(this)"
                             style="padding: 8px 16px; margin-top: 10px;">
                         수정
                     </button>
-                    </button>
+                    </th:block>
                     <a class="back-button" th:href="@{/student/profile}">목록으로 돌아가기</a>
                 </div>
             </div>
@@ -160,52 +171,37 @@
         <div class="profile-content">
             <div class="profile-section">
 
-                <!-- 프로필 사진 -->
-
-                <!--            <div class="profile-section" th:if="${profile.filePath != null}">-->
-                <!--                <h3>프로필 사진</h3>-->
-                <!--                <img th:src="@{${profile.filePath}}" alt="Profile Image" style="max-width: 200px; border-radius: 10px;">-->
-                <!--            </div>-->
-                <!--            <h3>기본 정보</h3>-->
-                <!--            <p th:if="${profile.github}">GitHub: <a th:href="${profile.github}" target="_blank" th:text="${profile.github}"></a></p>-->
-                <!--            <p th:if="${profile.blog}">Blog: <a th:href="${profile.blog}" target="_blank" th:text="${profile.blog}"></a></p>-->
-                <!--            <p th:if="${profile.email}">Email: <span th:text="${profile.email}"></span></p>-->
-
-
             </div>
         </div>
-
-
-
-        <script>
-            function goEdit(btn) {
-                var userId = btn.getAttribute('data-userid');
-                location.href = '/student/profile/' + userId + '/edit';
-            }
-            function previewImage(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                const preview = document.getElementById('previewImg');
-                preview.src = URL.createObjectURL(file);
-                preview.style.display = 'block';
-            }
-
-            document.getElementById('profileImage').addEventListener('change', previewImage);
-            const bioInput = document.getElementById('bio');
-            const preview = document.getElementById('markdownPreview');
-
-            bioInput.addEventListener('input', () => {
-                const markdown = bioInput.value;
-                preview.innerHTML = marked.parse(markdown);
-            });
-
-            // 초기 로드 시에도 반영
-            preview.innerHTML = marked.parse(bioInput.value);
-
-        </script>
     </div>
-    <div th:replace="fragments/footer :: footer"></div>
 </div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script>
+    function goEdit(btn) {
+        var userId = btn.getAttribute('data-userid');
+        location.href = '/student/profile/' + userId + '/edit';
+    }
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const preview = document.getElementById('previewImg');
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+    }
+
+    document.getElementById('profileImage').addEventListener('change', previewImage);
+    const bioInput = document.getElementById('bio');
+    const preview = document.getElementById('markdownPreview');
+
+    bioInput.addEventListener('input', () => {
+        const markdown = bioInput.value;
+        preview.innerHTML = marked.parse(markdown);
+    });
+
+    // 초기 로드 시에도 반영
+    preview.innerHTML = marked.parse(bioInput.value);
+
+</script>
 </body>
-</html> 
+</html>
