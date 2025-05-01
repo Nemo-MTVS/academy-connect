@@ -1,6 +1,10 @@
 server:
-  port: 8080
-
+  port: 8082
+  error:
+    whitelabel:
+      enabled: false
+    include-message: never
+    include-stacktrace: never
 
 spring:
   application:
@@ -11,7 +15,8 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
-
+  thymeleaf:
+    cache: false
   datasource:
     url: ${DB_URL:jdbc:log4jdbc:mysql://localhost:3306/academy_connect}
     username: ${DB_USERNAME:root}

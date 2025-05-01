@@ -457,7 +457,16 @@
             );
             deleteInput.value = deleteSlotIdsValue;
             console.log('삭제할 슬롯 ID들:', deleteSlotIdsValue); // 삭제될 ID 출력
+
             form.appendChild(deleteInput);
+
+            // csrf
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_csrf';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
 
             document.body.appendChild(form);
             form.submit();
@@ -565,6 +574,14 @@
                 selectSlotId.value = slotId;
                 form.appendChild(selectSlotId);
 
+                // csrf
+                const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_csrf';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+
                 document.body.appendChild(form);
                 form.submit();
 
@@ -599,6 +616,14 @@
                 form.method = 'POST';
                 form.action = `/teacher/consulting/${consultingId}/cancel`;
                 document.body.appendChild(form);
+
+                // csrf
+                const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_csrf';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
                 form.submit();
 
                 // 모달 닫기
