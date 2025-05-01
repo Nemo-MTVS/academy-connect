@@ -54,12 +54,21 @@ public class CounselingResultController {
      * 상담 결과 상세 조회 (수정 페이지)
      */
     @GetMapping("/counselingresult/{resultId}/edit")
-    public String editCounselingResult(@PathVariable Long resultId, Model model) {
-        log.info("상담 결과 상세 조회 요청: resultId={}", resultId);
+    public String editCounselingResultForm(@PathVariable Long resultId, Model model) {
+        log.info("상담 결과 수정 폼 요청: resultId={}", resultId);
 
         try {
-            CounselingResultDTO.Response result = counselingResultService.findById(resultId);
-            model.addAttribute("counselingResult", result);
+            // Get counseling result with eager loading
+            CounselingResult result = counselingResultRepository.findByIdWithUsers(resultId)
+                .orElseThrow(() -> new NoSuchElementException("상담 결과를 찾을 수 없습니다."));
+            
+            // Get recent bookings for dropdown
+            LocalDateTime now = LocalDateTime.now();
+            List<ConsultingBooking> bookings = consultingBookingRepository.findRecentBookings(now.minusWeeks(1), now);
+            
+            model.addAttribute("result", result);
+            model.addAttribute("bookings", bookings);
+            
             return "instructor/counselingresult-edit";
         } catch (NoSuchElementException e) {
             log.error("상담 결과를 찾을 수 없음: {}", e.getMessage(), e);
@@ -67,8 +76,8 @@ public class CounselingResultController {
             model.addAttribute("backUrl", "/teacher/counselingresults");
             return "error/consulting-student-error";
         } catch (Exception e) {
-            log.error("상담 결과 상세 조회 중 오류 발생: {}", e.getMessage(), e);
-            model.addAttribute("errorMessage", "상담 결과를 불러오는 중 오류가 발생했습니다.");
+            log.error("상담 결과 수정 폼 로딩 중 오류 발생: {}", e.getMessage(), e);
+            model.addAttribute("errorMessage", "상담 결과 수정 폼을 불러오는 중 오류가 발생했습니다.");
             model.addAttribute("backUrl", "/teacher/counselingresults");
             return "error/consulting-student-error";
         }
@@ -81,17 +90,12 @@ public class CounselingResultController {
     public String updateCounselingResult(
             @PathVariable Long resultId,
             @RequestParam String md,
-            @RequestParam(required = false) LocalDateTime counselAt,
             Model model) {
+        
         log.info("상담 결과 수정 요청: resultId={}", resultId);
 
         try {
-            CounselingResultDTO.UpdateRequest updateRequest = CounselingResultDTO.UpdateRequest.builder()
-                    .md(md)
-                    .counselAt(counselAt)
-                    .build();
-                    
-            counselingResultService.update(resultId, updateRequest);
+            counselingResultService.update(resultId, new CounselingResultDTO.UpdateRequest(md));
             log.info("상담 결과 수정 완료: resultId={}", resultId);
             return "redirect:/teacher/counselingresults";
         } catch (NoSuchElementException e) {

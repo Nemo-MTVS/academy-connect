@@ -54,10 +54,11 @@ public class CounselingResultDTO {
 
     @Getter
     @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     public static class UpdateRequest {
         private String md;
-        private LocalDateTime counselAt;
+
+        public UpdateRequest(String md) {
+            this.md = md;
+        }
     }
 } 
