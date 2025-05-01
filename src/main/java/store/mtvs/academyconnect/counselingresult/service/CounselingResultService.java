@@ -24,7 +24,7 @@ public class CounselingResultService {
     private final UserRepository userRepository;
     private final ConsultingBookingRepository consultingBookingRepository;
 
-    // 상담 결과 조회
+    // 상담 id 로 결과 조회
     public CounselingResultDTO.Response findById(Long id) {
         return CounselingResultDTO.Response.from(
                 counselingResultRepository.findByIdWithUsers(id)
@@ -74,6 +74,7 @@ public class CounselingResultService {
         return CounselingResultDTO.Response.from(counselingResultRepository.save(result));
     }
 
+    // 상담 결과 수정
     @Transactional
     public CounselingResultDTO.Response update(Long id, CounselingResultDTO.UpdateRequest request) {
         CounselingResult result = counselingResultRepository.findByIdWithUsers(id)
@@ -83,6 +84,7 @@ public class CounselingResultService {
         return CounselingResultDTO.Response.from(result);
     }
 
+    // 상담 결과 삭제
     @Transactional
     public void delete(Long id) {
         CounselingResult result = counselingResultRepository.findById(id)
@@ -90,4 +92,5 @@ public class CounselingResultService {
 
         result.delete();
     }
+    
 } 

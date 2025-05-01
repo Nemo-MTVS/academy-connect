@@ -5,6 +5,18 @@ VALUES
     (2, 'Unity', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH)),
     (3, 'TA', NOW(), DATE_ADD(NOW(), INTERVAL 8 MONTH));
 
+UPDATE
+users
+SET role = 'TEACHER'
+  WHERE login_id = 'ins';
+
+
+INSERT INTO users (id, class_group_id, login_id, passwd, name, created_at, updated_at, deleted_at, role)
+VALUES
+    ('testa',1,'tta','asdf','a제이크',NOW(), NOW(), NULL, 'TEACHER'),
+    ('testb',1,'ttb','asdf','b제이크',NOW(), NOW(), NULL, 'INSTRUCTOR'),
+    ('testc',1,'ttc','$2a$10$toIE.ba231ENRpsqtKA2qOiEO5DpyCY1Z4QZ4slS1Lo03RYYghqkW','c제이크',NOW(), NOW(), NULL, 'TEACHER'),
+    ('testd',1,'ttd','$2a$10$toIE.ba231ENRpsqtKA2qOiEO5DpyCY1Z4QZ4slS1Lo03RYYghqkW','d제이크',NOW(), NOW(), NULL, 'INSTRUCTOR');
 -- 사용자 데이터
 INSERT INTO users (id, class_group_id, login_id, passwd, name, created_at, updated_at, deleted_at, role)
 VALUES

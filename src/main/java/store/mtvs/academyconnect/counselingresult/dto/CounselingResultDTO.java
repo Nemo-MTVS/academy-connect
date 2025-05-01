@@ -2,6 +2,8 @@ package store.mtvs.academyconnect.counselingresult.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import store.mtvs.academyconnect.counselingresult.domain.entity.CounselingResult;
 
 import java.time.LocalDateTime;
@@ -31,14 +33,17 @@ public class CounselingResultDTO {
                     .instructorName(result.getInstructor().getName())
                     .bookingId(result.getBooking() != null ? result.getBooking().getId() : null)
                     .md(result.getMd())
-                    .counselAt(result.getCounselAt() != null ? result.getCounselAt() : null)
+                    .counselAt(result.getCounselAt())
                     .createdAt(result.getCreatedAt())
-                    .updatedAt(result.getUpdatedAt() != null ? result.getUpdatedAt() : null)
+                    .updatedAt(result.getUpdatedAt())
                     .build();
         }
     }
 
     @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class CreateRequest {
         private String studentId;
         private String instructorId;
@@ -48,7 +53,11 @@ public class CounselingResultDTO {
     }
 
     @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class UpdateRequest {
         private String md;
+        private LocalDateTime counselAt;
     }
 } 

@@ -466,22 +466,22 @@
             <span sec:authentication="principal.classGroupName"></span>  /  <span sec:authentication="principal.name"></span> 강사
         </div>
         <div class="menu-container">
-            <a href="/teacherss/scheduling" class="menu-item" th:classappend="${activeMenu == 'schedule'} ? 'active' : ''">
+            <a href="/teacher/scheduling" class="menu-item" th:classappend="${activeMenu == 'schedule'} ? 'active' : ''">
                 <i class="bi bi-calendar-check"></i> 스케줄 확인
             </a>
-            <a href="/teacherss/recurring" class="menu-item" th:classappend="${activeMenu == 'recurring'} ? 'active' : ''">
+            <a href="/teacher/recurring" class="menu-item" th:classappend="${activeMenu == 'recurring'} ? 'active' : ''">
                 <i class="bi bi-arrow-repeat"></i> 반복 스케줄 설정
             </a>
-            <a href="/teacherss/reservation" class="menu-item" th:classappend="${activeMenu == 'reservations'} ? 'active' : ''">
+            <a href="/teacher/reservation" class="menu-item" th:classappend="${activeMenu == 'reservation'} ? 'active' : ''">
                 <i class="bi bi-list-check"></i> 전체 예약 내역
             </a>
-            <a href="/teacherss/counselresult" class="menu-item" th:classappend="${activeMenu == 'counselresults'} ? 'active' : ''">
+            <a href="/teacher/counselingresults" class="menu-item" th:classappend="${activeMenu == 'counselingresults'} ? 'active' : ''">
                 <i class="bi bi-list-check"></i> 전체 상담 내역
             </a>
-            <a href="/teacherss/notifications" class="menu-item" th:classappend="${activeMenu == 'notifications'} ? 'active' : ''">
+            <a href="/teacher/notifications" class="menu-item" th:classappend="${activeMenu == 'notifications'} ? 'active' : ''">
                 <i class="bi bi-bell"></i> 알림
             </a>
-            <a href="/teacherss/profile" class="menu-item" th:classappend="${activeMenu == 'profile'} ? 'active' : ''">
+            <a href="/teacher/profile" class="menu-item" th:classappend="${activeMenu == 'profile'} ? 'active' : ''">
                 <i class="bi bi-person-circle"></i> 개인정보 관리
             </a>
         </div>
