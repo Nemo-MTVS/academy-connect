@@ -13,6 +13,7 @@ import store.mtvs.academyconnect.lunchmatching.domain.entity.LunchMatchingClass;
 import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.LunchMatchingClassRepository;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
 import store.mtvs.academyconnect.user.domain.entity.User;
+import store.mtvs.academyconnect.user.domain.enums.UserRole;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -80,7 +81,7 @@ public class ClassGroupAndTeacherGenerator {
                 .orElseThrow(() -> new IllegalStateException("ClassGroup \"" + classGroupName + "\" 없음"));
 
         String encodedPassword = passwordEncoder.encode(rawPassword);
-        User user = new User(id, classGroup, loginId, encodedPassword, name, "TEACHER");
+        User user = new User(id, classGroup, loginId, encodedPassword, name, UserRole.TEACHER.name());
 
         entityManager.persist(user);   // 반드시 먼저 저장
         entityManager.flush();         // flush 해서 ID가 반영되게

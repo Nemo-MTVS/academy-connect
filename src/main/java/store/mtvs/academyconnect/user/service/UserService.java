@@ -79,7 +79,7 @@ public class UserService {
                     loginId,
                     encodedPassword,
                     name,
-                    "STUDENT"
+                    UserRole.STUDENT.name()
             );
             entityManager.persist(user);
 
