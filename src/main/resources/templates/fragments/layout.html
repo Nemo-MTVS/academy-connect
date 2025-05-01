@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
-
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
 <!-- 공통 헤드 영역 -->
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
@@ -463,7 +463,7 @@
             <div class="logo-text">NimoVerse</div>
         </div>
         <div class="teacher-info">
-            백엔드 / 홍길동 강사
+            <span sec:authentication="principal.classGroupName"></span>  /  <span sec:authentication="principal.name"></span> 강사
         </div>
         <div class="menu-container">
             <a href="/teacherss/scheduling" class="menu-item" th:classappend="${activeMenu == 'schedule'} ? 'active' : ''">
@@ -485,11 +485,12 @@
                 <i class="bi bi-person-circle"></i> 개인정보 관리
             </a>
         </div>
-        <div class="logout-container">
-            <a href="/logout" class="logout-btn">
-                <i class="bi bi-box-arrow-right"></i> 로그아웃
-            </a>
+        <div sec:authorize="isAuthenticated()" class="logout-container">
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="nav-link btn btn-link logout-btn">로그아웃</button>
+            </form>
         </div>
+
     </div>
     
     <!-- 모바일 Bottom Navigation -->
@@ -498,7 +499,7 @@
             <i class="bi bi-calendar-check"></i>
             <span>스케줄</span>
         </a>
-        <a href="/teacher/recurring" class="bottom-nav-item" th:classappend="${activeMenu == 'recurring'} ? 'active' : ''">
+        <a href="/error-404" class="bottom-nav-item" th:classappend="${activeMenu == 'recurring'} ? 'active' : ''">
             <i class="bi bi-arrow-repeat"></i>
             <span>반복</span>
         </a>
@@ -506,11 +507,11 @@
             <i class="bi bi-list-check"></i>
             <span>예약</span>
         </a>
-        <a href="/teacher/notifications" class="bottom-nav-item" th:classappend="${activeMenu == 'notifications'} ? 'active' : ''">
+        <a href="/error-404" class="bottom-nav-item" th:classappend="${activeMenu == 'notifications'} ? 'active' : ''">
             <i class="bi bi-bell"></i>
             <span>알림</span>
         </a>
-        <a href="/teacher/profile" class="bottom-nav-item" th:classappend="${activeMenu == 'profile'} ? 'active' : ''">
+        <a href="/error-404" class="bottom-nav-item" th:classappend="${activeMenu == 'profile'} ? 'active' : ''">
             <i class="bi bi-person-circle"></i>
             <span>내정보</span>
         </a>
