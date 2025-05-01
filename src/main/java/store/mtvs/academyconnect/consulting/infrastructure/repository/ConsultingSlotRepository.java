@@ -25,6 +25,10 @@ public interface ConsultingSlotRepository extends JpaRepository<ConsultingSlot, 
     // 특정 상태의 상담 슬롯 조회
     List<ConsultingSlot> findByStatus(ConsultingSlot.SlotStatus status);
 
+    // 특정 강사의 특정 시간 이후에 사용 가능한 슬롯이 존재하는지 확인
+    boolean existsByInstructorIdAndStartTimeAfterAndStatusAndDeletedAtIsNull(
+            String instructorId, LocalDateTime startTime, ConsultingSlot.SlotStatus status);
+
     // 특정 강사의 상담 슬롯을 예약 취소할 때 상태 변경 위해 필요
     List<ConsultingSlot> findByInstructorAndStartTimeAndEndTime(User instructor, LocalDateTime startTime, LocalDateTime endTime);
 
