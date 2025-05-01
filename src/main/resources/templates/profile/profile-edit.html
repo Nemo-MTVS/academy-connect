@@ -7,10 +7,9 @@
     <meta charset="UTF-8">
     <title>프로필 수정</title>
     <style>
-        /* 기본 설정 */
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f8f9fa;
+            background-color: #f4f6fc;
             margin: 0;
             padding: 0;
         }
@@ -19,23 +18,56 @@
             width: 90%;
             max-width: 1200px;
             margin: 0 auto;
-            padding-top: 40px;
+            padding-top: 60px;
             display: flex;
             gap: 40px;
+            align-items: flex-start;
         }
 
         .profile-card {
-            width: 50%;
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 55%;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
         }
 
         .profile-header {
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            color: #2b3674;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+        }
+
+        .profile-info {
             margin-bottom: 20px;
+        }
+
+        .profile-info label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .profile-info input[type="text"],
+        .profile-info input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #fdfdfd;
+            transition: border 0.2s ease;
+        }
+
+        .profile-info input:focus,
+        textarea:focus {
+            border-color: #3d56cc;
+            outline: none;
         }
 
         .profile-image {
@@ -43,74 +75,62 @@
             height: 100px;
             border-radius: 50%;
             background-color: #ddd;
-            margin-bottom: 20px;
             overflow: hidden;
+            margin-top: 10px;
         }
 
-        .profile-info {
-            font-size: 16px;
-            margin-bottom: 12px;
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .button-group {
+            margin-top: 30px;
+            display: flex;
+            gap: 12px;
         }
 
         .change-button {
-            margin-top: 20px;
             padding: 12px 24px;
             background-color: #3d56cc;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            transition: background-color 0.2s ease;
             text-decoration: none;
             display: inline-block;
+            text-align: center;
         }
 
         .change-button:hover {
             background-color: #2c41a8;
         }
 
-        .upload-button {
-            margin-top: 10px;
-            padding: 8px 16px;
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .upload-button:hover {
-            background-color: #388e3c;
-        }
-
         .md-file {
-            width: 40%;
-            background: #ffffff;
+            width: 45%;
+            background: #e9ecf8;
             padding: 30px;
-            border-radius: 16px;
+            border-radius: 20px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 16px;
             color: #333;
             line-height: 1.6;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
             overflow-y: auto;
             height: 600px;
-        }
-        /* Footer */
-        .footer {
-            margin-top: 60px;
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
+            white-space: pre-wrap;
         }
     </style>
-    <!-- marked.js CDN for Markdown parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-
+<div th:replace="fragments/header :: header"></div>
 <div class="container">
     <div class="profile-card">
         <div class="profile-header">프로필 수정</div>
@@ -183,5 +203,6 @@
     preview.innerHTML = marked.parse(bioInput.value);
 
 </script>
+<div th:replace="fragments/footer :: footer"></div>
 </body>
 </html>

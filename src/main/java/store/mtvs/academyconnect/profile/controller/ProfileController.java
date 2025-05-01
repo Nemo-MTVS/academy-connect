@@ -64,8 +64,9 @@ public class ProfileController {
 
     // 학생 상세 페이지
     @GetMapping("/{userId}")
-    public String showUserProfile(@PathVariable String userId, Model model) {
+    public String showUserProfile(@PathVariable String userId, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
+            boolean isMyProfile = false;
             log.info("Showing profile for user: {}", userId);
 
             User user = profileService.getUserById(userId);
@@ -73,6 +74,13 @@ public class ProfileController {
 
             model.addAttribute("user", user);
             model.addAttribute("profile", profile);
+            if (userId.equals(userDetails.getId())) {
+                isMyProfile = true;
+            }
+            model.addAttribute("IsMyProfile", isMyProfile);
+            String markdown = profile.getMd(); // 사용자가 저장한 마크다운
+            String html = MarkdownUtil.convertToHtml(markdown);
+            profile.setMd(html); // Thymeleaf에서 th:utext로 출력할 수 있도록 HTML로 변환된 내용을 넣기
 
             return "profile/detail";
         } catch (Exception e) {
@@ -113,15 +121,6 @@ public class ProfileController {
         if (!userUuid.equals(userId)) {
             throw new AccessDeniedException("권한이 없습니다");
         }
-//        // 현재 로그인한 유저의 ID 확인
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String loggedInUserId = authentication.getName(); // 필요 시 커스텀 UserDetails로 교체
-//
-//        // 본인 확인: userId가 로그인한 사람의 ID가 아니면 수정 못 함
-//        if (!userId.equals(loggedInUserId)) {
-//            // 권한 없음 처리
-//            return "redirect:/access-denied"; // 또는 403 페이지
-//        }
 
         String email = form.getEmail();
         String github = form.getGithub();
@@ -142,6 +141,7 @@ public class ProfileController {
         }
 
         profileService.updateProfile(userId, email, github, blog, bio, profileImagePath);
+
 
         return "redirect:/student/profile/" + userId;
     }
