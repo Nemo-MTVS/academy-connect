@@ -22,9 +22,10 @@
 
             <div class="card">
                 <div class="card-body">
-                    <form th:action="@{/teacher/counselingresult/{id}(id=${result.id})}" method="post" class="needs-validation" novalidate>
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        
+                    <form th:action="@{/teacher/counselingresult/{id}(id=${result.id})}" 
+                          method="post" 
+                          class="needs-validation" 
+                          novalidate>
                         <!-- Student Name (Read-only) -->
                         <div class="mb-3">
                             <label class="form-label">학생 이름</label>

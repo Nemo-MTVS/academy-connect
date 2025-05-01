@@ -54,13 +54,24 @@ public class CounselingResultController {
      * 상담 결과 상세 조회 (수정 페이지)
      */
     @GetMapping("/counselingresult/{resultId}/edit")
-    public String editCounselingResultForm(@PathVariable Long resultId, Model model) {
+    public String editCounselingResultForm(
+            @PathVariable Long resultId,
+            @AuthenticationPrincipal CustomUserDetails instructor,
+            Model model) {
         log.info("상담 결과 수정 폼 요청: resultId={}", resultId);
 
         try {
             // Get counseling result with eager loading
             CounselingResult result = counselingResultRepository.findByIdWithUsers(resultId)
                 .orElseThrow(() -> new NoSuchElementException("상담 결과를 찾을 수 없습니다."));
+            
+            // Check if the current instructor is the owner of this counseling result
+            if (!result.getInstructor().getId().equals(instructor.getId())) {
+                log.error("권한 없음: 다른 강사의 상담 결과를 수정할 수 없습니다.");
+                model.addAttribute("errorMessage", "다른 강사의 상담 결과를 수정할 수 없습니다.");
+                model.addAttribute("backUrl", "/teacher/counselingresults");
+                return "error/consulting-student-error";
+            }
             
             // Get recent bookings for dropdown
             LocalDateTime now = LocalDateTime.now();
@@ -90,11 +101,24 @@ public class CounselingResultController {
     public String updateCounselingResult(
             @PathVariable Long resultId,
             @RequestParam String md,
+            @AuthenticationPrincipal CustomUserDetails instructor,
             Model model) {
         
         log.info("상담 결과 수정 요청: resultId={}", resultId);
 
         try {
+            // Get counseling result first to ensure it exists and check ownership
+            CounselingResult result = counselingResultRepository.findByIdWithUsers(resultId)
+                .orElseThrow(() -> new NoSuchElementException("상담 결과를 찾을 수 없습니다."));
+            
+            // Check if the current instructor is the owner of this counseling result
+            if (!result.getInstructor().getId().equals(instructor.getId())) {
+                log.error("권한 없음: 다른 강사의 상담 결과를 수정할 수 없습니다.");
+                model.addAttribute("errorMessage", "다른 강사의 상담 결과를 수정할 수 없습니다.");
+                model.addAttribute("backUrl", "/teacher/counselingresults");
+                return "error/consulting-student-error";
+            }
+            
             counselingResultService.update(resultId, new CounselingResultDTO.UpdateRequest(md));
             log.info("상담 결과 수정 완료: resultId={}", resultId);
             return "redirect:/teacher/counselingresults";
@@ -115,13 +139,24 @@ public class CounselingResultController {
      * 상담 결과 삭제
      */
     @DeleteMapping("/counselingresult/{resultId}")
-    public String deleteCounselingResult(@PathVariable Long resultId, Model model) {
+    public String deleteCounselingResult(
+            @PathVariable Long resultId,
+            @AuthenticationPrincipal CustomUserDetails instructor,
+            Model model) {
         log.info("상담 결과 삭제 요청: resultId={}", resultId);
 
         try {
             // Get counseling result first to ensure it exists
             CounselingResult result = counselingResultRepository.findByIdWithUsers(resultId)
                 .orElseThrow(() -> new NoSuchElementException("상담 결과를 찾을 수 없습니다."));
+            
+            // Check if the current instructor is the owner of this counseling result
+            if (!result.getInstructor().getId().equals(instructor.getId())) {
+                log.error("권한 없음: 다른 강사의 상담 결과를 삭제할 수 없습니다.");
+                model.addAttribute("errorMessage", "다른 강사의 상담 결과를 삭제할 수 없습니다.");
+                model.addAttribute("backUrl", "/teacher/counselingresults");
+                return "error/consulting-student-error";
+            }
             
             // Soft delete by setting deletedAt timestamp
             result.delete();
