@@ -300,31 +300,40 @@
                     }
                 });
 
-                // ✅ 매칭하기 버튼 처리 (이미 매칭했으면 모두 비활성화)
+                // 매칭하기 버튼 처리 (이미 매칭했으면 모두 비활성화)
                 document.querySelectorAll('.apply-btn').forEach(btn => {
-                    if (currentUserRole !== 'STUDENT' || isAlreadyMatched) {
+                    const card = btn.closest('.matching-card');
+                    const index = Array.from(cards).indexOf(card);
+                    const matchInfo = data[index];
+
+                    const myMajor = currentUserRole.toLowerCase();
+                    const myMajorCount = matchInfo.students.filter(s => s.major.toLowerCase() === myMajor).length;
+
+                    // 전공 인원이 3명이면 무조건 신청 불가
+                    const isMyMajorFull = myMajorCount >= 3;
+
+                    if (currentUserRole !== 'STUDENT' || isAlreadyMatched || isMyMajorFull) {
+                        // 학생이 아니거나 이미 매칭했거나 내 전공 다 찼으면 disable
                         btn.disabled = true;
                         btn.style.backgroundColor = '#ccc';
                         btn.style.cursor = 'not-allowed';
                         btn.onclick = null;
-                    } else {
+                    }
+                    else {
+                        // 신청 가능
                         btn.disabled = false;
                         btn.style.backgroundColor = 'black';
                         btn.style.cursor = 'pointer';
 
-                        const card = btn.closest('.matching-card');
                         const matchTitle = card.querySelector('.card-header span')?.innerText || '매칭';
-                        const index = Array.from(cards).indexOf(card);
-
                         btn.onclick = function() {
-                            applyForLunch(index + 1, matchTitle);
+                            applyForLunch(matchInfo.classId, matchTitle);
                         };
                     }
                 });
             })
             .catch(error => console.error('매칭 현황 불러오기 실패:', error));
     }
-
 
     // 매칭하기 버튼 클릭 시: 매칭 확인 모달 열기
     function applyForLunch(classId, matchTitle) {
