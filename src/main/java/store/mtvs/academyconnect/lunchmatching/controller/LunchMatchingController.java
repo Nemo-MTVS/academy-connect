@@ -1,35 +1,48 @@
 package store.mtvs.academyconnect.lunchmatching.controller;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import store.mtvs.academyconnect.lunchmatching.dto.ApplyRequestDto;
 import store.mtvs.academyconnect.lunchmatching.dto.LunchMatchingStatusResponse;
 import store.mtvs.academyconnect.lunchmatching.service.LunchMatchingService;
+import store.mtvs.academyconnect.user.service.UserService;
 
 import java.util.List;
 
 @RestController // 이 클래스는 REST API를 처리하는 컨트롤러임 (JSON 반환)
 @RequiredArgsConstructor // 생성자 주입 자동 처리
-@RequestMapping("/lunch")  // 기본 경로: /lunch
+@RequestMapping("/student/lunch")  // 기본 경로: /lunch
 public class LunchMatchingController {
 
     private final LunchMatchingService lunchMatchingService;
+    private final UserService userService;
+
+    // 현재 로그인한 사용자의 UUID 반환
+    private String getCurrentUserId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails userDetails) {
+            return userService.getUserByLoginId(userDetails.getUsername())
+                    .map(user -> user.getId()) // UUID 반환
+                    .orElse(null);
+        }
+        return null;
+    }
 
     /**
      * 점심 매칭 신청 API
      * [POST] /lunch/apply
      *
      * 사용자가 매칭 클래스를 신청하는 기능.
-     * (현재는 테스트용으로 사용자 ID를 임의 고정하여 사용)
      *
      * @param request ApplyRequestDto (lunchMatchingClassId 포함)
      * @return 성공 시 "신청 완료" 메시지 반환
      */
     @PostMapping("/apply")
     public ResponseEntity<String> apply(@RequestBody ApplyRequestDto request) {
-        String student = "uuid-be-001"; // 임시 고정 사용자 (테스트용)
+        String student = getCurrentUserId();
 
         lunchMatchingService.apply(student, request.getLunchMatchingClassId());
 
@@ -41,14 +54,13 @@ public class LunchMatchingController {
      * [POST] /lunch/cancel
      *
      * 사용자가 신청한 매칭을 취소하는 기능.
-     * (현재는 테스트용으로 사용자 ID를 임의 고정하여 사용)
      *
      * @param request ApplyRequestDto (lunchMatchingClassId 포함)
      * @return 성공 시 "신청 취소 완료" 메시지 반환
      */
     @PostMapping("/cancel")
     public ResponseEntity<String> cancel(@RequestBody ApplyRequestDto request) {
-        String student = "uuid-be-001"; // 임시 고정 사용자 (테스트용)
+        String student = getCurrentUserId();
 
         lunchMatchingService.cancel(student, request.getLunchMatchingClassId());
 

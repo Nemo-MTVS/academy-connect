@@ -103,6 +103,7 @@ body {
 
 /* 슬롯 영역 */
 .slots {
+    padding-top: 16px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
@@ -133,7 +134,7 @@ body {
     font-size: 16px;
     font-weight: bold;
     color: #111;
-    margin-top: 4px;
+    margin-top: 7px;
     opacity: 0;
     transition: opacity 0.4s ease;
 }
