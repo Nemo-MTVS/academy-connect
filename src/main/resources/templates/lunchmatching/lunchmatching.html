@@ -188,31 +188,21 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- JS 로직 -->>
 <script>
     let selectedClassId = null; // 현재 선택된 매칭 클래스 ID
 
     const currentUserId = document.querySelector('[data-user-id]').dataset.userId;
     const currentUserRole = document.querySelector('[data-user-role]').dataset.userRole;
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         loadMatchingStatus();   // 페이지 로드 시 매칭 현황 불러오기
         startCountdown();       // 타이머 시작
 
         // 매칭 신청 확인 버튼 클릭 이벤트 등록
         document.getElementById('confirmMatchBtn').addEventListener('click', confirmMatch);
 
-        // 매칭하기 버튼에 직접 이벤트 리스너 등록
-        document.querySelectorAll('.apply-btn').forEach((btn, index) => {
-            btn.addEventListener('click', function () {
-                // 버튼이 disable 상태가 아닐 때만 작동
-                if (!this.disabled) {
-                    const card = this.closest('.matching-card');
-                    const matchTitle = card.querySelector('.card-header span')?.innerText || '매칭';
-                    // index + 1 = classId로 가정 (1, 2, 3)
-                    applyForLunch(index + 1, matchTitle);
-                }
-            });
-        });
         setInterval(loadMatchingStatus, 60000); // 1분마다 매칭 현황 갱신
 
         // 매칭 취소 확정 버튼 클릭 이벤트 등록
@@ -458,6 +448,8 @@
                 if (response.ok) {
                     setTimeout(() => {
                         loadMatchingStatus(); // 0.5초 후 부드럽게 갱신
+                        const cancelModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('cancelConfirmModal'));
+                        cancelModal.hide();
                         cancelButton.disabled = false; // 버튼 다시 활성화
                     }, 500);
                 } else {
