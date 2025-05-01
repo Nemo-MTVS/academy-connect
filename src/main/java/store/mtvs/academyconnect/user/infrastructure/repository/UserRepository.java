@@ -37,6 +37,6 @@ public interface UserRepository extends JpaRepository<User, String> {
     List<User> findAllActiveStudents();
 
 
-    @Query("SELECT u FROM User u JOIN FETCH u.classGroup c WHERE c.name = :className")
-    List<User> findByClassGroupName(@Param("className") String className);
+    @Query("SELECT u FROM User u JOIN FETCH u.classGroup c WHERE c.name = :className and u.role = :role")
+    List<User> findByClassGroupNameWithRole(@Param("className") String className, String role);
 }
