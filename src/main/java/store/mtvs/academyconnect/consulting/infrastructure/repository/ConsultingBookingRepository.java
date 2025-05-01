@@ -23,6 +23,10 @@ public interface ConsultingBookingRepository extends JpaRepository<ConsultingBoo
     // 특정 기간의 상담 예약 조회
     List<ConsultingBooking> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
 
+    // 최근 상담 예약 조회 (기간설정)
+    @Query("SELECT cb FROM ConsultingBooking cb WHERE cb.startTime BETWEEN :startTime AND :endTime ORDER BY cb.startTime DESC")
+    List<ConsultingBooking> findRecentBookings(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+
     // 특정 강사의 특정 날짜 범위의 예약된/완료된 상담 조회 (S03 구현용)
     @Query("SELECT cb FROM ConsultingBooking cb WHERE cb.instructor.id = :instructorId " +
             "AND cb.startTime BETWEEN :startDateTime AND :endDateTime " +

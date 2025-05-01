@@ -62,6 +62,7 @@ public class CreateCounselingView {
         }
     }
 
+    // 상담 결과 생성
     @Transactional
     protected void createCounselingResult() {
         try {
@@ -188,7 +189,7 @@ public class CreateCounselingView {
             throw e; // Re-throw to trigger transaction rollback
         }
     }
-
+    // 상담 결과 상세 조회
     @Transactional(readOnly = true)
     protected void viewCounselingResult() {
         System.out.println("\n=== View Counseling Result ===");
@@ -217,6 +218,7 @@ public class CreateCounselingView {
         System.out.println("Deleted At: " + result.getDeletedAt());
     }
 
+    // 상담 결과 전체 조회
     @Transactional(readOnly = true)
     protected void viewAllCounselingResult() {
         try {
@@ -267,6 +269,7 @@ public class CreateCounselingView {
         }
     }
 
+    // 상담 결과 수정
     @Transactional
     protected void updateCounselingResult() {
         System.out.println("\n=== Update Counseling Result ===");
@@ -295,6 +298,7 @@ public class CreateCounselingView {
         }
     }
 
+    // 상담 결과 삭제
     @Transactional
     protected void deleteCounselingResult() {
         System.out.println("\n=== Delete Counseling Result ===");

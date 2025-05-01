@@ -11,6 +11,10 @@ import store.mtvs.academyconnect.counselingresult.domain.entity.CounselingResult
 import store.mtvs.academyconnect.counselingresult.infrastructure.repository.CounselingResultRepository;
 import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 import store.mtvs.academyconnect.consulting.infrastructure.repository.ConsultingBookingRepository;
+import store.mtvs.academyconnect.user.domain.entity.User;
+import store.mtvs.academyconnect.consulting.domain.entity.ConsultingBooking;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import store.mtvs.academyconnect.global.config.CustomUserDetails;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -128,37 +132,92 @@ public class CounselingResultController {
     }
 
     /**
+     * 새 상담 결과 생성 폼
+     */
+    @GetMapping("/counselingresult/new")
+    public String createCounselingResultForm(Model model) {
+        log.info("새 상담 결과 생성 폼 요청");
+        try {
+            // 예약 목록 조회 (최근 일주일)
+            LocalDateTime now = LocalDateTime.now();
+            List<ConsultingBooking> bookings = consultingBookingRepository.findRecentBookings(now.minusWeeks(1), now);
+            model.addAttribute("bookings", bookings);
+            
+            return "instructor/counselingresult-create";
+        } catch (Exception e) {
+            log.error("상담 결과 생성 폼 로딩 중 오류 발생: {}", e.getMessage(), e);
+            model.addAttribute("errorMessage", "상담 결과 생성 폼을 불러오는 중 오류가 발생했습니다.");
+            model.addAttribute("backUrl", "/teacher/counselingresults");
+            return "error/consulting-student-error";
+        }
+    }
+
+    /**
      * 새 상담 결과 생성
      */
     @PostMapping("/counselingresult")
     public String createCounselingResult(
-            @RequestParam String studentId,
+            @RequestParam String studentName,
             @RequestParam(required = false) Long bookingId,
             @RequestParam String md,
-            @RequestParam(required = false) LocalDateTime counselAt,
+            @AuthenticationPrincipal CustomUserDetails instructor,
             Model model) {
-        // 임시로 고정된 강사 ID 사용 (로그인 구현 후 세션에서 가져오도록 수정 필요)
-        String instructorId = "uuid-be-ins";
         
-        log.info("상담 결과 생성 요청: studentId={}, instructorId={}", studentId, instructorId);
+        log.info("상담 결과 생성 요청: studentName={}, bookingId={}", studentName, bookingId);
 
         try {
-            CounselingResultDTO.CreateRequest createRequest = CounselingResultDTO.CreateRequest.builder()
-                    .studentId(studentId)
-                    .instructorId(instructorId)
-                    .bookingId(bookingId)
-                    .md(md)
-                    .counselAt(counselAt)
-                    .build();
-            
-            counselingResultService.create(createRequest);
-            log.info("상담 결과 생성 완료");
+            // Find student by name
+            List<User> matchingStudents = userRepository.findAllByName(studentName);
+            if (matchingStudents.isEmpty()) {
+                log.error("학생을 찾을 수 없음: {}", studentName);
+                model.addAttribute("errorMessage", "해당 이름의 학생을 찾을 수 없습니다.");
+                model.addAttribute("backUrl", "/teacher/counselingresults");
+                return "error/consulting-student-error";
+            }
+
+            User student;
+            if (matchingStudents.size() > 1) {
+                // For multiple students with same name, use the first one for now
+                // In a real implementation, you might want to add student ID to the form
+                log.warn("동일한 이름의 학생이 여러명 있음: {}", studentName);
+                student = matchingStudents.get(0);
+            } else {
+                student = matchingStudents.get(0);
+            }
+            log.info("✅ Selected student: {} (UUID: {})", student.getName(), student.getId());
+
+            // Get instructor user from repository
+            User instructorUser = userRepository.findById(instructor.getId())
+                .orElseThrow(() -> new IllegalStateException("Instructor not found"));
+
+            // Handle booking and counselAt
+            ConsultingBooking booking = null;
+            LocalDateTime counselAt = null;
+            if (bookingId != null) {
+                booking = consultingBookingRepository.findById(bookingId)
+                    .orElse(null);
+                if (booking != null) {
+                    counselAt = booking.getStartTime();
+                    log.info("✅ Found booking with ID: {}", bookingId);
+                    log.info("✅ Using counseling time: {}", counselAt);
+                }
+            }
+
+            // Create and save counseling result
+            CounselingResult counselingResult = CounselingResult.createCounselingResult(
+                student,
+                instructorUser,
+                booking,
+                md,
+                counselAt
+            );
+
+            log.info("Saving to database...");
+            counselingResult = counselingResultRepository.save(counselingResult);
+            counselingResultRepository.flush();
+            log.info("✅ Created counseling result with ID: {}", counselingResult.getId());
+
             return "redirect:/teacher/counselingresults";
-        } catch (NoSuchElementException e) {
-            log.error("상담 결과 생성 실패 - 사용자를 찾을 수 없음: {}", e.getMessage(), e);
-            model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("backUrl", "/teacher/counselingresults");
-            return "error/consulting-student-error";
         } catch (Exception e) {
             log.error("상담 결과 생성 중 오류 발생: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "상담 결과 생성 중 오류가 발생했습니다.");
