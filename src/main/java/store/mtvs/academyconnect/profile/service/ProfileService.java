@@ -6,11 +6,10 @@ import org.springframework.transaction.annotation.Transactional;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
 import store.mtvs.academyconnect.profile.infrastructure.repository.ProfileRepository;
 import store.mtvs.academyconnect.user.domain.entity.User;
+import store.mtvs.academyconnect.user.domain.enums.UserRole;
 import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
-import java.io.File;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -28,7 +27,7 @@ public class ProfileService {
     public List<User> getStudentsByClassName(String className) {
         log.info("Finding students for class: {}", className);
         try {
-            List<User> students = userRepository.findByClassGroupName(className);
+            List<User> students = userRepository.findByClassGroupNameWithRole(className, UserRole.STUDENT.name());
             log.info("Found {} students in class {}", students.size(), className);
             for (User student : students) {
                 log.info("Student found: {} (ID: {})", student.getName(), student.getId());
