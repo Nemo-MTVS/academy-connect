@@ -7,4 +7,4 @@ import java.util.Optional;
 
 public interface LunchMatchingClassRepository extends JpaRepository<LunchMatchingClass, Long> {
 
-} 
+}

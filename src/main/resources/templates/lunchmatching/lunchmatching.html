@@ -8,6 +8,7 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
+    <link rel="icon" href="/images/favicon.ico">
     <!-- CSS 파일 연결 -->
     <link th:href="@{/css/lunchmatching.css}" rel="stylesheet">
     <link th:href="@{/css/main.css}" rel="stylesheet">
@@ -225,6 +226,9 @@
             .then(data => {
                 const cards = document.querySelectorAll('.matching-card');
 
+                // 내가 이미 매칭했는지 체크용
+                let isAlreadyMatched = false;
+
                 // 슬롯 초기화
                 document.querySelectorAll('.slot').forEach(slot => {
                     const nameSpan = slot.querySelector('.name');
@@ -277,6 +281,9 @@
                                     const cancelModal = new bootstrap.Modal(document.getElementById('cancelConfirmModal'));
                                     cancelModal.show();
                                 };
+
+                                // 내가 이미 매칭한 상태임을 체크
+                                isAlreadyMatched = true;
                             } else {
                                 nameSpan.style.cursor = 'default';
                                 nameSpan.onclick = null;
@@ -292,30 +299,37 @@
             <i class="bi bi-people-fill" style="font-size: 16px; margin-right: 5px;"></i> 잔여 ${remain}/6
         `;
                     }
+                });
 
-                    // 매칭하기 버튼 연결
-                    const applyBtn = card.querySelector('.apply-btn');
-                    const matchTitle = card.querySelector('.card-header span')?.innerText || '매칭';
+                // 매칭하기 버튼 처리 (이미 매칭했으면 모두 비활성화)
+                document.querySelectorAll('.apply-btn').forEach(btn => {
+                    const card = btn.closest('.matching-card');
+                    const index = Array.from(cards).indexOf(card);
+                    const matchInfo = data[index];
 
-                    if (currentUserRole !== 'STUDENT') {
-                        applyBtn.disabled = true;
-                        applyBtn.style.backgroundColor = '#ccc';
-                        applyBtn.style.cursor = 'not-allowed';
-                        applyBtn.onclick = null;
-                    } else {
-                        if (matchInfo.currentCount >= 6) {
-                            applyBtn.disabled = true;
-                            applyBtn.style.backgroundColor = '#ccc';
-                            applyBtn.style.cursor = 'not-allowed';
-                            applyBtn.onclick = null;
-                        } else {
-                            applyBtn.disabled = false;
-                            applyBtn.style.backgroundColor = 'black';
-                            applyBtn.style.cursor = 'pointer';
-                            applyBtn.onclick = function() {
-                                applyForLunch(matchInfo.classId, matchTitle);
-                            };
-                        }
+                    const myMajor = currentUserRole.toLowerCase();
+                    const myMajorCount = matchInfo.students.filter(s => s.major.toLowerCase() === myMajor).length;
+
+                    // 전공 인원이 3명이면 무조건 신청 불가
+                    const isMyMajorFull = myMajorCount >= 3;
+
+                    if (currentUserRole !== 'STUDENT' || isAlreadyMatched || isMyMajorFull) {
+                        // 학생이 아니거나 이미 매칭했거나 내 전공 다 찼으면 disable
+                        btn.disabled = true;
+                        btn.style.backgroundColor = '#ccc';
+                        btn.style.cursor = 'not-allowed';
+                        btn.onclick = null;
+                    }
+                    else {
+                        // 신청 가능
+                        btn.disabled = false;
+                        btn.style.backgroundColor = 'black';
+                        btn.style.cursor = 'pointer';
+
+                        const matchTitle = card.querySelector('.card-header span')?.innerText || '매칭';
+                        btn.onclick = function() {
+                            applyForLunch(matchInfo.classId, matchTitle);
+                        };
                     }
                 });
             })
@@ -448,6 +462,8 @@
                 if (response.ok) {
                     setTimeout(() => {
                         loadMatchingStatus(); // 0.5초 후 부드럽게 갱신
+                        const cancelModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('cancelConfirmModal'));
+                        cancelModal.hide();
                         cancelButton.disabled = false; // 버튼 다시 활성화
                     }, 500);
                 } else {

@@ -63,7 +63,7 @@
                                 <td th:text="${booking.safeMessage}">상담 메세지</td>
                                 <td>
                                     <div th:if="${booking.cancellable}">
-                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id})}" method="post"
+                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id}, view='list')}" method="post"
                                               onsubmit="return confirm('예약을 취소하시겠습니까?');">
                                             <button type="submit" class="action-btn danger" style="border: none;">취소</button>
                                         </form>
@@ -105,14 +105,9 @@
                                 <td><span th:class="${booking.isFixable} ? 'status-badge waiting' : ${booking.statusClass}" th:text="${booking.isFixable} ? '처리 대기중' : ${booking.status}">상태</span></td>
                                 <td th:text="${booking.safeMessage}">상담 메세지</td>
                                 <td>
-                                    <div th:if="${booking.cancellable}">
-                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id})}" method="post"
-                                              onsubmit="return confirm('예약을 취소하시겠습니까?');">
-                                            <button type="submit" class="action-btn danger" style="border: none;">취소</button>
-                                        </form>
-                                    </div>
+
                                     <div th:if="${booking.isFixable}" style="display: flex; gap: 8px;">
-                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id})}" method="post"
+                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id}, view='list')}" method="post"
                                               onsubmit="return confirm('상담을 취소하시겠습니까?');">
                                             <button type="submit" class="action-btn danger" style="border: none;">상담 취소</button>
                                         </form>

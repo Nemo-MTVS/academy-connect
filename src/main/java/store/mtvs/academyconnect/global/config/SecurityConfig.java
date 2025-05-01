@@ -19,14 +19,14 @@ import store.mtvs.academyconnect.global.filter.RequestDebugFilter;
 import store.mtvs.academyconnect.user.domain.enums.UserRole;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 
-import java.util.Collection;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final CustomUserDetailService userDetailService;
+
+    /* ---------- 공통 Bean ---------- */
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -40,153 +40,142 @@ public class SecurityConfig {
 
     @Bean
     public RequestDebugFilter requestDebugFilter() {
-        return new RequestDebugFilter();
+        return new RequestDebugFilter();   // 아래 2-항 참고
     }
 
-    // TEACHER용 로그인 성공 핸들러
-    @Bean
-    public AuthenticationSuccessHandler teacherAuthenticationSuccessHandler() {
-        return (request, response, authentication) -> {
-            response.sendRedirect("/teacher/scheduling");
-        };
-    }
-
-    // STUDENT용 로그인 성공 핸들러
-    @Bean
-    public AuthenticationSuccessHandler studentAuthenticationSuccessHandler() {
-        return (request, response, authentication) -> {
-            response.sendRedirect("/");
-        };
-    }
-
-    // TEACHER 권한 체크용 로그인 필터
-    @Bean
-    public AuthenticationFailureHandler teacherAuthenticationFailureHandler() {
-        return (request, response, exception) -> {
-            response.sendRedirect("/teacher/login?error=true");
-        };
-    }
-
-    // STUDENT 권한 체크용 로그인 필터
-    @Bean
-    public AuthenticationFailureHandler studentAuthenticationFailureHandler() {
-        return (request, response, exception) -> {
-            response.sendRedirect("/login?error=true");
-        };
-    }
-    
-    // 로그아웃 성공 핸들러
     @Bean
     public CustomLogoutSuccessHandler customLogoutSuccessHandler() {
         return new CustomLogoutSuccessHandler();
     }
 
-    // TEACHER 경로 전용 필터 체인 (우선순위 높음)
+    /* ---------- TEACHER ---------- */
+
+    @Bean
+    public AuthenticationSuccessHandler teacherAuthSuccessHandler() {
+        return (req, res, auth) -> res.sendRedirect("/teacher/scheduling");
+    }
+
+    @Bean
+    public AuthenticationFailureHandler teacherAuthFailureHandler() {
+        return (req, res, ex) -> res.sendRedirect("/teacher/login?error=true");
+    }
+
     @Bean
     @Order(1)
     public SecurityFilterChain teacherSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .securityMatcher("/teacher/**")
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/teacher/login").permitAll()
-                .anyRequest().hasRole(UserRole.TEACHER.name())
-            )
-            .formLogin(form -> form
-                .loginPage("/teacher/login")
-                .loginProcessingUrl("/teacher/login-process")
-                .successHandler(teacherAuthenticationSuccessHandler())
-                .failureHandler(teacherAuthenticationFailureHandler())
-                .permitAll()
-            )
+        http.securityMatcher("/teacher/**")
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/teacher/login",
+                                "/haccess-denied"         // ★ access-denied 페이지는 무조건 permitAll
+                        ).permitAll()
+                        .anyRequest().hasRole(UserRole.TEACHER.name())
+                )
+                .formLogin(form -> form
+                        .loginPage("/teacher/login")
+                        .loginProcessingUrl("/teacher/login-process")
+                        .successHandler(teacherAuthSuccessHandler())
+                        .failureHandler(teacherAuthFailureHandler())
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/teacher/logout")
+                        .logoutSuccessHandler(customLogoutSuccessHandler())
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID")
+                )
+                .exceptionHandling(ex -> ex
+                        .accessDeniedPage("/haccess-denied")
+                )
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/teacher/counselingresult/**"))
-            .logout(logout -> logout
-                .logoutUrl("/teacher/logout")
-                .logoutSuccessHandler(customLogoutSuccessHandler())
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .deleteCookies("JSESSIONID")
-            )
-            .exceptionHandling(exception -> exception
-                .accessDeniedPage("/haccess-denied")
-            );
+                .ignoringRequestMatchers("/teacher/counselingresult/**"));
+                // .csrf(AbstractHttpConfigurer::disable);
 
-        // TEACHER 인증 처리를 위한 인증 관리자 설정
-        AuthenticationManagerBuilder authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        authBuilder.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
-        
-        // TEACHER 로그인 시 TEACHER 권한만 허용하는 인증 관리자 구성
-        http.authenticationManager(teacherAuthenticationManager(authBuilder.build()));
+        /* 인증 관리자 구성 */
+        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        builder.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
 
+        http.authenticationManager(teacherOnlyManager(builder.build()));
         return http.build();
     }
 
-    // STUDENT 및 비로그인 사용자 경로 전용 필터 체인
+    /* ---------- STUDENT + 비로그인 ---------- */
+
+    @Bean
+    public AuthenticationSuccessHandler studentAuthSuccessHandler() {
+        return (req, res, auth) -> res.sendRedirect("/");
+    }
+
+    @Bean
+    public AuthenticationFailureHandler studentAuthFailureHandler() {
+        return (req, res, ex) -> res.sendRedirect("/login?error=true");
+    }
+
     @Bean
     @Order(2)
     public SecurityFilterChain studentSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .securityMatcher("/**") // 나머지 모든 요청
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/student/**").hasRole(UserRole.STUDENT.name())
-                .anyRequest().hasRole(UserRole.STUDENT.name())
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/login-process")
-                .successHandler(studentAuthenticationSuccessHandler())
-                .failureHandler(studentAuthenticationFailureHandler())
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessHandler(customLogoutSuccessHandler())
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .deleteCookies("JSESSIONID")
-            )
-            .exceptionHandling(exception -> exception
-                .accessDeniedPage("/access-denied")
-            );
 
-        // STUDENT 인증 처리를 위한 인증 관리자 설정
-        AuthenticationManagerBuilder authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        authBuilder.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
-        
-        // STUDENT 로그인 시 STUDENT 권한만 허용하는 인증 관리자 구성
-        http.authenticationManager(studentAuthenticationManager(authBuilder.build()));
+        http.securityMatcher("/**")
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/", "/login", "/signup",
+                                "/css/**", "/js/**", "/images/**",
+                                "/access-denied"           // ★ permitAll
+                        ).permitAll()
+                        .requestMatchers("/student/**").hasRole(UserRole.STUDENT.name())
+                        .anyRequest().hasRole(UserRole.STUDENT.name())
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login-process")
+                        .successHandler(studentAuthSuccessHandler())
+                        .failureHandler(studentAuthFailureHandler())
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessHandler(customLogoutSuccessHandler())
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID")
+                )
+                .exceptionHandling(ex -> ex
+                        .accessDeniedPage("/access-denied")
+                );
+                // .csrf(AbstractHttpConfigurer::disable);
 
+        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        builder.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
+
+        http.authenticationManager(studentOnlyManager(builder.build()));
         return http.build();
     }
 
-    // TEACHER 권한만 인증할 수 있는 인증 관리자
-    private AuthenticationManager teacherAuthenticationManager(AuthenticationManager authenticationManager) {
-        return authentication -> {
-            // 원래 인증 관리자로 인증 시도
-            var auth = authenticationManager.authenticate(authentication);
-            
-            // 인증 성공했지만 TEACHER 권한이 아니면 인증 실패 처리
-            Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
-            if (!authorities.contains(new SimpleGrantedAuthority("ROLE_" + UserRole.TEACHER.name()))) {
-                throw new TeacherAuthenticationException("TEACHER 권한이 없는 계정입니다.");
+    /* ---------- 전용 AuthenticationManager ---------- */
+
+    private static final GrantedAuthority ROLE_TEACHER =
+            new SimpleGrantedAuthority("ROLE_" + UserRole.TEACHER.name());
+    private static final GrantedAuthority ROLE_STUDENT =
+            new SimpleGrantedAuthority("ROLE_" + UserRole.STUDENT.name());
+
+    private AuthenticationManager teacherOnlyManager(AuthenticationManager base) {
+        return auth -> {
+            var result = base.authenticate(auth);
+            if (!result.getAuthorities().contains(ROLE_TEACHER)) {
+                throw new TeacherAuthenticationException("TEACHER 권한이 없습니다.");
             }
-            return auth;
+            return result;
         };
     }
 
-    // STUDENT 권한만 인증할 수 있는 인증 관리자
-    private AuthenticationManager studentAuthenticationManager(AuthenticationManager authenticationManager) {
-        return authentication -> {
-            // 원래 인증 관리자로 인증 시도
-            var auth = authenticationManager.authenticate(authentication);
-            
-            // 인증 성공했지만 STUDENT 권한이 아니면 인증 실패 처리
-            Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
-            if (!authorities.contains(new SimpleGrantedAuthority("ROLE_" + UserRole.STUDENT.name()))) {
-                throw new StudentAuthenticationException("STUDENT 권한이 없는 계정입니다.");
+    private AuthenticationManager studentOnlyManager(AuthenticationManager base) {
+        return auth -> {
+            var result = base.authenticate(auth);
+            if (!result.getAuthorities().contains(ROLE_STUDENT)) {
+                throw new StudentAuthenticationException("STUDENT 권한이 없습니다.");
             }
-            return auth;
+            return result;
         };
     }
 }

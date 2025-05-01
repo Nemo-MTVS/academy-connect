@@ -28,4 +28,8 @@ public interface LunchMatchingRepository extends JpaRepository<LunchMatching, St
 
     // 특정 매칭 클래스 ID의 삭제되지 않은 신청 내역 조회 (신청 시간 순 createdAt ASC 정렬)
     List<LunchMatching> findByLunchMatchingClassIdAndDeletedAtIsNullOrderByCreatedAtAsc(Long classId);
+
+    // 특정 매칭 클래스 내에서 특정 전공의 삭제되지 않은 신청 인원 수 조회
+    int countByLunchMatchingClassIdAndUser_ClassGroup_NameAndDeletedAtIsNull(Long lunchMatchingClassId, String major);
+
 }

@@ -16,6 +16,8 @@ import java.util.Optional;
 public interface ConsultingSlotRepository extends JpaRepository<ConsultingSlot, Long> {
     // 특정 강사의 상담 슬롯 조회
     List<ConsultingSlot> findByInstructor(User instructor);
+    
+    Optional<ConsultingSlot> findById(Long id);
 
     // 특정 시간대의 상담 슬롯 조회
     List<ConsultingSlot> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
@@ -63,4 +65,21 @@ public interface ConsultingSlotRepository extends JpaRepository<ConsultingSlot, 
             @Param("instructorId") String instructorId,
             @Param("year") int year,
             @Param("month") int month);
+
+    // 특정 강사의 슬롯 목록 조회 (달력 표시용)
+    @Query("SELECT cs FROM ConsultingSlot cs " +
+            "WHERE cs.instructor.id = :instructorId " +
+            "AND cs.deletedAt IS NULL " +
+            "AND cs.startTime >= :startDate " +
+            "AND cs.startTime < :endDate")
+    List<ConsultingSlot> findTimeSlotsByInstructor(
+            @Param("instructorId") String instructorId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
+    Optional<ConsultingSlot> findByInstructorIdAndStartTimeAndEndTime(
+            String instructorId,
+            LocalDateTime startTime,
+            LocalDateTime endTime
+    );
 }
