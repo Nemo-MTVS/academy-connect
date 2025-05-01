@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!--<html xmlns:th="http://www.thymeleaf.org">-->
+
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>Header</title>
@@ -38,39 +38,41 @@
         
         <!-- Lunch Mate -->
         <div class="nav-item">
-            <a class="nav-link" th:href="@{/lunchmatching}">점심 메이트</a>
+            <a class="nav-link" th:href="@{/student/lunchmatching}">점심 메이트</a>
         </div>
         
         <!-- Profile -->
         <div class="nav-item">
             <a class="nav-link" th:href="@{/profile}">프로필</a>
         </div>
-<!--        <div sec:authorize="isAuthenticated()">-->
-<!--            <span class="nav-link">-->
-<!--                <b>-->
-<!--                    <span sec:authentication="principal.classGroupName"></span>/<span sec:authentication="principal.name"></span>-->
-<!--                </b>-->
-<!--            </span>-->
-<!--        </div>-->
-
-        
-         Login / Profile Menu
-        <div class="nav-item login-item">
-            <a class="nav-link" th:href="@{/login}">로그인</a>
+        <div sec:authorize="isAuthenticated()">
+            <span class="nav-link">
+                <b>
+                    <span sec:authentication="principal.classGroupName"></span>/<span sec:authentication="principal.name"></span>
+                </b>
+            </span>
         </div>
 
-        <!-- Login / Logout -->
-<!--        <div class="nav-item login-item">-->
-<!--            &lt;!&ndash; 로그인 안한 상태 &ndash;&gt;-->
-<!--            <div sec:authorize="isAnonymous()">-->
-<!--                <a class="nav-link" th:href="@{/login}">로그인</a>-->
-<!--            </div>-->
 
-<!--            &lt;!&ndash; 로그인 한 상태 &ndash;&gt;-->
-<!--            <div sec:authorize="isAuthenticated()">-->
-<!--                <a class="nav-link" th:href="@{/logout}">로그아웃</a>-->
-<!--            </div>-->
+        <!-- Login / Profile Menu -->
+<!--        <div class="nav-item login-item">-->
+<!--            <a class="nav-link" th:href="@{/login}">로그인</a>-->
 <!--        </div>-->
+
+        <!-- Login / Logout -->
+        <div class="nav-item login-item">
+            <!-- 로그인 안한 상태 -->
+            <div sec:authorize="isAnonymous()">
+                <a class="nav-link" th:href="@{/login}">로그인</a>
+            </div>
+
+            <!-- 로그인 한 상태 -->
+            <div sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="nav-link btn btn-link logout-btn">로그아웃</button>
+                </form>
+            </div>
+        </div>
     </nav>
 </header>
 </body>

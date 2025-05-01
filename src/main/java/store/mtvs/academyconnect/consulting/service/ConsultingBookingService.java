@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.mtvs.academyconnect.consulting.domain.entity.ConsultingSlot;
+import store.mtvs.academyconnect.consulting.domain.entity.ConsultingSlot;
 import store.mtvs.academyconnect.consulting.dto.InstructorBookingDto;
 import store.mtvs.academyconnect.consulting.dto.InstructorBookingListItemDto;
 import store.mtvs.academyconnect.consulting.dto.MyBookingListItemDto;
 import store.mtvs.academyconnect.consulting.domain.entity.ConsultingBooking;
+import store.mtvs.academyconnect.consulting.dto.StudentBookingRequestDto;
 import store.mtvs.academyconnect.consulting.infrastructure.repository.ConsultingBookingRepository;
 import store.mtvs.academyconnect.consulting.infrastructure.repository.ConsultingSlotRepository;
 import store.mtvs.academyconnect.global.config.ClockConfiguration;
@@ -26,6 +28,8 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ConsultingBookingService {
 
+    private final ConsultingSlotRepository slotRepository;
+    private final ConsultingBookingRepository bookingRepository;
     private final ConsultingBookingRepository consultingBookingRepository;
     private final ConsultingSlotRepository consultingSlotRepository;
     private final UserRepository userRepository;
@@ -178,21 +182,131 @@ public class ConsultingBookingService {
         }
 
         // 서비스 계층에서 직접 상태 변경
-        ConsultingBooking updatedBooking = ConsultingBooking.builder()
-                .id(booking.getId())
-                .student(booking.getStudent())
-                .instructor(booking.getInstructor())
-                .status(ConsultingBooking.BookingStatus.취소됨)
-                .message(booking.getMessage())
-                .createdAt(booking.getCreatedAt())
-                .updateAt(now)
-                .startTime(booking.getStartTime())
-                .endTime(booking.getEndTime())
-                .build();
+        booking.setStatus(ConsultingBooking.BookingStatus.취소됨);
+        booking.setUpdateAt(now);
+        consultingBookingRepository.save(booking);
 
-        consultingBookingRepository.save(updatedBooking);
+        // 추가: 해당 시간의 강사 슬롯 상태를 '사용가능'으로 변경
+        log.debug("해당 시간의 강사 슬롯 조회 시작: instructorId={}, startTime={}, endTime={}",
+                booking.getInstructor().getId(), booking.getStartTime(), booking.getEndTime());
+
+        List<ConsultingSlot> slots = consultingSlotRepository.findByInstructorAndStartTimeAndEndTime(
+                booking.getInstructor(),
+                booking.getStartTime(),
+                booking.getEndTime()
+        );
+
+        if (slots.isEmpty()) {
+            log.warn("해당 시간의 강사 슬롯을 찾을 수 없음: instructorId={}, startTime={}, endTime={}",
+                    booking.getInstructor().getId(), booking.getStartTime(), booking.getEndTime());
+        } else {
+            ConsultingSlot slot = slots.get(0);
+            log.debug("강사 슬롯 조회 성공: slotId={}, 현재상태={}", slot.getId(), slot.getStatus());
+
+            if (slot.getStatus() == ConsultingSlot.SlotStatus.불가능) {
+                slot.setStatus(ConsultingSlot.SlotStatus.사용가능);
+                consultingSlotRepository.save(slot);
+                log.info("강사 슬롯 상태 변경 성공: slotId={}, 변경상태=사용가능", slot.getId());
+            } else {
+                log.warn("강사 슬롯이 이미 사용가능 상태임: slotId={}, status={}",
+                        slot.getId(), slot.getStatus());
+            }
+        }
+
         log.info("예약 취소 성공: bookingId={}", bookingId);
     }
+
+    @Transactional
+    public ConsultingBooking createBookingFromSlot(String studentId, StudentBookingRequestDto requestDto) {
+        log.info("시간 지정 예약 생성 시도: studentId={}, instructorId={}, slotId={}",
+                studentId, requestDto.getInstructorId(), requestDto.getSlotId());
+
+        try {
+            // 선택된 슬롯 가져오기
+            log.debug("1. 선택된 슬롯 조회 시도: slotId={}", requestDto.getSlotId());
+            ConsultingSlot slot = slotRepository.findById(requestDto.getSlotId())
+                    .orElseThrow(() -> new IllegalArgumentException("선택한 슬롯이 존재하지 않습니다."));
+            log.debug("1-1. 슬롯 조회 성공: slotId={}, status={}, instructorId={}, startTime={}",
+                    slot.getId(), slot.getStatus(), slot.getInstructor().getId(), slot.getStartTime());
+
+            // 슬롯 정보로 변수 초기화
+            LocalDateTime requestedStartTime = slot.getStartTime();
+            LocalDateTime requestedEndTime = slot.getEndTime();
+            String instructorId = slot.getInstructor().getId();
+
+            // 0. 현재 시간 이후인지 확인
+            log.debug("0. 과거 시간 체크: requestedTime={}, currentTime={}",
+                    requestedStartTime, LocalDateTime.now());
+            if (requestedStartTime.isBefore(LocalDateTime.now())) {
+                throw new IllegalArgumentException("과거 시간으로는 예약할 수 없습니다.");
+            }
+
+            // 1. 슬롯 가용성 확인
+            log.debug("2. 슬롯 가용성 확인: status={}", slot.getStatus());
+            if (slot.getStatus() != ConsultingSlot.SlotStatus.사용가능) {
+                throw new IllegalArgumentException("이미 예약되었거나 사용할 수 없는 슬롯입니다.");
+            }
+
+            // 2. 최종 중복 예약 확인
+            log.debug("3. 중복 예약 확인 시도: instructorId={}, startTime={}",
+                    instructorId, requestedStartTime);
+            boolean alreadyBooked = bookingRepository.existsByInstructor_IdAndStartTimeAndStatusIn(
+                    instructorId,
+                    requestedStartTime,
+                    Arrays.asList(ConsultingBooking.BookingStatus.예약됨, ConsultingBooking.BookingStatus.상담완료)
+            );
+            log.debug("3-1. 중복 예약 확인 결과: alreadyBooked={}", alreadyBooked);
+
+            if (alreadyBooked) {
+                throw new IllegalStateException("해당 시간은 다른 사용자가 방금 예약했습니다.");
+            }
+
+            // 3. ConsultingSlot 상태 변경
+            log.debug("4. 슬롯 상태 변경 시도: slotId={}, 이전상태={}",
+                    slot.getId(), slot.getStatus());
+            slot.setStatus(ConsultingSlot.SlotStatus.불가능);
+            slotRepository.save(slot);
+            log.debug("4-1. 슬롯 상태 변경 완료: 새상태={}", slot.getStatus());
+
+            // 4. 사용자(학생, 강사) 조회
+            log.debug("5. 사용자 정보 조회 시도: studentId={}, instructorId={}",
+                    studentId, instructorId);
+            User student = userRepository.findById(studentId)
+                    .orElseThrow(() -> new IllegalArgumentException("학생 정보를 찾을 수 없습니다."));
+
+            User instructor = userRepository.findById(instructorId)
+                    .orElseThrow(() -> new IllegalArgumentException("강사 정보를 찾을 수 없습니다."));
+            log.debug("5-1. 사용자 정보 조회 완료: student={}, instructor={}",
+                    student.getName(), instructor.getName());
+
+            // 5. 예약 레코드 생성 및 저장
+            log.debug("6. 새 예약 엔티티 생성 시도");
+            ConsultingBooking newBooking = ConsultingBooking.builder()
+                    .student(student)
+                    .instructor(instructor)
+                    .startTime(requestedStartTime)
+                    .endTime(requestedEndTime)
+                    .status(ConsultingBooking.BookingStatus.예약됨)
+                    .message(requestDto.getMessage() != null ? requestDto.getMessage() : "")
+                    .createdAt(LocalDateTime.now())
+                    .updateAt(LocalDateTime.now())
+                    .build();
+            log.debug("6-1. 예약 엔티티 생성 완료");
+
+            log.debug("7. 예약 정보 저장 시도 (save 호출 직전)");
+            ConsultingBooking savedBooking = bookingRepository.save(newBooking);
+            log.debug("7-1. 예약 정보 저장 완료 (save 호출 직후): bookingId={}",
+                    savedBooking != null ? savedBooking.getId() : "null");
+
+            log.info("시간 지정 예약 생성 완료: bookingId={}",
+                    savedBooking != null ? savedBooking.getId() : "null");
+            return savedBooking;
+        } catch (Exception e) {
+            log.error("예약 생성 중 오류 발생", e);
+            throw e;
+        }
+    }
+
 
 
     // 강사 기능 구현
@@ -355,7 +469,6 @@ public class ConsultingBookingService {
 
         // 서비스 계층에서 직접 상태 변경
         ConsultingBooking updatedBooking = ConsultingBooking.builder()
-                .id(booking.getId())
                 .student(booking.getStudent())
                 .instructor(booking.getInstructor())
                 .status(ConsultingBooking.BookingStatus.취소됨)
@@ -386,6 +499,8 @@ public class ConsultingBookingService {
 
         log.info("예약 취소 성공: bookingId={}", bookingId);
     }
+
+
 
 
     /**
@@ -442,7 +557,6 @@ public class ConsultingBookingService {
 
         // 서비스 계층에서 직접 상태 변경
         ConsultingBooking updatedBooking = ConsultingBooking.builder()
-                .id(booking.getId())
                 .student(booking.getStudent())
                 .instructor(booking.getInstructor())
                 .status(ConsultingBooking.BookingStatus.상담완료)
@@ -554,5 +668,4 @@ public class ConsultingBookingService {
             throw e;
         }
     }
-
 }

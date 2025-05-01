@@ -1,0 +1,192 @@
+/* 전체 공통 스타일 */
+body {
+    margin: 0;
+    font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+    background-color: #f9fafb;
+    color: #111;
+}
+
+/* 컨테이너 및 섹션 */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+.lunch-matching-section {
+    padding: 50px 0;
+}
+
+.lunch-matching-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 메인 타이틀 */
+.title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* 타이머 박스 */
+.timer-box {
+    display: inline-flex;
+    align-items: center;
+    background-color: #e2e8f0;
+    padding: 10px 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    font-size: 18px;
+    font-weight: bold;
+    gap: 10px;
+}
+
+.clock-icon {
+    width: 24px;
+}
+
+.countdown {
+    font-weight: bold;
+    font-size: 24px;
+}
+
+/* 매칭 카드 영역 */
+.matching-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.matching-row {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+/* 매칭 카드 */
+.matching-card {
+    background-color: white;
+    border-radius: 20px;
+    padding: 20px;
+    width: 320px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.matching-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* 카드 색상별 */
+.pink { background-color: #ffeef0; }
+.blue { background-color: #e6f4ff; }
+.green { background-color: #e6fff1; }
+
+/* 카드 헤더 */
+.card-header {
+    font-weight: bold;
+    font-size: 22px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 슬롯 영역 */
+.slots {
+    padding-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* 슬롯 기본 */
+.slot {
+    background-color: #f1f5f9;
+    border-radius: 10px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-weight: bold;
+    padding: 0;
+}
+
+/* 슬롯 내부 텍스트 */
+.slot .major {
+    font-size: 14px;
+    color: #555;
+}
+
+.slot .name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #111;
+    margin-top: 7px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+/* 슬롯 전공별 색상 */
+.ta { background-color: #ffe1e1; }
+.u { background-color: #d8f5d8; }
+.be { background-color: #d8e6ff; }
+
+/* 매칭하기 버튼 */
+.apply-btn {
+    width: 100%;
+    padding: 12px 0;
+    background-color: black;
+    color: white;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.apply-btn:hover {
+    background-color: #333;
+}
+
+/* 잔여 인원 뱃지 */
+.count-badge {
+    background-color: #d9e2ec;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 버튼 공통 스타일 */
+button {
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    filter: brightness(1.05);
+}
+
+button:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content {
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}

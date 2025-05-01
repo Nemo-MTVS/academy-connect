@@ -1,9 +1,6 @@
 package store.mtvs.academyconnect.consulting.domain.entity;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import store.mtvs.academyconnect.user.domain.entity.User;
 
 import jakarta.persistence.*;
@@ -12,6 +9,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "consulting_bookings")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ConsultingBooking {
 
@@ -48,9 +46,8 @@ public class ConsultingBooking {
     private LocalDateTime endTime;
 
     @Builder
-    public ConsultingBooking(Long id, User student, User instructor, BookingStatus status, String message,
+    public ConsultingBooking(User student, User instructor, BookingStatus status, String message,
                              LocalDateTime createdAt, LocalDateTime updateAt, LocalDateTime startTime, LocalDateTime endTime) {
-        this.id = id;
         this.student = student;
         this.instructor = instructor;
         this.status = status;

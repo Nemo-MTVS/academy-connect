@@ -2,14 +2,12 @@ package store.mtvs.academyconnect.user.service;
 
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import store.mtvs.academyconnect.classgroup.domain.entity.ClassGroup;
 import store.mtvs.academyconnect.classgroup.service.ClassGroupService;
-import store.mtvs.academyconnect.consulting.domain.entity.ConsultingBooking;
-import store.mtvs.academyconnect.consulting.dto.InstructorBookingListItemDto;
-import store.mtvs.academyconnect.consulting.dto.MyBookingListItemDto;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
 import store.mtvs.academyconnect.user.domain.entity.User;
 import store.mtvs.academyconnect.user.domain.enums.UserRole;
@@ -17,22 +15,27 @@ import store.mtvs.academyconnect.user.dto.InstructorDTO;
 import store.mtvs.academyconnect.user.dto.UserResponseDTO;
 import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserService {
+    private final PasswordEncoder passwordEncoder;
     private final ClassGroupService classGroupService;
     private final EntityManager entityManager; // EntityManager 주입
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    public UserService(ClassGroupService classGroupService, EntityManager entityManager, UserRepository userRepository, UserMapper userMapper) {
+    public UserService(ClassGroupService classGroupService, EntityManager entityManager,
+                       UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.classGroupService = classGroupService;
         this.entityManager = entityManager;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
     }
 
@@ -61,11 +64,20 @@ public class UserService {
             ) {
                 throw new IllegalArgumentException("로그인 아이디는 필수입니다");
             }
+
+            // 중복 아이디 체크
+            if (userRepository.findByLoginId(loginId).isPresent()) {
+                throw new IllegalArgumentException("이미 사용 중인 아이디입니다");
+            }
+
+            // 비밀번호 암호화
+            String encodedPassword = passwordEncoder.encode(password);
+
             User user = new User(
                     uuid,
                     classGroup,
                     loginId,
-                    password,
+                    encodedPassword,
                     name,
                     "STUDENT"
             );
@@ -80,6 +92,11 @@ public class UserService {
             log.error(e.getMessage());
             throw new IllegalArgumentException(e.getMessage());
         }
+    }
+
+    // 로그인 처리를 위한 유저 조회
+    public Optional<User> getUserByLoginId(String loginId) {
+        return userRepository.findByLoginId(loginId);
     }
 
     // 사용자 조회
@@ -135,7 +152,7 @@ public class UserService {
 
 
     public List<InstructorDTO> getInstructorDTO() {
-        List<User> users = userRepository.findByRoleWithClassGroupWithProfile(UserRole.INSTRUCTOR.name());
+        List<User> users = userRepository.findByRoleWithClassGroupWithProfile(UserRole.TEACHER.name());
         if (users.isEmpty()) {
             return List.of();
         }
