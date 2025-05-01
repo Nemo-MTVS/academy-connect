@@ -19,4 +19,11 @@ public interface UserRepository extends JpaRepository<User, String> {
                 JOIN FETCH Profile p on u.id = p.id WHERE u.role = :role
     """)
     List<User> findByRoleWithClassGroupWithProfile(String role);
+
+    @Query("""
+        SELECT u FROM User u
+        WHERE u.role = 'STUDENT'
+        AND u.deletedAt IS NULL
+    """)
+    List<User> findAllActiveStudents();
 }
