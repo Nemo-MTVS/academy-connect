@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import store.mtvs.academyconnect.global.filter.RequestDebugFilter;
 import store.mtvs.academyconnect.user.domain.enums.UserRole;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
 
 import java.util.Collection;
 
@@ -30,6 +31,11 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public HiddenHttpMethodFilter hiddenHttpMethodFilter() {
+        return new HiddenHttpMethodFilter();
     }
 
     @Bean
@@ -92,6 +98,8 @@ public class SecurityConfig {
                 .failureHandler(teacherAuthenticationFailureHandler())
                 .permitAll()
             )
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/teacher/counselingresult/**"))
             .logout(logout -> logout
                 .logoutUrl("/teacher/logout")
                 .logoutSuccessHandler(customLogoutSuccessHandler())

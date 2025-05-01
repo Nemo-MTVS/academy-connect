@@ -69,8 +69,10 @@
                                     </form>
                                     <form th:action="@{/teacher/counselingresult/{id}(id=${result.id})}" 
                                           method="post"
+                                          style="display: inline;"
                                           onsubmit="return confirm('상담 내역을 삭제하시겠습니까?');">
                                         <input type="hidden" name="_method" value="DELETE"/>
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                         <button type="submit" class="action-btn danger" style="border: none;">삭제</button>
                                     </form>
                                 </div>

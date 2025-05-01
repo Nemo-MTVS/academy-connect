@@ -119,7 +119,15 @@ public class CounselingResultController {
         log.info("상담 결과 삭제 요청: resultId={}", resultId);
 
         try {
-            counselingResultService.delete(resultId);
+            // Get counseling result first to ensure it exists
+            CounselingResult result = counselingResultRepository.findByIdWithUsers(resultId)
+                .orElseThrow(() -> new NoSuchElementException("상담 결과를 찾을 수 없습니다."));
+            
+            // Soft delete by setting deletedAt timestamp
+            result.delete();
+            counselingResultRepository.save(result);
+            counselingResultRepository.flush();
+            
             log.info("상담 결과 삭제 완료: resultId={}", resultId);
             return "redirect:/teacher/counselingresults";
         } catch (NoSuchElementException e) {
