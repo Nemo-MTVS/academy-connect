@@ -5,398 +5,639 @@
 </head>
 
 <body>
-    <!-- 왼쪽 메뉴 -->
-    <div th:replace="fragments/layout :: sidebar('schedule')"></div>
-    
-    <!-- 컨텐츠 영역 -->
-    <div class="content-wrapper">
-        <div class="container-fluid">
-            <div class="row">
-                <!-- 달력 영역 -->
-                <div class="col-lg-8">
-                    <div class="calendar-container">
-                        <div class="month-header">
-                            <span id="current-month"></span>
-                            <div class="float-end">
-                                <button id="prev-month" class="btn btn-sm btn-outline-secondary me-2">
-                                    <i class="bi bi-chevron-left"></i>
-                                </button>
-                                <button id="next-month" class="btn btn-sm btn-outline-secondary">
-                                    <i class="bi bi-chevron-right"></i>
-                                </button>
-                            </div>
+<!-- 왼쪽 메뉴 -->
+<div th:replace="fragments/layout :: sidebar('schedule')"></div>
+
+<!-- 컨텐츠 영역 -->
+<div class="content-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 달력 영역 -->
+            <div class="col-lg-8">
+                <div class="calendar-container">
+                    <div class="month-header">
+                        <span id="current-month"></span>
+                        <div class="float-end">
+                            <button id="prev-month" class="btn btn-sm btn-outline-secondary me-2">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <button id="next-month" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
                         </div>
-                        <table class="calendar">
-                            <thead>
-                                <tr>
-                                    <th>일</th>
-                                    <th>월</th>
-                                    <th>화</th>
-                                    <th>수</th>
-                                    <th>목</th>
-                                    <th>금</th>
-                                    <th>토</th>
-                                </tr>
-                            </thead>
-                            <tbody id="calendar-body">
-                                <!-- 달력 내용은 JavaScript로 생성됩니다 -->
-                            </tbody>
-                        </table>
                     </div>
+                    <table class="calendar">
+                        <thead>
+                        <tr>
+                            <th>일</th>
+                            <th>월</th>
+                            <th>화</th>
+                            <th>수</th>
+                            <th>목</th>
+                            <th>금</th>
+                            <th>토</th>
+                        </tr>
+                        </thead>
+                        <tbody id="calendar-body">
+                        <!-- 달력 내용은 JavaScript로 생성됩니다 -->
+                        </tbody>
+                    </table>
                 </div>
-                
-                <!-- 시간대 영역 -->
-                <div class="col-lg-4">
-                    <div class="schedule-panel">
-                        <div class="date-header" id="selected-date-header">
-                            날짜를 선택하세요
-                        </div>
-                        <div id="time-slots-container">
-                            <div class="text-center text-muted my-5">
-                                <i class="bi bi-calendar-date fs-1"></i>
-                                <p class="mt-3">왼쪽 달력에서 날짜를 선택하세요</p>
-                            </div>
-                        </div>
-                        <button class="schedule-btn" id="set-schedule-btn" style="display: none;">스케줄 설정</button>
+            </div>
+
+            <!-- 시간대 영역 -->
+            <div class="col-lg-4">
+                <div class="schedule-panel">
+                    <div class="date-header" id="selected-date-header">
+                        날짜를 선택하세요
                     </div>
+                    <div id="time-slots-container">
+                        <div class="text-center text-muted my-5">
+                            <i class="bi bi-calendar-date fs-1"></i>
+                            <p class="mt-3">왼쪽 달력에서 날짜를 선택하세요</p>
+                        </div>
+                    </div>
+                    <button class="schedule-btn" id="set-schedule-btn" style="display: none;">스케줄 설정</button>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- 모바일 Bottom Navigation -->
-    <div th:replace="fragments/layout :: bottomnav('schedule')"></div>
-    
-    <!-- 스케줄 설정 모달 -->
-    <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="scheduleModalLabel">상담 가능 시간 설정</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<!-- 모바일 Bottom Navigation -->
+<div th:replace="fragments/layout :: bottomnav('schedule')"></div>
+
+<!-- 스케줄 설정 모달 -->
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="scheduleModalLabel">상담 가능 시간 설정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>상담 가능한 시간대를 선택하세요.</p>
+                <div id="time-options-container" class="d-flex flex-wrap">
+                    <!-- 시간 옵션들은 JavaScript로 생성됩니다 -->
                 </div>
-                <div class="modal-body">
-                    <p>상담 가능한 시간대를 선택하세요.</p>
-                    <div id="time-options-container" class="d-flex flex-wrap">
-                        <!-- 시간 옵션들은 JavaScript로 생성됩니다 -->
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <button type="button" class="btn save-btn" id="save-schedule-btn">저장</button>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn save-btn" id="save-schedule-btn">저장</button>
             </div>
         </div>
     </div>
-    
-    <!-- 상담 생성 모달 -->
-    <div class="modal fade" id="consultationModal" tabindex="-1" aria-labelledby="consultationModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="consultationModalLabel">상담 생성</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<!-- 상담 생성 모달 -->
+<div class="modal fade" id="consultationModal" tabindex="-1" aria-labelledby="consultationModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="consultationModalLabel">상담 생성</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>학생 이름을 검색하여 상담을 생성하세요.</p>
+                <div class="position-relative mb-3">
+                    <input type="text" class="search-input" id="student-search" placeholder="학생 이름 검색...">
                 </div>
-                <div class="modal-body">
-                    <p>학생 이름을 검색하여 상담을 생성하세요.</p>
-                    <div class="position-relative mb-3">
-                        <input type="text" class="search-input" id="student-search" placeholder="학생 이름 검색...">
-                    </div>
-                    <div id="search-results" class="mt-3">
-                        <!-- 검색 결과는 JavaScript로 표시됩니다 -->
-                    </div>
+                <div id="search-results" class="mt-3">
+                    <!-- 검색 결과는 JavaScript로 표시됩니다 -->
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <button type="button" class="btn create-consultation-btn" id="create-consultation-btn">상담 생성</button>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn create-consultation-btn" id="create-consultation-btn">상담 생성</button>
             </div>
         </div>
     </div>
-    
-    <th:block th:replace="fragments/layout :: scripts"></th:block>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 현재 날짜 정보
-            let currentDate = new Date();
-            let selectedDate = null;
-            let selectedTimeSlot = null;
-            
-            // 캘린더 초기화
-            initCalendar();
-            
-            // 이전/다음 월 버튼 이벤트
-            document.getElementById('prev-month').addEventListener('click', function() {
-                currentDate.setMonth(currentDate.getMonth() - 1);
+</div>
+
+<!-- 예정된 상담 취소 모달 -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelModalLabel">예약된 상담</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="cancelDayTime">5월 30일 10:00 - 11:00</p>
+                <p id="cancelNameGroup">백엔드 / 황채연</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                <button type="button" class="btn create-consultation-btn" id="cancel-consultation-btn">예약 취소</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // Thymeleaf가 slots를 JavaScript로 변환하여 할당합니다.
+    const allSlots = [[${slots}]];
+    const allStudents = [[${students}]];
+    console.log(allStudents);
+</script>
+
+
+<th:block th:replace="fragments/layout :: scripts"></th:block>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let today = new Date(); // 오늘 날짜
+        today.setHours(0, 0, 0, 0);
+
+        let currentDate = new Date(today); // 현재 보여지는 달력 날짜
+        let selectedDate = null;
+        let selectedTimeSlot = null;
+
+        // 캘린더 초기화
+        initCalendar();
+
+
+        // 이전/다음 월 버튼 이벤트
+        document.getElementById('prev-month').addEventListener('click', function () {
+            let prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+            if (prevMonth >= new Date(today.getFullYear(), today.getMonth(), 1)) {
+                currentDate = prevMonth;
                 updateCalendar();
-            });
-            
-            document.getElementById('next-month').addEventListener('click', function() {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-                updateCalendar();
-            });
-            
-            // 스케줄 설정 버튼 이벤트
-            document.getElementById('set-schedule-btn').addEventListener('click', function() {
-                openScheduleModal();
-            });
-            
-            // 스케줄 저장 버튼 이벤트
-            document.getElementById('save-schedule-btn').addEventListener('click', function() {
-                saveSchedule();
-            });
-            
-            // 캘린더 초기화 함수
-            function initCalendar() {
-                updateCalendar();
-            }
-            
-            // 캘린더 업데이트 함수
-            function updateCalendar() {
-                const year = currentDate.getFullYear();
-                const month = currentDate.getMonth();
-                const firstDay = new Date(year, month, 1);
-                const lastDay = new Date(year, month + 1, 0);
-                const daysInMonth = lastDay.getDate();
-                const startingDay = firstDay.getDay(); // 0-6 (일-토)
-                
-                // 월 헤더 업데이트
-                document.getElementById('current-month').textContent = `${year}년 ${month + 1}월`;
-                
-                // 캘린더 바디 초기화
-                const calendarBody = document.getElementById('calendar-body');
-                calendarBody.innerHTML = '';
-                
-                let date = 1;
-                for (let i = 0; i < 6; i++) {
-                    // 필요한 경우에만 행 추가
-                    if (date > daysInMonth) break;
-                    
-                    const row = document.createElement('tr');
-                    
-                    for (let j = 0; j < 7; j++) {
-                        const cell = document.createElement('td');
-                        
-                        if (i === 0 && j < startingDay) {
-                            // 이전 달 날짜
-                            cell.classList.add('text-muted');
-                        } else if (date > daysInMonth) {
-                            // 다음 달 날짜
-                            cell.classList.add('text-muted');
-                        } else {
-                            // 현재 달 날짜
-                            cell.innerHTML = `<div class="date-number">${date}</div>`;
-                            
-                            const cellDate = new Date(year, month, date);
-                            
-                            // 오늘 날짜 표시
-                            const today = new Date();
-                            if (cellDate.getDate() === today.getDate() && 
-                                cellDate.getMonth() === today.getMonth() && 
-                                cellDate.getFullYear() === today.getFullYear()) {
-                                cell.classList.add('today');
-                            }
-                            
-                            // 날짜 선택 이벤트
-                            cell.addEventListener('click', function() {
-                                const allCells = document.querySelectorAll('.calendar td');
-                                allCells.forEach(c => c.classList.remove('selected'));
-                                
-                                this.classList.add('selected');
-                                selectedDate = new Date(year, month, date);
-                                
-                                updateTimeSlotsPanel();
-                            });
-                            
-                            date++;
-                        }
-                        
-                        row.appendChild(cell);
-                    }
-                    
-                    calendarBody.appendChild(row);
-                }
-            }
-            
-            // 시간대 패널 업데이트 함수
-            function updateTimeSlotsPanel() {
-                if (!selectedDate) return;
-                
-                // 날짜 포맷 (YYYY년 MM월 DD일 (요일))
-                const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-                const formattedDate = `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일 (${weekdays[selectedDate.getDay()]})`;
-                document.getElementById('selected-date-header').textContent = formattedDate;
-                
-                // 시간대 표시 (임시 데이터)
-                const timeSlotsContainer = document.getElementById('time-slots-container');
-                timeSlotsContainer.innerHTML = '';
-                
-                // 스케줄 설정 버튼 표시
-                document.getElementById('set-schedule-btn').style.display = 'block';
-                
-                // 임시 데이터 (실제 데이터는 서버에서 가져와야 함)
-                const mockTimeSlots = [
-                    { time: '09:00 - 10:00', status: 'unavailable' },
-                    { time: '10:00 - 11:00', status: 'available' },
-                    { time: '11:00 - 12:00', status: 'booked', student: '학생1' },
-                    { time: '13:00 - 14:00', status: 'available' },
-                    { time: '14:00 - 15:00', status: 'unavailable' },
-                    { time: '15:00 - 16:00', status: 'booked', student: '학생2' },
-                    { time: '16:00 - 17:00', status: 'available' }
-                ];
-                
-                mockTimeSlots.forEach(slot => {
-                    const timeSlot = document.createElement('div');
-                    timeSlot.classList.add('time-slot');
-                    
-                    if (slot.status === 'available') {
-                        timeSlot.classList.add('available');
-                        timeSlot.innerHTML = `<div>${slot.time}</div>`;
-                        timeSlot.addEventListener('click', function() {
-                            openConsultationModal(slot.time);
-                        });
-                    } else if (slot.status === 'booked') {
-                        timeSlot.classList.add('booked');
-                        timeSlot.innerHTML = `
-                            <div>${slot.time}</div>
-                            <div class="student-name">${slot.student}</div>
-                        `;
-                    } else {
-                        timeSlot.innerHTML = `<div>${slot.time}</div>`;
-                    }
-                    
-                    timeSlotsContainer.appendChild(timeSlot);
-                });
-            }
-            
-            // 스케줄 설정 모달 열기
-            function openScheduleModal() {
-                if (!selectedDate) return;
-                
-                // 시간 옵션 생성
-                const timeOptionsContainer = document.getElementById('time-options-container');
-                timeOptionsContainer.innerHTML = '';
-                
-                // 임시 시간 옵션 (9시~17시까지 1시간 단위)
-                const timeOptions = [
-                    '09:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00', '12:00 - 13:00',
-                    '13:00 - 14:00', '14:00 - 15:00', '15:00 - 16:00', '16:00 - 17:00'
-                ];
-                
-                timeOptions.forEach(time => {
-                    const option = document.createElement('div');
-                    option.classList.add('time-option');
-                    option.textContent = time;
-                    
-                    option.addEventListener('click', function() {
-                        this.classList.toggle('selected');
-                    });
-                    
-                    timeOptionsContainer.appendChild(option);
-                });
-                
-                // 모달 열기
-                const scheduleModal = new bootstrap.Modal(document.getElementById('scheduleModal'));
-                scheduleModal.show();
-            }
-            
-            // 스케줄 저장 함수
-            function saveSchedule() {
-                // 선택된 시간대 저장 로직
-                const selectedTimes = Array.from(document.querySelectorAll('.time-option.selected'))
-                    .map(el => el.textContent);
-                
-                // 저장 후 모달 닫기
-                const scheduleModal = bootstrap.Modal.getInstance(document.getElementById('scheduleModal'));
-                scheduleModal.hide();
-                
-                // 저장 후 시간대 패널 업데이트
-                updateTimeSlotsPanel();
-                
-                // 성공 알림 (선택사항)
-                alert('스케줄이 저장되었습니다.');
-            }
-            
-            // 상담 생성 모달 열기
-            function openConsultationModal(timeSlot) {
-                selectedTimeSlot = timeSlot;
-                
-                // 학생 검색 입력 초기화
-                document.getElementById('student-search').value = '';
-                document.getElementById('search-results').innerHTML = '';
-                
-                // 모달 열기
-                const consultationModal = new bootstrap.Modal(document.getElementById('consultationModal'));
-                consultationModal.show();
-                
-                // 학생 검색 이벤트
-                document.getElementById('student-search').addEventListener('input', function() {
-                    const searchTerm = this.value.trim();
-                    
-                    if (searchTerm.length < 2) {
-                        document.getElementById('search-results').innerHTML = '';
-                        return;
-                    }
-                    
-                    // 임시 검색 결과 (실제로는 서버에 요청해야 함)
-                    const mockResults = [
-                        { id: 1, name: '김학생', grade: '3학년' },
-                        { id: 2, name: '이학생', grade: '2학년' },
-                        { id: 3, name: '박학생', grade: '1학년' }
-                    ].filter(student => student.name.includes(searchTerm));
-                    
-                    const searchResults = document.getElementById('search-results');
-                    searchResults.innerHTML = '';
-                    
-                    if (mockResults.length === 0) {
-                        searchResults.innerHTML = '<p class="text-center text-muted">검색 결과가 없습니다.</p>';
-                    } else {
-                        const resultsList = document.createElement('ul');
-                        resultsList.classList.add('list-group');
-                        
-                        mockResults.forEach(student => {
-                            const item = document.createElement('li');
-                            item.classList.add('list-group-item', 'list-group-item-action');
-                            item.innerHTML = `<strong>${student.name}</strong> (${student.grade})`;
-                            
-                            item.addEventListener('click', function() {
-                                // 선택된 학생 표시
-                                const allItems = document.querySelectorAll('.list-group-item');
-                                allItems.forEach(i => i.classList.remove('active'));
-                                this.classList.add('active');
-                            });
-                            
-                            resultsList.appendChild(item);
-                        });
-                        
-                        searchResults.appendChild(resultsList);
-                    }
-                });
-                
-                // 상담 생성 버튼 이벤트
-                document.getElementById('create-consultation-btn').addEventListener('click', function() {
-                    const selectedStudent = document.querySelector('.list-group-item.active');
-                    
-                    if (!selectedStudent) {
-                        alert('학생을 선택해주세요.');
-                        return;
-                    }
-                    
-                    // 상담 생성 로직 (서버에 요청)
-                    
-                    // 모달 닫기
-                    const consultationModal = bootstrap.Modal.getInstance(document.getElementById('consultationModal'));
-                    consultationModal.hide();
-                    
-                    // 시간대 패널 업데이트
-                    updateTimeSlotsPanel();
-                    
-                    // 성공 알림 (선택사항)
-                    alert('상담이 생성되었습니다.');
-                });
             }
         });
-    </script>
+
+        document.getElementById('next-month').addEventListener('click', function () {
+            let nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+            let maxMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1); // 다음 달까지만 허용
+            if (nextMonth <= maxMonth) {
+                currentDate = nextMonth;
+                updateCalendar();
+            }
+        });
+
+        // 스케줄 설정 버튼 이벤트
+        document.getElementById('set-schedule-btn').addEventListener('click', function () {
+            const dataString = this.dataset.data; // dataset에서 문자열 형태로 읽음
+            const scheduleSlotSelect = JSON.parse(dataString); // 문자열을 배열로 변환
+
+            openScheduleModal(scheduleSlotSelect);
+        });
+
+
+        // 스케줄 저장 버튼 이벤트
+        document.getElementById('save-schedule-btn').addEventListener('click', function () {
+            saveSchedule();
+        });
+
+        // 캘린더 초기화 함수
+        function initCalendar() {
+            updateCalendar();
+        }
+
+        // 캘린더 업데이트 함수
+        function updateCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDay = firstDay.getDay(); // 0-6 (일-토)
+
+            // 월 헤더 업데이트
+            document.getElementById('current-month').textContent = `${year}년 ${month + 1}월`;
+
+            // 캘린더 바디 초기화
+            const calendarBody = document.getElementById('calendar-body');
+            calendarBody.innerHTML = '';
+
+            let date = 1;
+            for (let i = 0; i < 6; i++) {
+                // 필요한 경우에만 행 추가
+                if (date > daysInMonth) break;
+
+                const row = document.createElement('tr');
+
+                for (let j = 0; j < 7; j++) {
+                    const cell = document.createElement('td');
+
+                    if (i === 0 && j < startingDay) {
+                        // 이전 달 날짜
+                        cell.classList.add('text-muted');
+                        cell.classList.add('disabled'); // 클릭 막기용 CSS 클래스
+                    } else if (date > daysInMonth) {
+                        // 다음 달 날짜
+                        cell.classList.add('text-muted');
+                        cell.classList.add('disabled'); // 클릭 막기용 CSS 클래스
+                    } else {
+                        // 현재 달 날짜
+                        cell.innerHTML = `<div class="date-number">${date}</div>`;
+
+                        const cellDate = new Date(year, month, date);
+
+                        // 오늘 날짜 표시
+                        //const today = new Date();
+                        if (cellDate.getDate() === today.getDate() &&
+                            cellDate.getMonth() === today.getMonth() &&
+                            cellDate.getFullYear() === today.getFullYear()) {
+                            cell.classList.add('today');
+                        }
+
+                        if (j === 0 || j === 6) {
+                            cell.classList.add('disabled');
+                            cell.classList.add('text-muted');
+                        } else {
+                            // 날짜 선택 이벤트
+                            cell.addEventListener('click', function () {
+                                const allCells = document.querySelectorAll('.calendar td');
+                                allCells.forEach(c => c.classList.remove('selected'));
+
+                                this.classList.add('selected');
+                                selectedDate = cellDate;
+
+                                console.log('selectedDate:', selectedDate);
+                                updateTimeSlotsPanel();
+                            });
+                        }
+
+                        date++;
+                    }
+
+                    row.appendChild(cell);
+                }
+
+                calendarBody.appendChild(row);
+            }
+        }
+
+        // 시간대 패널 업데이트 함수
+        function updateTimeSlotsPanel() {
+            if (!selectedDate) return;
+
+            // 날짜 포맷 (YYYY년 MM월 DD일 (요일))
+            const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+            const formattedDate = `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일 (${weekdays[selectedDate.getDay()]})`;
+            document.getElementById('selected-date-header').textContent = formattedDate;
+
+            // 시간대 표시 (임시 데이터)
+            const timeSlotsContainer = document.getElementById('time-slots-container');
+            timeSlotsContainer.innerHTML = '';
+
+            const scheduleSlotSelect = [0, 0, 0, 0, 0, 0, 0, 0];
+
+            // allSlots에서 selectedDate에 맞는 시간대만 필터링
+            allSlots.filter(slot => {
+                const slotDate = new Date(slot.startTime); // startTime을 Date 객체로 변환
+                return slotDate.toDateString() === selectedDate.toDateString(); // 날짜만 비교
+            }).forEach(slot => {
+                const consultDate = `${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`;
+                const startEndTime = slot.startTime.slice(11, 16) +' - '+ slot.endTime.slice(11, 16);
+                const studentNameGroup = slot.studentName + '/' + slot.studentClassGroup;
+
+                const timeSlot = document.createElement('div');
+                timeSlot.classList.add('time-slot');
+
+                // 시작 시간으로 배열 인덱스 결정
+                const startHour = parseInt(slot.startTime.slice(11, 13)); // 예: 09, 10 등
+                const index = startHour - 9; // 09시부터 시작이므로 9를 빼서 인덱스(0~7)로
+
+                if (slot.status === '사용가능') {
+                    scheduleSlotSelect[index] = 1;
+                    timeSlot.classList.add('available');
+                    timeSlot.innerHTML = `<div>${startEndTime}</div>`;
+                    timeSlot.addEventListener('click', function () {
+                        openConsultationModal(slot.id, slot.startTime, consultDate, startEndTime);
+                    });
+                } else if (slot.status === '불가능') {
+                    scheduleSlotSelect[index] = 2;
+                    timeSlot.classList.add('booked');
+                    timeSlot.innerHTML = `<div>${startEndTime}</div><div class="student-name">${studentNameGroup}</div>`;
+                    timeSlot.addEventListener('click', function () {
+                        openCancelModal(consultDate, startEndTime, slot.consultingId, studentNameGroup);
+                    });
+                } else {
+                    // 비활성화 (지나갔지만 예약이 없었던 타임)
+                    timeSlot.innerHTML = `<div>${startEndTime}</div>`;
+                }
+
+
+                timeSlotsContainer.appendChild(timeSlot);
+            });
+            // 스케줄 설정 버튼 표시
+            const setSchedule = document.getElementById('set-schedule-btn');
+            setSchedule.style.display = 'block';
+            setSchedule.dataset.data = JSON.stringify(scheduleSlotSelect);
+        }
+
+        // 스케줄 설정 모달 열기
+        function openScheduleModal(scheduleSlotSelect) {
+            if (!selectedDate) return;
+
+            console.log(scheduleSlotSelect);
+            // 시간 옵션 생성
+            const timeOptionsContainer = document.getElementById('time-options-container');
+            timeOptionsContainer.innerHTML = '';
+
+            // 시간 옵션 (9시~17시까지 1시간 단위)
+            const timeOptions = [
+                '09:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00', '12:00 - 13:00',
+                '13:00 - 14:00', '14:00 - 15:00', '15:00 - 16:00', '16:00 - 17:00'
+            ];
+
+            timeOptions.forEach(((time, index) => {
+                const option = document.createElement('div');
+                option.classList.add('time-option');
+                option.textContent = time;
+
+                const status = scheduleSlotSelect[index];
+
+                // 👉 scheduleSlotSelect 값이 1이면 미리 선택
+                if (status === 1) {
+                    option.classList.add('selected');
+                }else if (status === 2) {
+                    // 불가능 → 비활성화
+                    option.classList.add('disabled');
+                    option.style.pointerEvents = 'none';
+                    option.style.opacity = '0.4'; // 흐리게 표시
+                }
+
+                option.addEventListener('click', function () {
+                    this.classList.toggle('selected');
+                });
+
+                timeOptionsContainer.appendChild(option);
+            }));
+
+            // 모달 열기
+            const scheduleModal = new bootstrap.Modal(document.getElementById('scheduleModal'));
+            scheduleModal.show();
+        }
+
+        // 스케줄 저장 함수
+        function saveSchedule() {
+            // Array.from(document.querySelectorAll('.time-option.selected'))
+            //     .map(el => el.textContent);
+
+            const timeOptions = document.querySelectorAll('.time-option');
+            // 사용자의 선택에 의해 바뀐 인덱스 저장하는 배열 (비활성 슬롯 포함)
+            const updatedScheduleSlotSelect = Array.from(timeOptions).map(option =>
+                option.classList.contains('selected') ? 1 : 0
+            );
+
+            // 이전 인덱스 상태 저장하는 배열
+            const prevScheduleSlotSelect = JSON.parse(document.getElementById('set-schedule-btn').dataset.data);
+
+            // 사용자의 선택에 의해 바뀐 인덱스 저장하는 배열
+            const changedIndices = updatedScheduleSlotSelect
+                .map((val, i) => {
+                    // 처음 상태가 0 또는 1일 때만 비교
+                    if (prevScheduleSlotSelect[i] === 0 || prevScheduleSlotSelect[i] === 1) {
+                        return val !== prevScheduleSlotSelect[i] ? i : -1;
+                    }
+                    return -1; // 2 인덱스는 무시
+                })
+                .filter(i => i !== -1);
+
+            // 생성, 삭제 분리
+            const slotsToCreate = [];
+            const slotsToDelete = [];
+
+            changedIndices.forEach(i => {
+                if (prevScheduleSlotSelect[i] === 0 && updatedScheduleSlotSelect[i] === 1) {
+                    slotsToCreate.push(i); // 생성
+                } else if (prevScheduleSlotSelect[i] === 1 && updatedScheduleSlotSelect[i] === 0) {
+                    slotsToDelete.push(i); // 삭제
+                }
+            });
+
+            // 서버에 하나의 폼으로 전송
+            submitScheduleChanges(slotsToCreate, slotsToDelete);
+
+            // 저장 후 모달 닫기
+            const scheduleModal = bootstrap.Modal.getInstance(document.getElementById('scheduleModal'));
+            scheduleModal.hide();
+
+            // 저장 후 시간대 패널 업데이트
+            updateTimeSlotsPanel();
+
+            // 성공 알림 (선택사항)
+            alert('스케줄이 저장되었습니다.');
+        }
+
+        function submitScheduleChanges(slotsToCreate, slotsToDelete) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/teacher/schedule/update';
+
+            // 생성할 슬롯 시간들
+            const createInput = document.createElement('input');
+            createInput.type = 'hidden';
+            createInput.name = 'createSlots';
+            const createSlotsValue = JSON.stringify(slotsToCreate.map(getSlotDateTime));
+            createInput.value = createSlotsValue;
+            console.log('생성할 슬롯 시간들:', createSlotsValue); // 생성될 시간 출력
+            form.appendChild(createInput);
+
+            // 삭제할 슬롯 ID들
+            const deleteInput = document.createElement('input');
+            deleteInput.type = 'hidden';
+            deleteInput.name = 'deleteSlotIds';
+            const deleteSlotIdsValue = JSON.stringify(
+                slotsToDelete.map(index => {
+                    const slot = allSlots.find(slot => {
+                        const slotDate = new Date(slot.startTime);
+                        return (
+                            slotDate.toDateString() === selectedDate.toDateString() &&
+                            slotDate.getHours() === 9 + index
+                        );
+                    });
+                    return slot ? slot.id : null;
+                }).filter(Boolean)
+            );
+            deleteInput.value = deleteSlotIdsValue;
+            console.log('삭제할 슬롯 ID들:', deleteSlotIdsValue); // 삭제될 ID 출력
+
+            form.appendChild(deleteInput);
+
+            // csrf
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_csrf';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+
+        function getSlotDateTime(index) {
+            const baseDate = new Date(selectedDate);
+            baseDate.setHours(9 + index, 0, 0, 0);
+            // 한국 시간으로 변환 (UTC +9)
+            const kstOffset = 9 * 60; // UTC+9
+            baseDate.setMinutes(baseDate.getMinutes() + kstOffset);
+
+            // KST 기준 시간 반환 (ISO 문자열로 변환)
+            return baseDate.toISOString(); // 예: "2025-05-01T16:00:00.000+09:00"
+        }
+
+
+        // 상담 생성 모달 열기
+        function openConsultationModal(slotId, date, consultDate, startEndTime) {
+
+            // 학생 검색 입력 초기화
+            document.getElementById('student-search').value = '';
+            document.getElementById('search-results').innerHTML = '';
+            document.getElementById('consultationModalLabel').innerHTML = `${consultDate} ${startEndTime}`;
+
+            // 모달 열기
+            const consultationModal = new bootstrap.Modal(document.getElementById('consultationModal'));
+            consultationModal.show();
+
+            // 학생 검색 이벤트
+            document.getElementById('student-search').addEventListener('input', function () {
+                const searchTerm = this.value.trim();
+
+                if (searchTerm.length < 2) {
+                    document.getElementById('search-results').innerHTML = '';
+                    return;
+                }
+
+                // 학생 검색
+                const mockResults = allStudents.filter(student => student.name.includes(searchTerm));
+
+                const searchResults = document.getElementById('search-results');
+                searchResults.innerHTML = '';
+
+                if (mockResults.length === 0) {
+                    searchResults.innerHTML = '<p class="text-center text-muted">검색 결과가 없습니다.</p>';
+                } else {
+                    const resultsList = document.createElement('ul');
+                    resultsList.classList.add('list-group');
+
+                    mockResults.forEach(student => {
+                        const item = document.createElement('li');
+                        item.classList.add('list-group-item', 'list-group-item-action');
+                        item.dataset.id = student.userId;
+                        item.innerHTML = `<strong>${student.name}</strong> (${student.classGroupName})`;
+
+                        item.addEventListener('click', function () {
+                            // 선택된 학생 표시
+                            const allItems = document.querySelectorAll('.list-group-item');
+                            allItems.forEach(i => i.classList.remove('active'));
+                            this.classList.add('active');
+                        });
+
+                        resultsList.appendChild(item);
+                    });
+
+                    searchResults.appendChild(resultsList);
+                }
+            });
+
+            // 상담 생성 버튼 이벤트
+            document.getElementById('create-consultation-btn').addEventListener('click', function () {
+                const selectedStudent = document.querySelector('.list-group-item.active');
+
+                if (!selectedStudent) {
+                    alert('학생을 선택해주세요.');
+                    return;
+                }
+                const selectedStudentId = selectedStudent.dataset.id;
+
+                // 상담 생성 로직 (서버에 요청)
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/teacher/consulting/reservation`;
+
+                // hidden input - studentId
+                const studentInput = document.createElement('input');
+                studentInput.type = 'hidden';
+                studentInput.name = 'studentId';
+                studentInput.value = selectedStudentId;
+                form.appendChild(studentInput);
+
+                // hidden input - timeInput
+                const timeInput = document.createElement('input');
+                timeInput.type = 'hidden';
+                timeInput.name = 'startTime';
+                timeInput.value = date;
+                form.appendChild(timeInput);
+
+                // hidden input - slotId
+                const selectSlotId = document.createElement('input');
+                selectSlotId.type = 'hidden';
+                selectSlotId.name = 'slotId';
+                selectSlotId.value = slotId;
+                form.appendChild(selectSlotId);
+
+                // csrf
+                const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_csrf';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+
+                document.body.appendChild(form);
+                form.submit();
+
+
+                // 모달 닫기
+                const consultationModal = bootstrap.Modal.getInstance(document.getElementById('consultationModal'));
+                consultationModal.hide();
+
+                // 시간대 패널 업데이트
+                updateTimeSlotsPanel();
+
+                // 성공 알림 (선택사항)
+                alert('상담이 생성되었습니다.');
+            });
+        }
+
+        // 상담 취소 모달 열기
+        function openCancelModal(consultDate, startEndTime, consultingId, studentNameGroup) {
+
+            // 모달 열기
+            const cancelModal = new bootstrap.Modal(document.getElementById('cancelModal'));
+            document.getElementById('cancelDayTime').innerHTML = `${consultDate} ${startEndTime}`;
+            document.getElementById('cancelNameGroup').innerHTML = `${studentNameGroup}`;
+            cancelModal.show();
+
+
+            // 상담 취소 버튼 이벤트
+            document.getElementById('cancel-consultation-btn').addEventListener('click', function () {
+                if (!confirm('상담을 취소하시겠습니까?')) return;
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/teacher/consulting/${consultingId}/cancel`;
+                document.body.appendChild(form);
+
+                // csrf
+                const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_csrf';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+                form.submit();
+
+                // 모달 닫기
+                const consultationModal = bootstrap.Modal.getInstance(document.getElementById('cancelModal'));
+                consultationModal.hide();
+
+                // 시간대 패널 업데이트
+                updateTimeSlotsPanel();
+
+                // 성공 알림 (선택사항)
+                alert('상담이 취소되었습니다.');
+            });
+        }
+    });
+</script>
 </body>
 </html>

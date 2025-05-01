@@ -1,24 +1,35 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout :: html(~{::title}, ~{::link}, ~{::section}, ~{::script})}">
+<html xmlns:th="http://www.thymeleaf.org">
+<!--      th:replace="~{layout :: html(~{::title}, ~{::link}, ~{::section}, ~{::script})}">-->
 
 <head>
     <meta charset="UTF-8">
     <title>점심 메이트</title>
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
-    <!-- 점심 매칭 스타일 -->
+    <link rel="icon" href="/images/favicon.ico">
+    <!-- CSS 파일 연결 -->
     <link th:href="@{/css/lunchmatching.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+    <link th:href="@{/css/header.css}" rel="stylesheet">
+    <link th:href="@{/css/footer.css}" rel="stylesheet">
 
     <!-- Bootstrap 아이콘 라이브러리 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Pretendard 폰트 적용 -->
     <link href="https://cdn.jsdelivr.net/npm/pretendard@latest/dist/web/static/pretendard.css" rel="stylesheet">
+
 </head>
 
 <body>
+<div th:replace="fragments/header :: header"></div>
 
-<section class="lunch-matching-section">
+<section class="lunch-matching-section"
+         th:data-user-id="${currentUserId}"
+         th:data-user-role="${currentUserRole}">
     <div class="container">
         <div class="lunch-matching-inner">
 
@@ -54,15 +65,12 @@
 
                         <!-- 슬롯 영역 -->
                         <div class="slots">
-                            <div class="slot ta">
-                                <span class="major">TA</span><br>
-                                <span class="name"></span> <!-- 학생 이름 채워질 자리 -->
-                            </div>
-                            <div class="slot ta"><span class="major">TA</span><br><span class="name"></span></div>
-                            <div class="slot ta"><span class="major">TA</span><br><span class="name"></span></div>
-                            <div class="slot be"><span class="major">BE</span><br><span class="name"></span></div>
-                            <div class="slot be"><span class="major">BE</span><br><span class="name"></span></div>
-                            <div class="slot be"><span class="major">BE</span><br><span class="name"></span></div>
+                            <div class="slot ta"><span class="major">TA</span><span class="name"></span></div>
+                            <div class="slot ta"><span class="major">TA</span><span class="name"></span></div>
+                            <div class="slot ta"><span class="major">TA</span><span class="name"></span></div>
+                            <div class="slot be"><span class="major">BE</span><span class="name"></span></div>
+                            <div class="slot be"><span class="major">BE</span><span class="name"></span></div>
+                            <div class="slot be"><span class="major">BE</span><span class="name"></span></div>
                         </div>
 
                         <!-- 매칭하기 버튼 -->
@@ -79,12 +87,12 @@
                         </div>
 
                         <div class="slots">
-                            <div class="slot u"><span class="major">U</span><br><span class="name"></span></div>
-                            <div class="slot u"><span class="major">U</span><br><span class="name"></span></div>
-                            <div class="slot u"><span class="major">U</span><br><span class="name"></span></div>
-                            <div class="slot be"><span class="major">BE</span><br><span class="name"></span></div>
-                            <div class="slot be"><span class="major">BE</span><br><span class="name"></span></div>
-                            <div class="slot be"><span class="major">BE</span><br><span class="name"></span></div>
+                            <div class="slot u"><span class="major">U</span><span class="name"></span></div>
+                            <div class="slot u"><span class="major">U</span><span class="name"></span></div>
+                            <div class="slot u"><span class="major">U</span><span class="name"></span></div>
+                            <div class="slot be"><span class="major">BE</span><span class="name"></span></div>
+                            <div class="slot be"><span class="major">BE</span><span class="name"></span></div>
+                            <div class="slot be"><span class="major">BE</span><span class="name"></span></div>
                         </div>
 
                         <button class="apply-btn">매칭하기</button>
@@ -102,12 +110,12 @@
                     </div>
 
                     <div class="slots">
-                        <div class="slot ta"><span class="major">TA</span><br><span class="name"></span></div>
-                        <div class="slot ta"><span class="major">TA</span><br><span class="name"></span></div>
-                        <div class="slot ta"><span class="major">TA</span><br><span class="name"></span></div>
-                        <div class="slot u"><span class="major">U</span><br><span class="name"></span></div>
-                        <div class="slot u"><span class="major">U</span><br><span class="name"></span></div>
-                        <div class="slot u"><span class="major">U</span><br><span class="name"></span></div>
+                        <div class="slot ta"><span class="major">TA</span><span class="name"></span></div>
+                        <div class="slot ta"><span class="major">TA</span><span class="name"></span></div>
+                        <div class="slot ta"><span class="major">TA</span><span class="name"></span></div>
+                        <div class="slot u"><span class="major">U</span><span class="name"></span></div>
+                        <div class="slot u"><span class="major">U</span><span class="name"></span></div>
+                        <div class="slot u"><span class="major">U</span><span class="name"></span></div>
                     </div>
 
                     <button class="apply-btn">매칭하기</button>
@@ -177,9 +185,17 @@
     </div>
 </section>
 
+<div th:replace="fragments/footer :: footer"></div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <!-- JS 로직 -->>
 <script>
     let selectedClassId = null; // 현재 선택된 매칭 클래스 ID
+
+    const currentUserId = document.querySelector('[data-user-id]').dataset.userId;
+    const currentUserRole = document.querySelector('[data-user-role]').dataset.userRole;
 
     document.addEventListener("DOMContentLoaded", function() {
         loadMatchingStatus();   // 페이지 로드 시 매칭 현황 불러오기
@@ -205,10 +221,13 @@
 
     // 서버에서 매칭 현황 불러와서 화면 업데이트하는 함수
     function loadMatchingStatus() {
-        fetch('/lunch/status')
+        fetch('/student/lunch/status')
             .then(response => response.json())
             .then(data => {
                 const cards = document.querySelectorAll('.matching-card');
+
+                // 내가 이미 매칭했는지 체크용
+                let isAlreadyMatched = false;
 
                 // 슬롯 초기화
                 document.querySelectorAll('.slot').forEach(slot => {
@@ -232,32 +251,43 @@
                 `;
                 });
 
-                // 매칭 정보 채우기
+                // 매칭 정보 채우기 (정확한 순서로 전공별로 처리)
                 data.forEach((matchInfo, index) => {
                     const card = cards[index];
                     const slots = card.querySelectorAll('.slot');
 
-                    matchInfo.students.forEach(student => {
-                        const major = student.major;
-                        const name = student.name;
+                    const majorOrder = ['ta', 'be', 'u']; // 전공 순서 지정
 
-                        const emptySlot = Array.from(slots).find(slot =>
-                            slot.classList.contains(major.toLowerCase()) &&
-                            slot.querySelector('.name')?.innerText.trim() === ''
+                    majorOrder.forEach(major => {
+                        const students = matchInfo.students.filter(s => s.major.toLowerCase() === major);
+                        const majorSlots = Array.from(slots).filter(slot =>
+                            slot.classList.contains(major)
                         );
 
-                        if (emptySlot) {
-                            const nameSpan = emptySlot.querySelector('.name');
-                            nameSpan.innerText = name;
-                            nameSpan.style.cursor = 'pointer';
+                        for (let i = 0; i < students.length && i < majorSlots.length; i++) {
+                            const student = students[i];
+                            const slot = majorSlots[i];
+                            const nameSpan = slot.querySelector('.name');
+
+                            nameSpan.innerText = student.name;
                             nameSpan.style.opacity = '1';
 
-                            nameSpan.onclick = function () {
-                                selectedClassId = matchInfo.classId;
-                                document.getElementById('cancelConfirmText').innerText = `매칭 신청을 취소하시겠습니까?`;
-                                const cancelModal = new bootstrap.Modal(document.getElementById('cancelConfirmModal'));
-                                cancelModal.show();
-                            };
+                            // 본인일 때만 클릭 가능
+                            if (student.userId === currentUserId) {
+                                nameSpan.style.cursor = 'pointer';
+                                nameSpan.onclick = function () {
+                                    selectedClassId = matchInfo.classId;
+                                    document.getElementById('cancelConfirmText').innerText = `매칭 신청을 취소하시겠습니까?`;
+                                    const cancelModal = new bootstrap.Modal(document.getElementById('cancelConfirmModal'));
+                                    cancelModal.show();
+                                };
+
+                                // 내가 이미 매칭한 상태임을 체크
+                                isAlreadyMatched = true;
+                            } else {
+                                nameSpan.style.cursor = 'default';
+                                nameSpan.onclick = null;
+                            }
                         }
                     });
 
@@ -266,23 +296,40 @@
                     const countBadge = card.querySelector('.count-badge');
                     if (countBadge) {
                         countBadge.innerHTML = `
-                    <i class="bi bi-people-fill" style="font-size: 16px; margin-right: 5px;"></i> 잔여 ${remain}/6
-                    `;
+            <i class="bi bi-people-fill" style="font-size: 16px; margin-right: 5px;"></i> 잔여 ${remain}/6
+        `;
                     }
+                });
 
-                    // 매칭하기 버튼 연결
-                    const applyBtn = card.querySelector('.apply-btn');
-                    const matchTitle = card.querySelector('.card-header span')?.innerText || '매칭';
-                    applyBtn.onclick = () => applyForLunch(matchInfo.classId, matchTitle);
+                // 매칭하기 버튼 처리 (이미 매칭했으면 모두 비활성화)
+                document.querySelectorAll('.apply-btn').forEach(btn => {
+                    const card = btn.closest('.matching-card');
+                    const index = Array.from(cards).indexOf(card);
+                    const matchInfo = data[index];
 
-                    if (matchInfo.currentCount >= 6) {
-                        applyBtn.disabled = true;               // 버튼 비활성화
-                        applyBtn.style.backgroundColor = '#ccc'; // 회색 배경
-                        applyBtn.style.cursor = 'not-allowed';    // 커서 바꾸기
-                    } else {
-                        applyBtn.disabled = false;               // 버튼 활성화
-                        applyBtn.style.backgroundColor = 'black'; // 원래 스타일 복구
-                        applyBtn.style.cursor = 'pointer';        // 원래 커서 복구
+                    const myMajor = currentUserRole.toLowerCase();
+                    const myMajorCount = matchInfo.students.filter(s => s.major.toLowerCase() === myMajor).length;
+
+                    // 전공 인원이 3명이면 무조건 신청 불가
+                    const isMyMajorFull = myMajorCount >= 3;
+
+                    if (currentUserRole !== 'STUDENT' || isAlreadyMatched || isMyMajorFull) {
+                        // 학생이 아니거나 이미 매칭했거나 내 전공 다 찼으면 disable
+                        btn.disabled = true;
+                        btn.style.backgroundColor = '#ccc';
+                        btn.style.cursor = 'not-allowed';
+                        btn.onclick = null;
+                    }
+                    else {
+                        // 신청 가능
+                        btn.disabled = false;
+                        btn.style.backgroundColor = 'black';
+                        btn.style.cursor = 'pointer';
+
+                        const matchTitle = card.querySelector('.card-header span')?.innerText || '매칭';
+                        btn.onclick = function() {
+                            applyForLunch(matchInfo.classId, matchTitle);
+                        };
                     }
                 });
             })
@@ -305,12 +352,20 @@
         const confirmButton = document.getElementById('confirmMatchBtn');
         confirmButton.disabled = true; // 버튼 비활성화 (중복 클릭 방지)
 
-        fetch('/lunch/apply', {
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+
+        fetch('/student/lunch/apply', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
             body: JSON.stringify({ lunchMatchingClassId: selectedClassId })
         })
             .then(response => {
+                console.log("신청 응답:", response);
                 if (response.ok) {
                     const successModal = new bootstrap.Modal(document.getElementById('matchingSuccessModal'));
                     successModal.show();
@@ -393,15 +448,22 @@
         const cancelButton = document.getElementById('confirmCancelBtn');
         cancelButton.disabled = true; // 버튼 비활성화 (중복 클릭 방지)
 
-        fetch('/lunch/cancel', {
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        fetch('/student/lunch/cancel', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
             body: JSON.stringify({ lunchMatchingClassId: lunchMatchingClassId })
         })
             .then(response => {
                 if (response.ok) {
                     setTimeout(() => {
                         loadMatchingStatus(); // 0.5초 후 부드럽게 갱신
+                        const cancelModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('cancelConfirmModal'));
+                        cancelModal.hide();
                         cancelButton.disabled = false; // 버튼 다시 활성화
                     }, 500);
                 } else {

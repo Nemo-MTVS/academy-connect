@@ -19,6 +19,11 @@ public class UserController {
         return "user/login";
     }
 
+    @GetMapping("/teacher/login")
+    public String teacherLogin() {
+        return "teacher/login";
+    }
+
     @GetMapping("/signup")
     public String signup() {
         return "user/signup";

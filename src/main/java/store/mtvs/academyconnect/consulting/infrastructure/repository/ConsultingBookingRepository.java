@@ -23,6 +23,10 @@ public interface ConsultingBookingRepository extends JpaRepository<ConsultingBoo
     // 특정 기간의 상담 예약 조회
     List<ConsultingBooking> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
 
+    // 최근 상담 예약 조회 (기간설정)
+    @Query("SELECT cb FROM ConsultingBooking cb WHERE cb.startTime BETWEEN :startTime AND :endTime ORDER BY cb.startTime DESC")
+    List<ConsultingBooking> findRecentBookings(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+
     // 특정 강사의 특정 날짜 범위의 예약된/완료된 상담 조회 (S03 구현용)
     @Query("SELECT cb FROM ConsultingBooking cb WHERE cb.instructor.id = :instructorId " +
             "AND cb.startTime BETWEEN :startDateTime AND :endDateTime " +
@@ -31,12 +35,6 @@ public interface ConsultingBookingRepository extends JpaRepository<ConsultingBoo
             @Param("instructorId") String instructorId,
             @Param("startDateTime") LocalDateTime startDateTime,
             @Param("endDateTime") LocalDateTime endDateTime);
-
-    // 특정 강사의 특정 시작 시간에 '예약됨' 또는 '상담완료' 상태의 예약 존재 여부 확인
-    boolean existsByInstructor_IdAndStartTimeAndStatusIn(
-            String instructorId,
-            LocalDateTime startTime,
-            List<ConsultingBooking.BookingStatus> statuses);
 
     // 특정 강사의 특정 날짜의 예약된/완료된 상담 조회 (S03 구현용)
     @Query("SELECT cb FROM ConsultingBooking cb WHERE cb.instructor.id = :instructorId " +
@@ -56,4 +54,22 @@ public interface ConsultingBookingRepository extends JpaRepository<ConsultingBoo
             @Param("instructorId") String instructorId,
             @Param("year") int year,
             @Param("month") int month);
+
+    //
+    @Query("SELECT cb FROM ConsultingBooking cb " +
+            "WHERE cb.instructor.id = :instructorId " +
+            "AND cb.startTime >= :startTime " +
+            "AND cb.endTime <= :endTime " +
+            "AND cb.status IN ('예약됨', '상담완료')")
+    List<ConsultingBooking> findBookingByInstructorAndTime(
+            @Param("instructorId") String instructorId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime);
+
+    // 특정 강사의 특정 시작 시간에 '예약됨' 또는 '상담완료' 상태의 예약 존재 여부 확인
+    boolean existsByInstructor_IdAndStartTimeAndStatusIn(
+            String instructorId,
+            LocalDateTime startTime,
+            List<ConsultingBooking.BookingStatus> statuses);
+
 }
