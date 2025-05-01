@@ -1,10 +1,13 @@
-docs
+docs/
+src/main/java/store/mtvs/academyconnect/counselingresult/view/
+src/test
 HELP.md
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+sql_tables.dbml
 
 ### STS ###
 .apt_generated

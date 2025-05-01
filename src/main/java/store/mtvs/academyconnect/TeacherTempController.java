@@ -16,11 +16,6 @@ public class TeacherTempController {
         return "instructor/reservation";
     }
 
-    @GetMapping("/teacherss/counselresult")
-    public String testtest4() {
-        return "instructor/counselresult";
-    }
-
     @GetMapping("/teacherss/schedule")
     public String test3() {
         return "teacher";
