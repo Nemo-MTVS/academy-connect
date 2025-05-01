@@ -77,7 +77,15 @@ public class LunchMatchingService {
         String userMajor = convertMajorToShortForm(user.getClassGroup().getName().toUpperCase());
         String matchName = lunchClass.getName();
         if(!matchName.contains(userMajor)) {
-            throw new IllegalArgumentException("본인 전공과 관련된 매칭만 신청할 수 있습니다.");
+            throw new IllegalArgumentException("본인 전공과 관련된 매칭만 신청할 수 없습니다.");
+        }
+
+        // 전공별 인원 카운트용
+        String userMajorForCount = user.getClassGroup().getName();
+        int myMajorCount = lunchMatchingRepository.countByLunchMatchingClassIdAndUser_ClassGroup_NameAndDeletedAtIsNull(lunchMatchingClassId, userMajorForCount);
+
+        if (myMajorCount >= 3) {
+            throw new IllegalArgumentException("해당 전공 신청 인원이 초과되었습니다.");
         }
 
         // 해당 클래스에 신청한 인원이 6명 이상이면 신청 불가

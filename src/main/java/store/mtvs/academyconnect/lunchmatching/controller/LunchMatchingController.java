@@ -44,9 +44,12 @@ public class LunchMatchingController {
     public ResponseEntity<String> apply(@RequestBody ApplyRequestDto request) {
         String student = getCurrentUserId();
 
-        lunchMatchingService.apply(student, request.getLunchMatchingClassId());
-
-        return ResponseEntity.ok("신청 완료");
+        try {
+            lunchMatchingService.apply(student, request.getLunchMatchingClassId());
+            return ResponseEntity.ok("신청 완료");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     /**
