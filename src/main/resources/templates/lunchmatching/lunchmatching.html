@@ -26,7 +26,9 @@
 <body>
 <div th:replace="fragments/header :: header"></div>
 
-<section class="lunch-matching-section" th:attr="data-user-id=${currentUserId}, data-user-role=${currentUserRole}">
+<section class="lunch-matching-section"
+         th:data-user-id="${currentUserId}"
+         th:data-user-role="${currentUserRole}">
     <div class="container">
         <div class="lunch-matching-inner">
 
@@ -310,7 +312,9 @@
                             applyBtn.disabled = false;
                             applyBtn.style.backgroundColor = 'black';
                             applyBtn.style.cursor = 'pointer';
-                            applyBtn.onclick = () => applyForLunch(matchInfo.classId, matchTitle);
+                            applyBtn.onclick = function() {
+                                applyForLunch(matchInfo.classId, matchTitle);
+                            };
                         }
                     }
                 });
@@ -347,6 +351,7 @@
             body: JSON.stringify({ lunchMatchingClassId: selectedClassId })
         })
             .then(response => {
+                console.log("신청 응답:", response);
                 if (response.ok) {
                     const successModal = new bootstrap.Modal(document.getElementById('matchingSuccessModal'));
                     successModal.show();
