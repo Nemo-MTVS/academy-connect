@@ -154,13 +154,14 @@
                                     <td></td>
                                     <td><span th:class="${booking.statusClass}" th:text="${booking.formattedStatus}">대기중</span></td>
                                     <td th:text="${booking.comment}">코멘트</td>
-                                    <td th:if="${booking.isAssignable}">
-                                        <button
-                                                class="action-btn success set-schedule-btn"
-                                                th:attr="data-student-id=${booking.studentId}, data-booking-id=${booking.id}">
-                                            시간 배정
-                                        </button>
-
+                                    <td>
+                                        <div th:if="${booking.isAssignable}">
+                                            <button
+                                                    class="action-btn success set-schedule-btn" style="border: none;"
+                                                    th:attr="data-student-id=${booking.studentId}, data-booking-id=${booking.id}">
+                                                시간 배정
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
 
