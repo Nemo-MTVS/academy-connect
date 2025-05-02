@@ -1,10 +1,7 @@
 package store.mtvs.academyconnect.consulting.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -28,6 +25,7 @@ public class UndefinedConsulting {
     @Column(name = "request_at", nullable = false)
     private LocalDateTime requestAt;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private RequestStatus status;

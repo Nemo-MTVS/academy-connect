@@ -131,14 +131,26 @@ public class UndefinedConsultingService {
 
         List<UndefinedConsulting> allRequests = undefinedConsultingRepository.findByInstructorId(instructorId);
 
-        List<UndefinedConsulting> sortedRequests = allRequests.stream()
-                .sorted(Comparator
-                        .comparing(UndefinedConsulting::getStatus)
-                        .thenComparing(UndefinedConsulting::getRequestAt).reversed())
+        List<UndefinedConsulting> waiting = allRequests.stream()
+                .filter(r -> r.getStatus() == UndefinedConsulting.RequestStatus.WAITING)
+                .sorted(Comparator.comparing(UndefinedConsulting::getRequestAt).reversed())
                 .collect(Collectors.toList());
+
+        List<UndefinedConsulting> completed = allRequests.stream()
+                .filter(r -> r.getStatus() == UndefinedConsulting.RequestStatus.DONE)
+                .sorted(Comparator.comparing(UndefinedConsulting::getRequestAt).reversed())
+                .collect(Collectors.toList());
+
+        List<UndefinedConsulting> sortedRequests = new ArrayList<>();
+        sortedRequests.addAll(waiting);
+        sortedRequests.addAll(completed);
+
+        log.info("정렬된 미지정 상담 요청 수: {}", sortedRequests.size());
 
         return convertToDtoIns(sortedRequests);
     }
+
+
 
     /**
      * Entity를 DTO로 변환
@@ -148,6 +160,7 @@ public class UndefinedConsultingService {
                 .map(request -> {
                     User student = userRepository.findById(request.getStudentId()).orElse(null);
                     String studentName = student != null ? student.getName() : "알 수 없음";
+                    String studentId = student != null ? student.getId() : "알 수 없음";
                     String classGroup = student != null && student.getClassGroup() != null
                             ? student.getClassGroup().getName() : "-";
                     String filePath = student != null && student.getProfile() != null
@@ -156,6 +169,7 @@ public class UndefinedConsultingService {
                     return InstructorUndefinedConsultingDto.builder()
                             .id(request.getId())
                             .studentName(studentName)
+                            .studentId(studentId)
                             .classGroup(classGroup)
                             .filePath(filePath)
                             .status(request.getStatus().toString())
