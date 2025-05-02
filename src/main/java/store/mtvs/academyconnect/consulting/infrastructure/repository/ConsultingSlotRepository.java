@@ -16,12 +16,18 @@ import java.util.Optional;
 public interface ConsultingSlotRepository extends JpaRepository<ConsultingSlot, Long> {
     // 특정 강사의 상담 슬롯 조회
     List<ConsultingSlot> findByInstructor(User instructor);
+    
+    Optional<ConsultingSlot> findById(Long id);
 
     // 특정 시간대의 상담 슬롯 조회
     List<ConsultingSlot> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
 
     // 특정 상태의 상담 슬롯 조회
     List<ConsultingSlot> findByStatus(ConsultingSlot.SlotStatus status);
+
+    // 특정 강사의 특정 시간 이후에 사용 가능한 슬롯이 존재하는지 확인
+    boolean existsByInstructorIdAndStartTimeAfterAndStatusAndDeletedAtIsNull(
+            String instructorId, LocalDateTime startTime, ConsultingSlot.SlotStatus status);
 
     // 특정 강사의 상담 슬롯을 예약 취소할 때 상태 변경 위해 필요
     List<ConsultingSlot> findByInstructorAndStartTimeAndEndTime(User instructor, LocalDateTime startTime, LocalDateTime endTime);
@@ -63,4 +69,21 @@ public interface ConsultingSlotRepository extends JpaRepository<ConsultingSlot, 
             @Param("instructorId") String instructorId,
             @Param("year") int year,
             @Param("month") int month);
+
+    // 특정 강사의 슬롯 목록 조회 (달력 표시용)
+    @Query("SELECT cs FROM ConsultingSlot cs " +
+            "WHERE cs.instructor.id = :instructorId " +
+            "AND cs.deletedAt IS NULL " +
+            "AND cs.startTime >= :startDate " +
+            "AND cs.startTime < :endDate")
+    List<ConsultingSlot> findTimeSlotsByInstructor(
+            @Param("instructorId") String instructorId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
+    Optional<ConsultingSlot> findByInstructorIdAndStartTimeAndEndTime(
+            String instructorId,
+            LocalDateTime startTime,
+            LocalDateTime endTime
+    );
 }

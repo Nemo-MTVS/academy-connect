@@ -10,6 +10,7 @@ import store.mtvs.academyconnect.lunchmatching.dto.StudentInfo;
 import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.LunchMatchingClassRepository;
 import store.mtvs.academyconnect.lunchmatching.infrastructure.repository.LunchMatchingRepository;
 import store.mtvs.academyconnect.user.domain.entity.User;
+import store.mtvs.academyconnect.user.domain.enums.UserRole;
 import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -60,7 +61,7 @@ public class LunchMatchingService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
 
         // 수강생(STUDENT)만 신청 가능
-        if (!"STUDENT".equalsIgnoreCase(user.getRole())) {
+        if (!UserRole.STUDENT.name().equalsIgnoreCase(user.getRole())) {
             throw new IllegalArgumentException("수강생만 신청할 수 있습니다.");
         }
 
@@ -74,10 +75,18 @@ public class LunchMatchingService {
                 .orElseThrow(() -> new IllegalArgumentException("매칭 클래스가 존재하지 않습니다."));
 
         // 본인의 전공이 매칭 클래스 이름에 포함되어 있어야 신청 가능
-        String userMajor = user.getClassGroup().getName();
+        String userMajor = convertMajorToShortForm(user.getClassGroup().getName().toUpperCase());
         String matchName = lunchClass.getName();
         if(!matchName.contains(userMajor)) {
-            throw new IllegalArgumentException("본인 전공과 관련된 매칭만 신청할 수 있습니다.");
+            throw new IllegalArgumentException("본인 전공과 관련된 매칭만 신청할 수 없습니다.");
+        }
+
+        // 전공별 인원 카운트용
+        String userMajorForCount = user.getClassGroup().getName();
+        int myMajorCount = lunchMatchingRepository.countByLunchMatchingClassIdAndUser_ClassGroup_NameAndDeletedAtIsNull(lunchMatchingClassId, userMajorForCount);
+
+        if (myMajorCount >= 3) {
+            throw new IllegalArgumentException("해당 전공 신청 인원이 초과되었습니다.");
         }
 
         // 해당 클래스에 신청한 인원이 6명 이상이면 신청 불가
@@ -178,16 +187,27 @@ public class LunchMatchingService {
         List<LunchMatchingClass> lunchClasses = lunchMatchingClassRepository.findAll();
 
         for (LunchMatchingClass lunchClass : lunchClasses) {
-            // 각 클래스별 살아있는 신청자 목록 가져오기
-            List<LunchMatching> matchings = lunchMatchingRepository.findByLunchMatchingClassIdAndDeletedAtIsNull(lunchClass.getId());
+            // 각 클래스별 살아있는 신청자 목록 가져오기 (신청 순으로 정렬됨)
+            List<LunchMatching> matchings = lunchMatchingRepository
+                    .findByLunchMatchingClassIdAndDeletedAtIsNullOrderByCreatedAtAsc(lunchClass.getId());
 
             // 신청자 이름 + 전공 + 사용자 ID 추출
             List<StudentInfo> students = matchings.stream()
-                    .map(matching -> new StudentInfo(
-                            matching.getUser().getName(),                      // 이름
-                            matching.getUser().getClassGroup().getName(),     // 전공
-                            matching.getUser().getId()                         // userId 추가
-                    ))
+                    .map(matching -> {
+                        String originalMajor = matching.getUser().getClassGroup().getName();
+                        String shortMajor = switch (originalMajor.toUpperCase()) {
+                            case "BACKEND" -> "BE";
+                            case "UNITY" -> "U";
+                            case "TA" -> "TA";
+                            default -> "UNKNOWN";
+                        };
+
+                        return new StudentInfo(
+                                matching.getUser().getName(),
+                                shortMajor,
+                                matching.getUser().getId()
+                        );
+                    })
                     .toList();
 
             // 현재 신청 인원 수
@@ -204,6 +224,15 @@ public class LunchMatchingService {
         }
 
         return result;
+    }
+
+    private String convertMajorToShortForm(String major) {
+        return switch (major.toUpperCase()) {
+            case "BACKEND" -> "BE";
+            case "UNITY" -> "U";
+            case "TA" -> "TA";
+            default -> "UNKNOWN";
+        };
     }
 
 }

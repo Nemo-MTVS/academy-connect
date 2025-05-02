@@ -63,7 +63,7 @@
                                 <td th:text="${booking.safeMessage}">상담 메세지</td>
                                 <td>
                                     <div th:if="${booking.cancellable}">
-                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id})}" method="post"
+                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id}, view='list')}" method="post"
                                               onsubmit="return confirm('예약을 취소하시겠습니까?');">
                                             <button type="submit" class="action-btn danger" style="border: none;">취소</button>
                                         </form>
@@ -105,14 +105,9 @@
                                 <td><span th:class="${booking.isFixable} ? 'status-badge waiting' : ${booking.statusClass}" th:text="${booking.isFixable} ? '처리 대기중' : ${booking.status}">상태</span></td>
                                 <td th:text="${booking.safeMessage}">상담 메세지</td>
                                 <td>
-                                    <div th:if="${booking.cancellable}">
-                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id})}" method="post"
-                                              onsubmit="return confirm('예약을 취소하시겠습니까?');">
-                                            <button type="submit" class="action-btn danger" style="border: none;">취소</button>
-                                        </form>
-                                    </div>
+
                                     <div th:if="${booking.isFixable}" style="display: flex; gap: 8px;">
-                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id})}" method="post"
+                                        <form th:action="@{/teacher/consulting/{id}/cancel(id=${booking.id}, view='list')}" method="post"
                                               onsubmit="return confirm('상담을 취소하시겠습니까?');">
                                             <button type="submit" class="action-btn danger" style="border: none;">상담 취소</button>
                                         </form>
@@ -159,8 +154,14 @@
                                     <td></td>
                                     <td><span th:class="${booking.statusClass}" th:text="${booking.formattedStatus}">대기중</span></td>
                                     <td th:text="${booking.comment}">코멘트</td>
-                                    <td th:if="${booking.isAssignable}">
-                                        <a href="#" class="action-btn success">시간 배정</a>
+                                    <td>
+                                        <div th:if="${booking.isAssignable}">
+                                            <button
+                                                    class="action-btn success set-schedule-btn" style="border: none;"
+                                                    th:attr="data-student-id=${booking.studentId}, data-booking-id=${booking.id}">
+                                                시간 배정
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
 
@@ -171,7 +172,196 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- 상담 생성 모달 -->
+    <div class="modal fade" id="consultationModal" tabindex="-1" aria-labelledby="consultationModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="consultationModalLabel">상담 생성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>시간을 선택하여 상담을 생성하세요.</p>
+                    <select id="day-select" class="form-select mt-3">
+                        <option value="" disabled selected>상담 날짜를 선택하세요</option>
+                    </select>
+                    <select id="slot-select" class="form-select mt-3">
+                        <option value="" disabled selected>상담 시간을 선택하세요</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn create-consultation-btn" id="create-consultation-btn">상담 생성</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script th:inline="javascript">
+        // Thymeleaf가 slots를 JavaScript로 변환하여 할당합니다.
+        const allSlots = [[${slots}]];
+    </script>
+
     <th:block th:replace="fragments/layout :: scripts"></th:block>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 목록이 여러개 일 수도 있으므로 모든 "시간 배정" 버튼을 선택
+            const buttons = document.querySelectorAll('.set-schedule-btn');
+
+            // 각각의 버튼에 클릭 이벤트 리스너 등록
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    // data 속성에서 studentName와 bookingId 꺼내기
+                    const studentId = button.getAttribute('data-student-id');
+                    const bookingId = button.getAttribute('data-booking-id');
+                    console.log('클릭됨! 학생 이름:', studentId, '예약 ID:', bookingId);
+
+                    // 모달 열기
+                    openConsultingModal(studentId, bookingId); // 필요 시 함수 호출
+                });
+            });
+
+
+            let selectedStudentId = null;
+            let selectedBookingId = null;
+
+
+            function openConsultingModal(studentId, bookingId) {
+                selectedStudentId = studentId;
+                selectedBookingId = bookingId;
+
+                const dateSelect = document.getElementById('day-select');
+                const slotSelect = document.getElementById('slot-select');
+
+                // 날짜 드롭다운 초기화
+                dateSelect.innerHTML = '<option value="" disabled selected>상담 날짜를 선택하세요</option>';
+                slotSelect.innerHTML = '<option value="" disabled selected>상담 시간을 선택하세요</option>';
+
+                const now = new Date();
+                const dateMap = new Map();
+
+                // 날짜별 슬롯들을 그룹화
+                allSlots.forEach(slot => {
+                    const slotStart = new Date(slot.startTime);
+                    if (slotStart > now && slot.status === '사용가능') {
+                        const dateStr = slotStart.toISOString().split('T')[0]; // yyyy-MM-dd
+
+                        if (!dateMap.has(dateStr)) {
+                            dateMap.set(dateStr, []);
+                        }
+                        dateMap.get(dateStr).push(slot);
+                    }
+                });
+
+                // 날짜 옵션 추가
+                Array.from(dateMap.keys()).sort().forEach(dateStr => {
+                    const option = document.createElement('option');
+                    option.value = dateStr;
+                    option.textContent = dateStr;
+                    dateSelect.appendChild(option);
+                });
+
+                // 날짜 선택 시 해당 날짜의 시간 옵션 추가
+                dateSelect.onchange = function () {
+                    const selectedDate = dateSelect.value;
+                    const slotsForDate = dateMap.get(selectedDate) || [];
+
+                    // 시간 드롭다운 초기화
+                    slotSelect.innerHTML = '<option value="" disabled selected>상담 시간을 선택하세요</option>';
+
+                    slotsForDate.forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value = slot.id; // 서버로 보낼 slot ID
+                        const timeStr = new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        option.textContent = timeStr;
+                        slotSelect.appendChild(option);
+                    });
+                };
+
+                // 상담 생성 버튼
+                const createBtn = document.getElementById('create-consultation-btn');
+                createBtn.onclick = function () {
+                    const selectedSlotId = slotSelect.value;
+                    if (!selectedSlotId) {
+                        alert("상담 시간을 선택해주세요.");
+                        return;
+                    }
+
+                    // 선택된 slot 객체 찾기
+                    const selectedSlotObj = allSlots.find(slot => String(slot.id) === selectedSlotId);
+                    if (!selectedSlotObj) {
+                        alert("선택한 시간 정보를 찾을 수 없습니다.");
+                        return;
+                    }
+
+                    // 상담 생성 로직 (예시: fetch POST 요청)
+                    console.log("상담 생성 요청:", {
+                        studentId: selectedStudentId,
+                        bookingId: selectedBookingId,
+                        slotId: selectedSlotId,
+                        timeInput : selectedSlotObj.startTime
+                    });
+
+                    // 상담 생성 로직 (서버에 요청)
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/teacher/consulting/undefinedreservation`;
+
+                    // hidden input - studentId
+                    const studentInput = document.createElement('input');
+                    studentInput.type = 'hidden';
+                    studentInput.name = 'studentId';
+                    studentInput.value = selectedStudentId;
+                    form.appendChild(studentInput);
+
+                    // hidden input - timeInput
+                    const timeInput = document.createElement('input');
+                    timeInput.type = 'hidden';
+                    timeInput.name = 'startTime';
+                    timeInput.value = selectedSlotObj.startTime;
+                    form.appendChild(timeInput);
+
+                    // hidden input - slotId
+                    const selectSlotId = document.createElement('input');
+                    selectSlotId.type = 'hidden';
+                    selectSlotId.name = 'slotId';
+                    selectSlotId.value = selectedSlotId;
+                    form.appendChild(selectSlotId);
+
+                    // hidden input - slotId
+                    const selectBookingId = document.createElement('input');
+                    selectBookingId.type = 'hidden';
+                    selectBookingId.name = 'bookingId';
+                    selectBookingId.value = selectedBookingId;
+                    form.appendChild(selectBookingId);
+
+                    // csrf
+                    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_csrf';
+                    csrfInput.value = csrfToken;
+                    form.appendChild(csrfInput);
+
+                    document.body.appendChild(form);
+                    form.submit();
+
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('consultationModal'));
+                    modal.hide();
+                    alert("상담이 생성되었습니다.");
+                };
+
+                // 모달 열기
+                const modal = new bootstrap.Modal(document.getElementById('consultationModal'));
+                modal.show();
+            }
+
+        });
+    </script>
+
 </body>
 </html> 

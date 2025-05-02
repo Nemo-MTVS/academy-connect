@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class InstructorUndefinedConsultingDto {
     private Long id;
     private String studentName;
+    private String studentId;
     private String classGroup;
     private String filePath;
     private String status;

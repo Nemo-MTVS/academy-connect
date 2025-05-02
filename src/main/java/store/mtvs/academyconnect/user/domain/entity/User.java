@@ -10,6 +10,8 @@ import store.mtvs.academyconnect.classgroup.domain.entity.ClassGroup;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
 
 import jakarta.persistence.*;
+import store.mtvs.academyconnect.user.domain.enums.UserRole;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -48,7 +50,7 @@ public class User {
     private LocalDateTime deletedAt;
 
     @Column(name = "role", nullable = false)
-    private String role = "STUDENT";
+    private String role = UserRole.STUDENT.name();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Profile profile;

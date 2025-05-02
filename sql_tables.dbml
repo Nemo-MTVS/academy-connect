@@ -1,0 +1,85 @@
+Table users {
+  id varchar(255) [primary key, note: 'UUID']
+  class_group_id bigint [not null, ref: > class_groups.id]
+  login_id varchar(255) [not null, note: '암호화(복호화 가능)']
+  passwd varchar(255) [not null, note: '암호화']
+  name varchar(255) [not null, note: '암호화(복호화 가능)']
+  created_at datetime [not null]
+  updated_at datetime [not null]
+  deleted_at datetime [null]
+  role varchar(255) [not null, note: 'STUDENT, INSTRUCTOR, ADMIN']
+}
+
+Table profiles {
+  id varchar(255) [primary key, ref: - users.id, note: 'UUID, shared primary key with users']
+  md longtext [null]
+  github varchar(255) [null]
+  blog varchar(255) [null]
+  email varchar(255) [null]
+  file_path varchar(255) [null]
+}
+
+Table consulting_bookings {
+  id bigint [primary key]
+  student_id varchar(255) [not null, ref: > users.id]
+  instructor_id varchar(255) [not null, ref: > users.id]
+  status enum('취소됨','상담완료','예약됨') [not null, default: '예약됨', note: '예약 상태']
+  message varchar(255) [null, note: '~~ 점이 궁금해요']
+  created_at datetime [not null]
+  update_at datetime [not null]
+  start_time datetime [not null]
+  end_time datetime [not null]
+}
+
+Table consulting_slots {
+  id bigint [primary key]
+  instructor_id varchar(255) [not null, ref: > users.id]
+  start_time datetime [not null]
+  end_time datetime [not null]
+  created_at datetime [not null, note: '등록시간 기준']
+  deleted_at datetime [null]
+  status enum('사용가능','불가능') [not null]
+}
+
+Table counseling_results {
+  id bigint [primary key]
+  booking_id bigint [null, ref: > consulting_bookings.id, note: '예약없이 진행된 상담인 경우 null']
+  student_id varchar(255) [not null, ref: > users.id]
+  instructor_id varchar(255) [not null, ref: > users.id]
+  md longtext [null, note: '상담 내용']
+  counsel_at datetime [null]
+  created_at datetime [not null]
+  updated_at datetime [null]
+  deleted_at datetime [null]
+}
+
+Table class_groups {
+  id bigint [primary key]
+  name varchar(255) [not null, note: '백엔드']
+  created_at datetime [not null]
+  expired_at datetime [not null]
+}
+
+Table lunch_matching_classes {
+  id bigint [primary key]
+  name varchar(255) [null, note: 'BE, TA']
+  created_at varchar(255) [not null]
+}
+
+Table lunch_matchings {
+  id varchar(255) [primary key]
+  lunch_matching_id bigint [not null, ref: > lunch_matching_classes.id]
+  user_id varchar(255) [not null, ref: > users.id]
+  created_at datetime [not null]
+  deleted_at datetime [null]
+}
+
+Table undefined_consultings {
+  id bigint [primary key]
+  student_id varchar(255) [not null, ref: > users.id]
+  instructor_id varchar(255) [not null, ref: > users.id]
+  request_at datetime [not null]
+  status enum('WAITING','DONE') [not null]
+  updated_at datetime [not null]
+  comment varchar(255) [null]
+}
