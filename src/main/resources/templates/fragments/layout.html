@@ -473,9 +473,6 @@
             <a href="/teacher/scheduling" class="menu-item" th:classappend="${activeMenu == 'schedule'} ? 'active' : ''">
                 <i class="bi bi-calendar-check"></i> 스케줄 확인
             </a>
-            <a href="/teacher/recurring" class="menu-item" th:classappend="${activeMenu == 'recurring'} ? 'active' : ''">
-                <i class="bi bi-arrow-repeat"></i> 반복 스케줄 설정
-            </a>
             <a href="/teacher/reservation" class="menu-item" th:classappend="${activeMenu == 'reservations'} ? 'active' : ''">
                 <i class="bi bi-list-check"></i> 전체 예약 내역
             </a>
@@ -491,7 +488,7 @@
         </div>
         <div sec:authorize="isAuthenticated()" class="logout-container">
             <form th:action="@{/logout}" method="post" style="display: inline;">
-                <button type="submit" class="nav-link btn btn-link logout-btn">로그아웃</button>
+                <button type="submit" class="nav-link btn btn-link logout-btn"> <i class="bi bi-box-arrow-right"></i>로그아웃</button>
             </form>
         </div>
 
