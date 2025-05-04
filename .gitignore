@@ -39,8 +39,14 @@ out/
 
 ### VS Code ###
 .vscode/
+.cursorrules
 
+### Environment ###
 .env
 .gradle/*
 .build/*
 .idea/*
+execution.bat
+*.p12
+*.pem
+*.crt
