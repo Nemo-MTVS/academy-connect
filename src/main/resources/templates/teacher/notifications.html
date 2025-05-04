@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head th:replace="fragments/layout :: head('알림 목록')"></head>
+<body>
+
+<!-- 사이드바 -->
+<div th:replace="fragments/layout :: sidebar('notifications')"></div>
+
+<!-- 본문 -->
+<div class="content-wrapper main-content">
+    <div class="container">
+        <h2 class="mb-4">📨 알림 목록</h2>
+
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+            <tr>
+                <th>내용</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="notification : ${notifications}">
+                <td th:text="${notification.message}">알림 내용</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(notifications)}">
+                <td colspan="5" class="text-center">알림이 없습니다.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 스크립트 -->
+<div th:replace="fragments/layout :: scripts"></div>
+<script>
+    function markAsRead(id) {
+        fetch(`/notification/${id}/read`, {
+            method: 'PATCH'
+        }).then(() => {
+            location.reload(); // 읽음 처리 후 새로고침
+        }).catch(err => {
+            alert("알림 읽음 처리 중 오류 발생");
+        });
+    }
+</script>
+</body>
+</html>

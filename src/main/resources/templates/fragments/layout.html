@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
 <!-- 공통 헤드 영역 -->
-<head th:fragment="head(title)">
+<head th:fragment="head(title='제목')">
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,7 +29,7 @@
             --warning-color: #ffc107;
             --danger-color: #dc3545;
         }
-        
+
 
         body {
             font-family: 'Noto Sans KR', sans-serif;
@@ -37,7 +37,7 @@
             padding: 0;
             overflow-x: hidden;
         }
-        
+
         .sidebar {
             background-color: var(--primary-color);
             color: var(--light-text);
@@ -49,29 +49,29 @@
             bottom: 0;
             z-index: 100;
         }
-        
+
         .content-wrapper {
             margin-left: 250px;
             width: calc(100% - 250px);
         }
-        
+
         .logo-container {
             padding: 20px 15px;
             display: flex;
             align-items: center;
         }
-        
+
         .logo-container img {
             height: 50px;
             margin-right: 10px;
         }
-        
+
         .logo-text {
             font-size: 22px;
             font-weight: bold;
             color: white;
         }
-        
+
         .teacher-info {
             padding: 15px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -79,11 +79,11 @@
             font-size: 16px;
             margin-bottom: 20px;
         }
-        
+
         .menu-container {
             padding: 0;
         }
-        
+
         .menu-item {
             padding: 12px 20px;
             display: flex;
@@ -92,24 +92,24 @@
             text-decoration: none;
             transition: all 0.3s;
         }
-        
+
         .menu-item.active, .menu-item:hover {
             background-color: rgba(255, 255, 255, 0.1);
         }
-        
+
         .menu-item i {
             margin-right: 10px;
             width: 20px;
             text-align: center;
         }
-        
+
         .logout-container {
             position: absolute;
             bottom: 20px;
             width: 100%;
             padding: 0 15px;
         }
-        
+
         .logout-btn {
             display: flex;
             align-items: center;
@@ -117,29 +117,29 @@
             color: white;
             text-decoration: none;
         }
-        
+
         .logout-btn i {
             margin-right: 10px;
         }
-        
+
         /* 스케줄 화면 스타일 */
         .calendar-container {
             padding: 20px;
             background-color: #fff;
         }
-        
+
         .month-header {
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 20px;
             margin-top: 10px;
         }
-        
+
         .calendar {
             width: 100%;
             border-collapse: collapse;
         }
-        
+
         .calendar th {
             text-align: center;
             padding: 15px;
@@ -148,7 +148,7 @@
             border: 1px solid var(--border-color);
             background-color: #f9f9f9;
         }
-        
+
         .calendar td {
             height: 100px;
             vertical-align: top;
@@ -157,7 +157,7 @@
             position: relative;
             cursor: pointer;
         }
-        
+
         .calendar td.today {
             background-color: var(--light-blue);
         }
@@ -167,20 +167,20 @@
             pointer-events: none;
             background-color: #f5f5f5;
         }
-        
+
         .calendar td.selected {
             background-color: var(--light-red);
         }
-        
+
         .calendar td:hover {
             background-color: #f5f5f5;
         }
-        
+
         .date-number {
             font-size: 16px;
             font-weight: 500;
         }
-        
+
         .schedule-panel {
             background-color: #f8f9fa;
             border-left: 1px solid var(--border-color);
@@ -188,13 +188,13 @@
             height: 100vh;
             overflow-y: auto;
         }
-        
+
         .date-header {
             font-size: 20px;
             font-weight: bold;
             margin-bottom: 20px;
         }
-        
+
         .time-slot {
             background-color: #e9ecef;
             border-radius: 5px;
@@ -203,25 +203,25 @@
             cursor: not-allowed;
             color: #6c757d;
         }
-        
+
         .time-slot.available {
             background-color: #fff;
             border: 1px solid var(--border-color);
             color: var(--dark-text);
             cursor: pointer;
         }
-        
+
         .time-slot.booked {
             background-color: var(--light-blue);
             color: var(--dark-text);
             border: 1px solid var(--accent-color);
         }
-        
+
         .student-name {
             font-weight: 500;
             margin-top: 5px;
         }
-        
+
         .schedule-btn {
             background-color: var(--light-blue);
             color: var(--dark-text);
@@ -233,15 +233,15 @@
             width: 100%;
             margin-top: 20px;
         }
-        
+
         .schedule-btn:hover {
             background-color: #c8d8e8;
         }
-        
+
         .modal-title {
             font-weight: bold;
         }
-        
+
         .time-option {
             padding: 10px 15px;
             border: 1px solid var(--border-color);
@@ -252,12 +252,12 @@
             text-align: center;
             width: calc(50% - 10px);
         }
-        
+
         .time-option.selected {
             background-color: var(--light-blue);
             border-color: var(--accent-color);
         }
-        
+
         .save-btn {
             background-color: var(--accent-color);
             color: white;
@@ -266,14 +266,14 @@
             border-radius: 5px;
             float: right;
         }
-        
+
         .search-input {
             padding: 10px;
             border: 1px solid var(--border-color);
             border-radius: 5px;
             width: 100%;
         }
-        
+
         .search-input-icon {
             position: absolute;
             top: 50%;
@@ -281,7 +281,7 @@
             transform: translateY(-50%);
             color: #6c757d;
         }
-        
+
         .create-consultation-btn {
             background-color: var(--accent-color);
             color: white;
@@ -290,16 +290,16 @@
             border-radius: 5px;
             float: right;
         }
-        
+
         /* 예약 내역 화면 스타일 */
         .main-content {
             padding: 30px;
         }
-        
+
         .tab-container {
             margin-bottom: 30px;
         }
-        
+
         .nav-tabs .nav-link {
             color: var(--dark-text);
             font-weight: 500;
@@ -307,80 +307,80 @@
             padding: 10px 20px;
             position: relative;
         }
-        
+
         .nav-tabs .nav-link.active {
             color: var(--accent-color);
             background-color: transparent;
             border-bottom: 2px solid var(--accent-color);
         }
-        
+
         .table-container {
             background-color: white;
             border-radius: 5px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
-        
+
         .reservation-table {
             width: 100%;
         }
-        
+
         .reservation-table th {
             padding: 15px;
             font-weight: 500;
             color: #666;
             border-bottom: 1px solid var(--border-color);
         }
-        
+
         .reservation-table td {
             padding: 15px;
             vertical-align: middle;
             border-bottom: 1px solid var(--border-color);
         }
-        
+
         .avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             margin-right: 10px;
         }
-        
+
         .student-info {
             display: flex;
             align-items: center;
         }
-        
+
         .status-badge {
             padding: 5px 10px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 500;
         }
-        
+
         /*.status-badge.completed {*/
         /*    background-color: var(--light-blue);*/
         /*    color: var(--accent-color);*/
         /*}*/
-        
+
         .status-badge.upcoming {
             background-color: #e6f7ff;
             color: #1890ff;
         }
-        
+
         .status-badge.waiting {
             background-color: #EAE2FF;
             color: #4A1DB8;
         }
-        
+
         .status-badge.canceled {
             background-color: #ffe6e6;
             color: #f5222d;
         }
-        
+
         .status-badge.completed {
             background-color: #D4F8D3;
             color: #073B05;
         }
-        
+
         .action-btn {
             padding: 5px 10px;
             border-radius: 5px;
@@ -389,12 +389,12 @@
             text-decoration: none;
             display: inline-block;
         }
-        
+
         .action-btn.danger {
             background-color: #ffe6e6;
             color: #f5222d;
         }
-        
+
         .action-btn.success {
             background-color: #EAE2FF;
             color: #4A1DB8;
@@ -412,7 +412,7 @@
             border-radius: 4px;
             font-size: 12px;
         }
-        
+
         /* 모바일 Bottom Navigation */
         .bottom-nav {
             display: none;
@@ -425,7 +425,7 @@
             z-index: 1000;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
         }
-        
+
         .bottom-nav-item {
             display: flex;
             flex-direction: column;
@@ -434,36 +434,36 @@
             text-decoration: none;
             font-size: 12px;
         }
-        
+
         .bottom-nav-item.active {
             color: white;
         }
-        
+
         .bottom-nav-item i {
             font-size: 20px;
             margin-bottom: 4px;
         }
-        
+
         @media (max-width: 992px) {
             .sidebar {
                 display: none;
             }
-            
+
             .content-wrapper {
                 margin-left: 0;
                 width: 100%;
                 padding-bottom: 70px; /* 하단 네비게이션 공간 확보 */
             }
-            
+
             .bottom-nav {
                 display: flex;
                 justify-content: space-around;
             }
-            
+
             .calendar td {
                 height: 60px;
             }
-            
+
             .schedule-panel {
                 height: auto;
             }
@@ -492,8 +492,11 @@
             <a href="/teacher/counselingresults" class="menu-item" th:classappend="${activeMenu == 'counselingresults'} ? 'active' : ''">
                 <i class="bi bi-list-check"></i> 전체 상담 내역
             </a>
-            <a href="/teacher/notifications" class="menu-item" th:classappend="${activeMenu == 'notifications'} ? 'active' : ''">
+            <a href="/teacher/notifications" class="menu-item position-relative"
+               th:classappend="${activeMenu == 'notifications'} ? 'active' : ''">
                 <i class="bi bi-bell"></i> 알림
+                <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      style="display: none; font-size: 0.6rem;">●</span>
             </a>
             <a href="/teacher/profile" class="menu-item" th:classappend="${activeMenu == 'profile'} ? 'active' : ''">
                 <i class="bi bi-person-circle"></i> 개인정보 관리
@@ -506,7 +509,7 @@
         </div>
 
     </div>
-    
+
     <!-- 모바일 Bottom Navigation -->
     <div th:fragment="bottomnav(activeMenu)" class="bottom-nav">
         <a href="/teacher" class="bottom-nav-item" th:classappend="${activeMenu == 'schedule'} ? 'active' : ''">
@@ -521,20 +524,55 @@
             <i class="bi bi-list-check"></i>
             <span>예약</span>
         </a>
-        <a href="/error-404" class="bottom-nav-item" th:classappend="${activeMenu == 'notifications'} ? 'active' : ''">
-            <i class="bi bi-bell"></i>
+
+        <a href="/teacher/notifications" class="bottom-nav-item position-relative"
+           th:classappend="${activeMenu == 'notifications'} ? 'active' : ''">
+            <i class="bi bi-bell position-relative">
+        <span id="mobile-notification-badge"
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              style="display: none; font-size: 0.5rem;">●</span>
+            </i>
             <span>알림</span>
         </a>
+
         <a href="/error-404" class="bottom-nav-item" th:classappend="${activeMenu == 'profile'} ? 'active' : ''">
             <i class="bi bi-person-circle"></i>
             <span>내정보</span>
         </a>
     </div>
-    
+
     <!-- 공통 스크립트 -->
     <th:block th:fragment="scripts">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+        <div sec:authorize="isAuthenticated()">
+            <script th:inline="javascript">
+
+                console.log("TESTSETAESSDTASD");
+                /*<![CDATA[*/
+                const sendTeacherId = /*[[${#authentication.principal.id}]]*/ null;
+                console.log("TEACHER ID:", sendTeacherId);
+                if (sendTeacherId) {
+                    console.log("SSE 재연결")
+                    const eventSource = new EventSource(`/teacher/notification/subscribe?studentId=${sendTeacherId}`);
+                    eventSource.addEventListener("notification", function (event) {
+                        // 사이드바 뱃지
+                        const badge = document.getElementById('notification-badge');
+                        if (badge) badge.style.display = 'inline-block';
+
+                        // 모바일 뱃지
+                        const mobileBadge = document.getElementById('mobile-notification-badge');
+                        if (mobileBadge) mobileBadge.style.display = 'inline-block';
+
+                    });
+                    eventSource.onerror = function () {
+                        console.warn("SSE 연결 종료됨");
+                        eventSource.close();
+                    };
+                }
+            </script>
+        </div>
         <th:block th:replace="${extraScripts} ?: _"></th:block>
     </th:block>
 </body>
-</html> 
+</html>

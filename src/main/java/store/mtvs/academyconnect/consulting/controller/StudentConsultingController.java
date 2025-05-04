@@ -2,11 +2,9 @@ package store.mtvs.academyconnect.consulting.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +13,9 @@ import store.mtvs.academyconnect.consulting.domain.entity.ConsultingBooking;
 import store.mtvs.academyconnect.consulting.dto.*;
 import store.mtvs.academyconnect.consulting.service.*;
 import store.mtvs.academyconnect.global.config.CustomUserDetails;
+import store.mtvs.academyconnect.notification.NotificationService;
+import store.mtvs.academyconnect.user.domain.entity.User;
+import store.mtvs.academyconnect.user.infrastructure.repository.UserRepository;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -33,6 +34,8 @@ public class StudentConsultingController {
     private final StudentBookingViewService studentBookingViewService;
     private final InstructorInfoService instructorInfoService;
     private final Clock clock;
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     /**
      * 학생의 예약용 화면 (S01, S02, S03 기능 통합)
@@ -258,8 +261,16 @@ public class StudentConsultingController {
                     .build();
 
             undefinedConsultingService.createConsultationRequest(requestDto);
-
+            User student = userRepository.findById(studentId).orElse(null);
+            if (student != null){
+                // 상담 요청 성공 시 알림 전송
+                String notiSendMessage = student.getClassGroup().getName() + "반의 " + student.getName() + " 학생으로 부터 상담 요청이 들어왔습니다.";
+                log.info("상담 요청 성공: studentId={}, instructorId={}, message={}",
+                        studentId, instructorId, notiSendMessage);
+                notificationService.send(studentId, instructorId, notiSendMessage);
+            }
             redirectAttributes.addFlashAttribute("successMessage", "상담 요청이 성공적으로 등록되었습니다.");
+
             return "redirect:/student/consulting-my-bookings?view=requests";
 
         } catch (Exception e) {

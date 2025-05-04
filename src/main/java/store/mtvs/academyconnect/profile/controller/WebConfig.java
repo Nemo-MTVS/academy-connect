@@ -7,11 +7,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    @Value("${profile.upload.dir:C:/upload/profile}") // application.properties 에 profile.upload.dir=C:/upload/profile
+    @Value("${profile.upload.dir}")
     private String uploadDir;
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/student/profile-images/**")
-                .addResourceLocations("file:///" + uploadDir + "/");
+                .addResourceLocations("file://" + uploadDir + "/");
     }
 }

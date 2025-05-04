@@ -1,14 +1,11 @@
 <!DOCTYPE html>
-
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>Header</title>
     <link rel="icon" href="/images/favicon.ico">
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Header CSS -->
     <link th:href="@{/css/header.css}" rel="stylesheet">
 </head>
 <body>
@@ -20,14 +17,14 @@
                  onerror="this.src='https://placehold.co/140x50'">
         </a>
     </div>
-    
+
     <!-- Navigation Menu -->
     <nav class="nav-menu-container">
         <!-- Service Introduction -->
         <div class="nav-item">
             <a class="nav-link" th:href="@{/}">서비스 소개</a>
         </div>
-        
+
         <!-- Consulting -->
         <div class="nav-item dropdown-hover">
             <span class="nav-link">상담</span>
@@ -36,38 +33,41 @@
                 <a class="dropdown-item" th:href="@{/student/consulting-my-bookings}">내 예약 보기</a>
             </div>
         </div>
-        
+
         <!-- Lunch Mate -->
         <div class="nav-item">
             <a class="nav-link" th:href="@{/student/lunchmatching}">점심 메이트</a>
         </div>
-        
+
         <!-- Profile -->
         <div class="nav-item">
             <a class="nav-link" th:href="@{/student/profile}">프로필</a>
         </div>
+
+        <!-- 알림 아이콘 -->
+        <div class="nav-item" sec:authorize="isAuthenticated()">
+            <span class="nav-link position-relative">
+                🔔
+                <span id="notification-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      style="display: none;">1</span>
+            </span>
+        </div>
+
+        <!-- 로그인된 사용자 정보 -->
         <div sec:authorize="isAuthenticated()">
             <span class="nav-link">
                 <b>
-                    <span sec:authentication="principal.classGroupName"></span>/<span sec:authentication="principal.name"></span>
+                    <span sec:authentication="principal.classGroupName"></span> /
+                    <span sec:authentication="principal.name"></span>
                 </b>
             </span>
         </div>
 
-
-        <!-- Login / Profile Menu -->
-<!--        <div class="nav-item login-item">-->
-<!--            <a class="nav-link" th:href="@{/login}">로그인</a>-->
-<!--        </div>-->
-
         <!-- Login / Logout -->
         <div class="nav-item login-item">
-            <!-- 로그인 안한 상태 -->
             <div sec:authorize="isAnonymous()">
                 <a class="nav-link" th:href="@{/login}">로그인</a>
             </div>
-
-            <!-- 로그인 한 상태 -->
             <div sec:authorize="isAuthenticated()">
                 <form th:action="@{/logout}" method="post" style="display: inline;">
                     <button type="submit" class="nav-link btn btn-link logout-btn">로그아웃</button>
@@ -76,5 +76,31 @@
         </div>
     </nav>
 </header>
+
+<!-- ✅ SSE 알림 스크립트 -->
+<div sec:authorize="isAuthenticated()">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const studentId = /*[[${#authentication.principal.username}]]*/ null;
+        if (studentId) {
+            const eventSource = new EventSource(`/notification/subscribe?studentId=${studentId}`);
+            eventSource.onmessage = function (event) {
+                console.log("📩 알림 수신:", event.data);
+
+                const badge = document.getElementById('notification-count');
+                badge.innerText = "1"; // 단순히 1개 알림
+                badge.style.display = "inline-block";
+
+                // 필요시 Toast나 모달로 보여주기 가능
+                alert("📩 새 알림: " + event.data);
+            };
+            eventSource.onerror = function () {
+                console.warn("SSE 연결 오류 또는 종료됨");
+                eventSource.close();
+            };
+        }
+        /*]]>*/
+    </script>
+</div>
 </body>
 </html>

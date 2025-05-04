@@ -3,24 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>상세 프로필</title>
-    <link th:href="@{/css/header.css}" rel="stylesheet">
     <link rel="stylesheet" href="/css/profile-detail.css">
-    <link th:href="@{/css/footer.css}" rel="stylesheet">
     <style>
-        footer{
-            height: auto; /* 필요 시 설정하되, 고정 높이는 피하세요 */
-            max-width: 100%; /* 전체 너비 사용 */
-            margin: 0 auto;
-        }
-        body {
-            flex-direction: column;
-            min-height: 100vh;
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #ffffff;
-            margin: 0;
-            padding: 0;
+        /*footer{*/
+        /*    height: auto; !* 필요 시 설정하되, 고정 높이는 피하세요 *!*/
+        /*    max-width: 100%; !* 전체 너비 사용 *!*/
+        /*    margin: 0 auto;*/
+        /*}*/
+        /*body {*/
+        /*    flex-direction: column;*/
+        /*    min-height: 100vh;*/
+        /*    font-family: 'Noto Sans KR', sans-serif;*/
+        /*    background-color: #ffffff;*/
+        /*    margin: 0;*/
+        /*    padding: 0;*/
 
-        }
+        /*}*/
 
         .profile-wrapper {
             display: flex;
@@ -128,6 +126,9 @@
             flex: 1;
         }
     </style>
+    <link th:href="@{/css/header.css}" rel="stylesheet">
+    <link th:href="@{/css/footer.css}" rel="stylesheet">
+
 </head>
 <body>
 <div th:replace="fragments/header :: header"></div>
@@ -142,7 +143,17 @@
             <!--                    <textarea id="bio"></textarea>-->
             <!--                    <div id="markdownPreview"></div>-->
             <!-- @{} 구문 안에는 ${}을 사용 하는 것이 타임리프 문법상 불안정하거나 오류를 발생 시킬 수 있음-->
-            <img th:if="${profile.filePath != null}" th:src="${profile.filePath}" alt="Profile Image">
+            <!-- 프로필 이미지가 있을 때 -->
+
+            <img th:if="${profile.filePath != null and !#strings.isEmpty(profile.filePath)}"
+                 th:src="${profile.filePath}"
+                 alt="Profile Image">
+
+            <!-- 프로필 이미지가 없을 때 -->
+            <img th:unless="${profile.filePath != null and !#strings.isEmpty(profile.filePath)}"
+                 th:src="@{/images/sample_profile_1.png}"
+                 alt="Default Profile Image">
+
             <h2 th:text="${user.name} + ' 님'"></h2>academy_connect
             <div class="profile-info">
                 <p th:if="${profile.email}">📧 <span th:text="${profile.email}"></span></p>

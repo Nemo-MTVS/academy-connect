@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,9 +14,6 @@ import store.mtvs.academyconnect.global.config.CustomUserDetails;
 import store.mtvs.academyconnect.profile.domain.entity.Profile;
 import store.mtvs.academyconnect.profile.dto.ProfileDTO;
 import store.mtvs.academyconnect.profile.service.ProfileService;
-import store.mtvs.academyconnect.user.domain.entity.User;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import store.mtvs.academyconnect.user.domain.entity.User;
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +25,10 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/student/profile")
 public class ProfileController {
+
+    @Value("${profile.upload.dir}")
+    private String uploadDir;
+
     public String renderMarkdownToHtml(String markdown) {
         Parser parser = Parser.builder().build();
         Node document = parser.parse(markdown);
@@ -132,11 +134,11 @@ public class ProfileController {
         String profileImagePath = existing.getFilePath();
 
         if (profileImage != null && !profileImage.isEmpty()) {
-            String uploadDir = "C:/upload/profile/";
             String fileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
             File saveFile = new File(uploadDir, fileName);
             saveFile.getParentFile().mkdirs();
             profileImage.transferTo(saveFile);
+            log.info("사용자 ID: {} 프로필 수정 저장된 파일 이름: {}", userId, fileName);
             profileImagePath = "/student/profile-images/" + fileName;
         }
 
